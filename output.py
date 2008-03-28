@@ -49,7 +49,7 @@ def reconnect(time, server):
 def connected(time, server, nick):
   "Wird gesendet, wenn ein Login auf dem IRC-Server stattgefunden hat. nick ist dabei der eigene Nickname."
   print timestamp("/// client is now connected to %s" % server, time)
-  print timestamp("/// nick is set to %s" % nick)
+  print timestamp("/// nick is set to %s" % nick, time)
 
 def quit(time, server, nick, message):
   "message ist optional und kann leer (\"\") sein."
