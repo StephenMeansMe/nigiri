@@ -16,6 +16,7 @@ class Nigiri(threading.Thread):
     self.servers = []
     self.channels = {}
     self.nicks = {}
+    self.own_nicks = {}
     self.current_server = "euirc" # TODO
     self.current_channel = "#Inkirei" # TODO
     self.commandlist = commands.get_commandlist()
@@ -33,6 +34,7 @@ class Nigiri(threading.Thread):
     print "starting signal processing..."
 
     commands.servers(self, "")
+    commands.own_nick(self, "")
     for server in self.servers:
       commands.channels(self, server)
   def run(self):

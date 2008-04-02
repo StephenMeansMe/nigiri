@@ -6,6 +6,8 @@
 # DBus Methods
 ###
 
+# TODO add descriptions to the help messages
+
 # Connection
 def servers(nigiri, args):
   """irc-call: /servers
@@ -93,11 +95,9 @@ key ist optional und kann leer ("") sein."""
   if help_request_p(args):
     print join.__doc__
   else:
-    args = args.split(" ")
+    args = split_first_word(args)
     channels = args[0].split(",")
-    key = ""
-    if len(args) == 2:
-      key = args[1]
+    key = args[1]
     for channel in channels:
       nigiri.proxy.join(nigiri.current_server, channel, key)
     if len(channels) == 1:
@@ -121,18 +121,21 @@ message ist optional und kann leer ("") sein."""
       nigiri.proxy.part(nigiri.current_server, nigiri.current_channel, "")
       nigiri.channels[nigiri.current_server].remove(nigiri.current_channel)
     else:
-      args = args.split(" ")
+      args = split_first_word(args)
       nigiri.proxy.part(nigiri.current_server, args[0], args[1])
   return True
 
 
 
 def nick(nigiri, args):
-  "dubs method: nick(server, nick)"
+  """irc-call: /nick <new_nick>
+dubs method: nick(server, nick)"""
   if help_request_p(args):
     print nick.__doc__
   else:
-    pass
+    if len(args) > 0:
+      nigiri.proxy.nick(nigiri.current_server, args)
+    own_nick(nigiri, "")
   return True
 
 
@@ -142,63 +145,87 @@ def own_nick(nigiri, args):
   if help_request_p(args):
     print own_nick.__doc__
   else:
-    pass
+    nigiri.own_nicks[nigiri.current_server] = nigiri.proxy.own_nick(nigiri.current_server)
   return True
 
 
 
 def raw(nigiri, args):
-  "dbus method: raw(server, command)"
+  """irc-call: /raw <command>
+dbus method: raw(server, command)"""
   if help_request_p(args):
     print raw.__doc__
   else:
-    pass
+    nigiri.proxy.raw(nigiri.current_server, args)
   return True
 
 
 
+# TODO global away to change status on every connected server
 def away(nigiri, args):
-  "dbus method: away(server, message)"
+  """irc-call: /away [<reason>]
+dbus method: away(server, message)"""
   if help_request_p(args):
     print away.__doc__
   else:
-    pass
+    nigiri.proxy.away(nigiri.current_server, args)
   return True
 
 
 
+# TODO global back to change status on every connected server
 def back(nigiri, args):
-  "dbus method: back(server)"
+  """irc-call: /back
+dbus method: back(server)"""
   if help_request_p(args):
     print back.__doc__
   else:
-    pass
+    nigiri.proxy.back(nigiri.current_server)
   return True
 
 
 
 # Chatting
 
-def message(nigiri, args, current_target):
-  "dbus method: message(server, channel, message)"
+def message(nigiri, args, current=False):
+  """irc-call: /message <target> <message>
+          /msg <target> <message>
+dbus method: message(server, channel, message)"""
   if help_request_p(args):
     print message.__doc__
   else:
-    pass
+    if current:
+      nigiri.proxy.message(nigiri.current_server, nigiri.current_channel, args)
+    else:
+      args = split_first_word(args)
+      nigiri.proxy.message(nigiri.current_server, args[0], args[1])
   return True
-
 
 
 def action(nigiri, args):
-  "dbus method: action(server, channel, message)"
+  """irc-call: /action <message>
+          /me <message>
+dbus method: action(server, channel, message)"""
   if help_request_p(args):
     print action.__doc__
   else:
-    pass
+    nigiri.proxy.action(nigiri.current_server, nigiri.current_channel, args)
   return True
 
 
 
+def notice(nigiri, args):
+  """irc-call: /notice <target> <message>
+dbus method: notice(server, target, message)"""
+  if help_request_p(args):
+    print notice.__doc__
+  else:
+    args = split_first_word(args)
+    nigiri.proxy.notice(nigiri.current_server, args[0], args[1])
+  return True
+
+
+# TODO
 def ctcp(nigiri, args):
   "dbus method: ctcp(server, target, message)"
   if help_request_p(args):
@@ -209,55 +236,52 @@ def ctcp(nigiri, args):
 
 
 
-def notice(nigiri, args):
-  "dbus method: notice(server, target, message)"
-  if help_request_p(args):
-    print notice.__doc__
-  else:
-    pass
-  return True
-
-
-
 # Administrative
 
 def shutdown(nigiri, args):
-  "dbus method: shutdown()"
+  """irc-call: /shutdown
+dbus method: shutdown()"""
   if help_request_p(args):
     print shutdown.__doc__
   else:
-    pass
+    nigiri.proxy.shutdown()
   return True
 
 
 
 def mode(nigiri, args):
-  "dbus method: mode(server, target, mode)"
+  """irc-call: /mode <own_nick>|<channel> [<mode>[ <parameters>]]
+example: /mode #channel +o own_nick
+dbus method: mode(server, target, mode)"""
   if help_request_p(args):
     print mode.__doc__
   else:
-    pass
+    args = split_first_word(args)
+    nigiri.proxy.mode(nigiri.current_server, args[0], args[1])
   return True
 
 
 
 def kick(nigiri, args):
-  """dbus method: kick(server, channel, who, message)
+  """irc-call: /kick <who> <message>
+dbus method: kick(server, channel, who, message)
 message ist optional und kann leer ("") sein."""
   if help_request_p(args):
     print kick.__doc__
   else:
-    pass
+    args = split_first_word(args)
+    nigiri.proxy.kick(nigiri.current_server, nigiri.current_channel, args[0], args[1])
   return True
 
 
 
 def topic(nigiri, args):
-  "dbus method: topic(server, channel, topic)"
+  """irc-call: /topic <topic>"
+dbus method: topic(server, channel, topic)"""
   if help_request_p(args):
     print topic.__doc__
   else:
-    pass
+    nigiri.proxy.topic(nigiri.current_server, nigiri.current_channel, args)
   return True
 
 
@@ -322,6 +346,7 @@ def get_commandlist():
            'nick': nick,
            'connect': connect,
            'action': action,
+           'me': action,
            'away': away,
            'back': back,
            'shutdown': shutdown,
@@ -341,6 +366,7 @@ def get_commandlist():
            'away': away,
            'back': back,
            'message': message,
+           'msg': message,
            'action': action,
            'ctcp': ctcp,
            'notice': notice,
@@ -356,26 +382,32 @@ def get_commandlist():
 
 
 def help_request_p(arg):
+  "checks if the given argument is a request for help"
   return arg in ['--help', '-h', '-?', '/?']
+
+
+
+def split_first_word(message, seperator = " "):
+  "splits the first word, delimited by seperator, and returns a list where [0] is the word and [1] the rest of the string"
+  border = message.find(seperator)
+  if border == -1:
+    return [message, ""]
+  return [message[:border], message[border + 1:]]
 
 
 
 def input_handler(inputstream, io_condition, nigiri):
   input = inputstream.readline()
   if input[0] != "/":
-    return message(nigiri, input, current_target=True)
+    return message(nigiri, input, current=True)
   if input == "/exit\n":
     nigiri.loop.quit()
     return False
   if input[0] == "/":
     input = input[1:-1]
-    space = input.find(" ")
-    if space == -1:
-      space = len(input)
-    command = input[:space]
-    args = input[space + 1:]
+    input = split_first_word(input)
     try:
-      ret = nigiri.commandlist[command](nigiri, args)
+      ret = nigiri.commandlist[input[0]](nigiri, input[1])
     except KeyError:
       ret = True
     return ret
