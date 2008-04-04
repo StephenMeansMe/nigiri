@@ -11,6 +11,7 @@ def timestamp(line, timestamp):
 def add_all(bus):
   print "adding signals..."
   bus.add_signal_receiver(message, "message")
+  bus.add_signal_receiver(notice, "notice")
   bus.add_signal_receiver(action, "action")
   bus.add_signal_receiver(ctcp, "ctcp")
   bus.add_signal_receiver(away, "away")
@@ -19,11 +20,13 @@ def add_all(bus):
   bus.add_signal_receiver(join, "join")
   bus.add_signal_receiver(part, "part")
   bus.add_signal_receiver(kick, "kick")
-  bus.add_signal_receiver(mode, "mode")
   bus.add_signal_receiver(nick, "nick")
+  bus.add_signal_receiver(mode, "mode")
   bus.add_signal_receiver(connect, "connect")
-  bus.add_signal_receiver(connected, "connected")
   bus.add_signal_receiver(reconnect, "reconnect")
+  bus.add_signal_receiver(connected, "connected")
+  bus.add_signal_receiver(topic, "topic")
+  bus.add_signal_receiver(motd, "motd")
   bus.add_signal_receiver(quit, "quit")
   bus.add_signal_receiver(shutdown, "shutdown")
 
@@ -68,7 +71,11 @@ def nick(time, server, nick, new_nick):
   print timestamp("-!- %s is now known as %s" % (nick, new_nick), time)
 
 def mode(time, server, nick, target, mode, parameter):
-  print timestamp("-!- mode of %s changed for %s by %s" % (parameter, mode, nick), time)
+  "nick ist optional und kann leer(\"\") sein."
+  if nick == "":
+    print timestamp("-!- your mode is %s" % mode, time)
+  else:
+    print timestamp("-!- mode of %s changed for %s by %s" % (parameter, mode, nick), time)
 
 def connect(time, server):
   "Wird gesendet, wenn eine erfolgreiche Verbindung zum IRC-Server aufgebaut wurde."
@@ -82,6 +89,13 @@ def connected(time, server, nick):
   "Wird gesendet, wenn ein Login auf dem IRC-Server stattgefunden hat. nick ist dabei der eigene Nickname."
   print timestamp("/// client is now connected to %s" % server, time)
   print timestamp("    nick is set to %s" % nick, time)
+
+def topic(time, server, nick, channel, topic):
+  "nick ist optional und kann leer (\"\") sein."
+  if nick == "":
+    print timestamp("||| the current topic is: %s" % topic, time)
+  else:
+    print timestamp("||| %s changed the topic to: %s" (nick, topic), time)
 
 def motd(time, server, message):
   print message
