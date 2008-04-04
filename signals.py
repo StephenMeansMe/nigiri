@@ -73,13 +73,15 @@ def nick(time, server, nick, new_nick):
 def mode(time, server, nick, target, mode, parameter):
   """nick ist optional und kann leer(\"\") sein.
 parameter ist optional und kann leer(\"\") sein."""
-  print "mode(time=%s, server=%s, nick=%s, target=%s, mode=%s, parameter=%s)" % (time, server, nick, target, mode, parameter)
   if parameter != "":
-    target = parameter
-  if nick == "":
-    print timestamp("-!- mode of %s is %s" % (target, mode), time)
+    space = " "
   else:
-    print timestamp("-!- mode of %s changed for %s by %s" % (target, mode, nick), time)
+    space = ""
+
+  if nick == "":
+    print timestamp("-!- current mode of %s [%s%s%s]" % (target, mode, space, parameter), time)
+  else:
+    print timestamp("-!- %s changed mode of %s [%s%s%s]" % (nick, target, mode, space, parameter), time)
 
 def connect(time, server):
   "Wird gesendet, wenn eine erfolgreiche Verbindung zum IRC-Server aufgebaut wurde."
