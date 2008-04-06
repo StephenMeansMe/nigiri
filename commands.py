@@ -239,12 +239,13 @@ def ctcp(nigiri, args):
 # Administrative
 
 def shutdown(nigiri, args):
-  """irc-call: /shutdown
-dbus method: shutdown()"""
+  """irc-call: /shutdown [message]
+dbus method: shutdown(message)
+message ist optional und kann leer ("") sein."""
   if help_request_p(args):
     print shutdown.__doc__
   else:
-    nigiri.proxy.shutdown()
+    nigiri.proxy.shutdown(args)
   return True
 
 
