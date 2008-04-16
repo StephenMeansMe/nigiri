@@ -11,6 +11,9 @@ def timestamp(line, timestamp):
 def add_all(bus):
   print "adding signals..."
   bus.add_signal_receiver(message, "message")
+  bus.add_signal_receiver(own_message, "own_message")
+  bus.add_signal_receiver(query, "query")
+  bus.add_signal_receiver(own_query, "own_query")
   bus.add_signal_receiver(notice, "notice")
   bus.add_signal_receiver(action, "action")
   bus.add_signal_receiver(ctcp, "ctcp")
@@ -34,8 +37,16 @@ def add_all(bus):
 # Signal Handlers
 ###
 def message(time, server, nick, target, message):
-  "Wichtig: Auch eigene Nachrichten werden an die Clients geschickt, um mehrere parallele Clients zu ermoeglichen."
   print timestamp("<%s> %s" % (nick, message), time)
+
+def own_message(time, server, target, message):
+  print timestamp("<%s> %s" % ("FIXME", message), time)
+
+def query(time, server, nick, message):
+  print timestamp("<%s> %s" % (nick, message), time)
+
+def own_query(time, server, target, message):
+  print timestamp("<%s> %s" % ("FIXME", message), time)
 
 def notice(time, server, nick, target, message):
   print timestamp("<<%s>> %s" % (nick, message), time)
