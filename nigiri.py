@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# vi:tabstop=2:shiftwidth=2:expandtab
 ############################################
 ##  Licence: Public Domain
 ############################################
