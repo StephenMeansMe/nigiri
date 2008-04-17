@@ -81,6 +81,9 @@ class Signals:
     print timestamp("-!- %s has been kicked by %s (reason: %s)" % (who, nick, message), time)
   
   def nick(self, time, server, nick, new_nick):
+    if nick == self.nigiri.own_nicks[server]:
+      self.nigiri.own_nicks[server] = new_nick
+
     print timestamp("-!- %s is now known as %s" % (nick, new_nick), time)
   
   def mode(self, time, server, nick, target, mode, parameter):
@@ -106,6 +109,7 @@ class Signals:
   
   def connected(self, time, server, nick):
     "Wird gesendet, wenn ein Login auf dem IRC-Server stattgefunden hat. nick ist dabei der eigene Nickname."
+    self.nigiri.own_nicks[server] = nick
     print timestamp("/// client is now connected to %s" % server, time)
     print timestamp("    nick is set to %s" % nick, time)
   
