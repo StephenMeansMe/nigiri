@@ -393,7 +393,7 @@ def split_first_word(message, separator = None):
   "splits the first word, delimited by separator, and returns a list where [0] is the word and [1] the rest of the string"
   strings = message.split(separator, 1)
 
-  if len(strings) == 1:
+  for i in range(2 - len(strings)):
     strings.append("")
 
   return strings
