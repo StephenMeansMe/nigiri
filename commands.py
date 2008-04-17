@@ -401,17 +401,31 @@ def split_first_word(message, separator = None):
 
 
 def input_handler(inputstream, io_condition, nigiri):
-  input = inputstream.readline()
+  input = inputstream.readline().rstrip("\r\n")
+
+  if len(input) == 0:
+    return True
+
   if input[0] != "/":
     return message(nigiri, input, current=True)
-  if input == "/exit\n":
+
+  if input == "/exit":
     nigiri.loop.quit()
     return False
+
+  if len(input) == 1:
+    return True
+
   if input[0] == "/":
-    input = input[1:-1]
-    input = split_first_word(input)
+    if input[1] == "/":
+      return message(nigiri, input[1:], current=True)
+
+    input = split_first_word(input[1:])
+
     try:
       ret = nigiri.commandlist[input[0]](nigiri, input[1])
     except KeyError:
+      print "Unknown command: %s" % (input[0])
       ret = True
+
     return ret
