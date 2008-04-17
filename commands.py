@@ -196,10 +196,12 @@ dbus method: message(server, channel, message)"""
     print message.__doc__
   else:
     if current:
-      nigiri.proxy.message(nigiri.current_server, nigiri.current_channel, args)
+      if args:
+        nigiri.proxy.message(nigiri.current_server, nigiri.current_channel, args)
     else:
       args = split_first_word(args)
-      nigiri.proxy.message(nigiri.current_server, args[0], args[1])
+      if args[0] and args[1]:
+        nigiri.proxy.message(nigiri.current_server, args[0], args[1])
   return True
 
 
