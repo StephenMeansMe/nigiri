@@ -389,12 +389,14 @@ def help_request_p(arg):
 
 
 
-def split_first_word(message, seperator = " "):
-  "splits the first word, delimited by seperator, and returns a list where [0] is the word and [1] the rest of the string"
-  border = message.find(seperator)
-  if border == -1:
-    return [message, ""]
-  return [message[:border], message[border + 1:]]
+def split_first_word(message, separator = None):
+  "splits the first word, delimited by separator, and returns a list where [0] is the word and [1] the rest of the string"
+  strings = message.split(separator, 1)
+
+  if len(strings) == 1:
+    strings.append("")
+
+  return strings
 
 
 
