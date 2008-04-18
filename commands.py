@@ -3,6 +3,8 @@
 ##  Licence: Public Domain
 ############################################
 
+import os
+
 ###
 # DBus Methods
 ###
@@ -292,50 +294,40 @@ dbus method: topic(server, channel, topic)"""
 
 # Config
 
-def sushi_get(nigiri, args):
-  "dbus method: sushi_get(file, group, key)"
+def set(nigiri, args):
+  "irc-call: /set [<file>] [<group>] [<key>] [<value>]"
   if help_request_p(args):
-    print sushi_get.__doc__
+    print set.__doc__
   else:
-    pass
+    args = args.split(None, 4)
+    if len(args) == 1:
+      print "Files in %s:" % (args[0])
+      for file in map(str, nigiri.proxy.sushi_list(args[0], "", "")):
+        print "  %s" % (file)
+    if len(args) == 2:
+      print "Groups in %s/%s:" % (args[0], args[1])
+      for group in map(str, nigiri.proxy.sushi_list(args[0], args[1], "")):
+        print "  %s" % (group)
+    if len(args) == 3:
+      print "Keys in %s/%s [%s]:" % (args[0], args[1], args[2])
+      for key in map(str, nigiri.proxy.sushi_list(args[0], args[1], args[2])):
+        print "  %s=%s" % (key, str(nigiri.proxy.sushi_get(os.path.join(args[0], args[1]), args[2], key)))
+    if len(args) == 4:
+      print "%s/%s [%s] %s=%s" % (args[0], args[1], args[2], args[3], str(nigiri.proxy.sushi_get(os.path.join(args[0], args[1]), args[2], args[3])))
+    if len(args) == 5:
+      print "%s/%s [%s] %s=%s" % (args[0], args[1], args[2], args[3], args[4])
+      nigiri.proxy.sushi_set(os.path.join(args[0], args[1]), args[2], args[3], args[4])
   return True
 
-
-
-def sushi_set(nigiri, args):
-  "dbus method: sushi_set(file, group, key, value)"
-  if help_request_p(args):
-    print sushi_set.__doc__
-  else:
-    pass
-  return True
-
-
-
-def sushi_remove(nigiri, args):
+def unset(nigiri, args):
   """dbus method: sushi_remove(file, group, key)
 key ist optional und kann leer ("") sein. Dann wird die ganze Gruppe entfernt.
 group ist optional und kann leer ("") sein. Dann wird die ganze Datei entfernt."""
   if help_request_p(args):
-    print sushi_remove.__doc__
+    print unset.__doc__
   else:
     pass
   return True
-
-
-
-def sushi_list(nigiri, args):
-  """dbus method: sushi_list(directory, file, group)
-group ist optional und kann leer ("") sein. Dann werden alle Gruppen aufgelistet.
-file ist optional und kann leer ("") sein. Dann werden alle Dateien aufgelistet."""
-  if help_request_p(args):
-    print sushi_list.__doc__
-  else:
-    pass
-  return True
-
-
-
 
 ###
 # Input Handler
@@ -378,10 +370,8 @@ def get_commandlist():
            'mode': mode,
            'kick': kick,
            'topic': topic,
-           'sushi_get': sushi_get,
-           'sushi_set': sushi_set,
-           'sushi_remove': sushi_remove,
-           'sushi_list': sushi_list
+           'set': set,
+           'unset': unset
          }
 
 
