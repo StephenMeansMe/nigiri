@@ -150,7 +150,9 @@ message ist optional und kann leer ("") sein."""
       nigiri.channels[nigiri.current_server].remove(nigiri.current_channel)
     else:
       args = split_first_word(args)
-      nigiri.proxy.part(nigiri.current_server, args[0], args[1])
+      if args[0]:
+        nigiri.proxy.part(nigiri.current_server, args[0], args[1])
+        nigiri.channels[nigiri.current_server].remove(args[0])
   return True
 
 
