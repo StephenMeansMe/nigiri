@@ -3,8 +3,6 @@
 ##  Licence: Public Domain
 ############################################
 
-import os
-
 ###
 # DBus Methods
 ###
@@ -323,28 +321,33 @@ dbus method: topic(server, channel, topic)"""
 # Config
 
 def set(nigiri, args):
-  "irc-call: /set [<file>] [<group>] [<key>] [<value>]"
+  """irc-call: /set <path> [<group>] [<key>] [<value>]
+  <path> := <dir>[/<file>]"""
+
   if help_request_p(args):
     print set.__doc__
   else:
     args = args.split(None, 4)
-    if len(args) == 1:
-      print "Files in %s:" % (args[0])
-      for file in map(str, nigiri.proxy.sushi_list(args[0], "", "")):
-        print "  %s" % (file)
-    if len(args) == 2:
-      print "Groups in %s/%s:" % (args[0], args[1])
-      for group in map(str, nigiri.proxy.sushi_list(args[0], args[1], "")):
-        print "  %s" % (group)
-    if len(args) == 3:
-      print "Keys in %s/%s [%s]:" % (args[0], args[1], args[2])
-      for key in map(str, nigiri.proxy.sushi_list(args[0], args[1], args[2])):
-        print "  %s=%s" % (key, str(nigiri.proxy.sushi_get(os.path.join(args[0], args[1]), args[2], key)))
-    if len(args) == 4:
-      print "%s/%s [%s] %s=%s" % (args[0], args[1], args[2], args[3], str(nigiri.proxy.sushi_get(os.path.join(args[0], args[1]), args[2], args[3])))
-    if len(args) == 5:
-      print "%s/%s [%s] %s=%s" % (args[0], args[1], args[2], args[3], args[4])
-      nigiri.proxy.sushi_set(os.path.join(args[0], args[1]), args[2], args[3], args[4])
+    if len(args) > 0:
+      path = args[0].split('/')
+      if len(args) == 1:
+        if len(path) == 1:
+          print "Files in %s:" % (path[0])
+          for file in map(str, nigiri.proxy.sushi_list(path[0], "", "")):
+            print "  %s" % (file)
+        elif len(path) == 2:
+          print "Groups in %s/%s:" % (path[0], path[1])
+          for group in map(str, nigiri.proxy.sushi_list(path[0], path[1], "")):
+            print "  %s" % (group)
+      if len(args) == 2:
+        print "Keys in %s [%s]:" % (args[0], args[1])
+        for key in map(str, nigiri.proxy.sushi_list(path[0], path[1], args[1])):
+          print "  %s=%s" % (key, str(nigiri.proxy.sushi_get(args[0], args[1], key)))
+      if len(args) == 3:
+        print "%s [%s] %s=%s" % (args[0], args[1], args[2], str(nigiri.proxy.sushi_get(args[0], args[1], args[2])))
+      if len(args) == 4:
+        print "%s [%s] %s=%s" % (args[0], args[1], args[2], args[3])
+        nigiri.proxy.sushi_set(args[0], args[1], args[2], args[3])
   return True
 
 def unset(nigiri, args):
