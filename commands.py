@@ -3,6 +3,8 @@
 ##  Licence: Public Domain
 ############################################
 
+import traceback
+
 ###
 # DBus Methods
 ###
@@ -451,6 +453,9 @@ def input_handler(inputstream, io_condition, nigiri):
       ret = nigiri.commandlist[input[0]](nigiri, input[1])
     except KeyError:
       print "Unknown command: %s" % (input[0])
+      ret = True
+    except:
+      traceback.print_exc()
       ret = True
 
     return ret
