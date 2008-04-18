@@ -12,7 +12,7 @@ import os
 # TODO add descriptions to the help messages
 
 def server(nigiri, args):
-  "irc-call: /server <server>"
+  "irc-call: /server [<server>]"
   if help_request_p(args):
     print server.__doc__
   else:
@@ -21,6 +21,18 @@ def server(nigiri, args):
       nigiri.current_server = args
     else:
       print "Current server: %s" % (nigiri.current_server)
+  return True
+
+def channel(nigiri, args):
+  "irc-call: /channel [<channel>]"
+  if help_request_p(args):
+    print channel.__doc__
+  else:
+    if args and args in nigiri.channels[nigiri.current_server]:
+      print "Switching to channel: %s" % (args)
+      nigiri.current_channel = args
+    else:
+      print "Current channel: %s" % (nigiri.current_channel)
   return True
 
 # Connection
@@ -115,6 +127,7 @@ key ist optional und kann leer ("") sein."""
     key = args[1]
     for channel in channels:
       nigiri.proxy.join(nigiri.current_server, channel, key)
+      nigiri.channels[nigiri.current_server].append(channel)
     if len(channels) == 1:
       # TODO set active channel to channels[0]
       pass
@@ -363,6 +376,7 @@ def get_commandlist():
            'mode': mode,
            'server': server,
            'servers': servers,
+           'channel': channel,
            'channels': channels,
            'nicks': nicks,
            'quit': quit,
