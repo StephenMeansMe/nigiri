@@ -116,7 +116,7 @@ dbus method: connect(server)"""
 # Generic
 
 def join(nigiri, args):
-  """irc-call: /join <channel>[,<channels>] [key]
+  """irc-call: /join <channel>[,<channels>] [key[,keys]]
 dbus method: join(server, channel, key)"
 key ist optional und kann leer ("") sein."""
   if help_request_p(args):
@@ -124,16 +124,16 @@ key ist optional und kann leer ("") sein."""
   else:
     args = split_first_word(args)
     channels = args[0].split(",")
-    key = args[1]
+    keys = args[1].split(",")
     for channel in channels:
+      if len(keys) > 0:
+        key = keys.pop(0)
+      else:
+        key = ""
       nigiri.proxy.join(nigiri.current_server, channel, key)
       nigiri.channels[nigiri.current_server].append(channel)
-    if len(channels) == 1:
-      # TODO set active channel to channels[0]
-      pass
-    else:
-      # stay where you are
-      pass
+    if len(channels) == 1 and channels[0]:
+      nigiri.current_channel = channels[0]
   return True
 
 
