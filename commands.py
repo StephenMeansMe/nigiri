@@ -139,7 +139,7 @@ key ist optional und kann leer ("") sein."""
 
 
 def part(nigiri, args):
-  """irc-call: /part <channel>[,<channels>][ <message>]
+  """irc-call: /part <channel>[,<channels>] [<message>]
 dbus method: part(server, channel, message)
 message ist optional und kann leer ("") sein."""
   if help_request_p(args):
@@ -150,9 +150,10 @@ message ist optional und kann leer ("") sein."""
       nigiri.channels[nigiri.current_server].remove(nigiri.current_channel)
     else:
       args = split_first_word(args)
-      if args[0]:
-        nigiri.proxy.part(nigiri.current_server, args[0], args[1])
-        nigiri.channels[nigiri.current_server].remove(args[0])
+      channels = args[0].split(",")
+      for channel in channels:
+        nigiri.proxy.part(nigiri.current_server, channel, args[1])
+        nigiri.channels[nigiri.current_server].remove(channel)
   return True
 
 
