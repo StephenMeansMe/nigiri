@@ -11,6 +11,18 @@ import os
 
 # TODO add descriptions to the help messages
 
+def server(nigiri, args):
+  "irc-call: /server <server>"
+  if help_request_p(args):
+    print server.__doc__
+  else:
+    if args and args in nigiri.servers:
+      print "Switching to server: %s" % (args)
+      nigiri.current_server = args
+    else:
+      print "Current server: %s" % (nigiri.current_server)
+  return True
+
 # Connection
 def servers(nigiri, args):
   """irc-call: /servers
@@ -349,6 +361,7 @@ def get_commandlist():
            'ctcp': ctcp,
            'notice': notice,
            'mode': mode,
+           'server': server,
            'servers': servers,
            'channels': channels,
            'nicks': nicks,
