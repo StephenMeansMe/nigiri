@@ -15,7 +15,7 @@ import commands
 
 class Nigiri(threading.Thread):
   def __init__(self):
-    threading.Thread.__init__(self)        
+    threading.Thread.__init__(self)
     self.servers = []
     self.channels = {}
     self.nicks = {}
@@ -45,12 +45,12 @@ class Nigiri(threading.Thread):
     gobject.io_add_watch(sys.stdin, gobject.IO_IN | gobject.IO_ERR | gobject.IO_HUP, commands.input_handler, self)
     self.loop = gobject.MainLoop()
     self.bus = dbus.SessionBus()
-  
+
     print "starting signal processing..."
     self.signals = signals.Signals(self)
 
     retry = 0
-    while self.proxy == None and retry < self.connection_retries: 
+    while self.proxy == None and retry < self.connection_retries:
       print "connecting to maki..."
       try:
         self.proxy = self.bus.get_object("de.ikkoku.sushi", "/de/ikkoku/sushi")
@@ -62,7 +62,7 @@ class Nigiri(threading.Thread):
         else:
           print "connection failed!"
           sys.exit(1)
-    
+
     print "retrieve information from maki"
     commands.servers(self, "")
     commands.own_nick(self, "")

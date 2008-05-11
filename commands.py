@@ -85,7 +85,7 @@ if no channel is provided, the client will show the nicknames of the current cha
     else:
       nigiri.proxy.nicks(nigiri.current_server, args)
   return True
-      
+
 
 
 
