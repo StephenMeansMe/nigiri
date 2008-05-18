@@ -452,8 +452,7 @@ def input_handler(inputstream, io_condition, nigiri):
     try:
       ret = nigiri.commandlist[input[0]](nigiri, input[1])
     except KeyError:
-      print "Unknown command: %s" % (input[0])
-      ret = True
+      return raw(nigiri, "%s %s" % (input[0].upper(), input[1]))
     except:
       traceback.print_exc()
       ret = True
