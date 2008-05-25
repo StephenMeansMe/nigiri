@@ -1,12 +1,11 @@
 include ../Makefile.common
-PREFIX=/usr/share
 
 all:
 
 install: all
-	$(INSTALL) -d -m 755 '$(PREFIX)/nigiri'
-	$(INSTALL) -m 755 *py '$(PREFIX)/nigiri'
-	$(LN) '$(PREFIX)/nigiri/nigiri.py' '/usr/bin/nigiri'
+	$(INSTALL) -d -m 755 '$(PREFIX)/share/nigiri'
+	$(INSTALL) -m 755 *.py '$(PREFIX)/share/nigiri'
+	$(LN) '../share/nigiri/nigiri.py' '$(PREFIX)/bin/nigiri'
 
 clean:
 	$(RM) *.pyc
