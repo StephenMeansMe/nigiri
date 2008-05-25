@@ -3,9 +3,9 @@ include ../Makefile.common
 all:
 
 install: all
-	$(INSTALL) -d -m 755 '$(PREFIX)/share/nigiri'
-	$(INSTALL) -m 755 *.py '$(PREFIX)/share/nigiri'
-	$(LN) '../share/nigiri/nigiri.py' '$(PREFIX)/bin/nigiri'
+	$(INSTALL) -d -m 755 '$(sharedir)/sushi/nigiri'
+	$(INSTALL) -m 755 *.py '$(sharedir)/sushi/nigiri'
+	$(LN) '$(sharedir)/sushi/nigiri/nigiri.py' '$(bindir)/nigiri'
 
 clean:
 	$(RM) *.pyc
