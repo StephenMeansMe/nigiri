@@ -3,12 +3,12 @@
 You will need the python widget library urwid. On Debian-based systems this is
 available in the following package:
 
-* python-urwid (>= 0.9.8.1)
+* python-urwid (>= 0.9.8)
 
                                   INSTALLATION
 
-Just type "make install". This will install all the necessary files in the
-/usr/share directory. Other directories can be specified by calling make with
-the prefix variable, for example, "make prefix=/opt install".
+Just type "make install". This will install all the necessary files in your home
+directory. Other directories can be specified by calling make with the prefix
+variable, for example, "make prefix=/usr install".
 
 # vi:textwidth=80:expandtab
