@@ -1,7 +1,7 @@
                                   REQUIREMENTS
 
-You will need the python widget library urwid. On Debian-based systems this is
-available in the following package:
+You will need the Urwid Python module.
+On Debian-based systems this is available in the following package:
 
 * python-urwid (>= 0.9.8)
 
