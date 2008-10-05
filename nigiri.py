@@ -42,8 +42,8 @@ class Nigiri(threading.Thread):
     self.channels = {}
     self.nicks = {}
     self.own_nicks = {}
-    self.current_server = "euirc" # TODO
-    self.current_channel = "#Inkirei" # TODO
+    self.current_server = "test" # TODO
+    self.current_channel = "#test" # TODO
     self.commandlist = commands.get_commandlist()
     self.connection_retries = 12 # TODO client-config
     self.bus = None
