@@ -167,7 +167,7 @@ class MainWindow(object):
 					# TODO
 					pass
 
-			if self.current_world:
+			if self.current_tab:
 				history = self.current_tab.input_history
 			else:
 				history = self.generic_input_history
@@ -291,7 +291,7 @@ class MainWindow(object):
 		if not text or type(text) != str:
 			raise TypeError, "text must be of type str"
 
-		if self.current_world:
+		if self.current_tab:
 			walker = self.current_tab.output_walker
 
 		else:
