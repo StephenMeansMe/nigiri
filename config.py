@@ -315,9 +315,9 @@ def check_config_file(path):
 		# create the directories
 		try:
 			os.makedirs (os.path.join (os.path.split (path)[0]))
-		except os.error:
+		except os.error, e:
 			print "Error while creating neccessary directories: %s"\
-				% (os.error)
+				% (e)
 			return False
 
 		try:
