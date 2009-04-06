@@ -2,7 +2,8 @@ from typecheck import types
 
 from urwid import Signals, MetaSignals
 
-import commands
+# TODO:  method to get a generic list of
+# TODO:: tabs. (from tree to list)
 
 class Tab(object):
 

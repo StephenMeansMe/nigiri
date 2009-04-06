@@ -55,6 +55,8 @@ def switch_to_previous_world (main):
 	# TODO
 	pass
 
+
+
 class MainWindow(object):
 
 	__metaclass__ = MetaSignals
@@ -312,6 +314,8 @@ if __name__ == "__main__":
 	global main_window
 
 	config.setup()
+
+	# TODO: setup locale stuff
 
 	main_window = MainWindow()
 
