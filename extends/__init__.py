@@ -1,2 +1,2 @@
 
-__all__ = ["Text","ListBox","BoxAdapter","Edit"]
+__all__ = ["ListBox","BoxAdapter","Edit"]

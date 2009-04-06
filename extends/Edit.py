@@ -1,7 +1,5 @@
 import urwid
 
-import debug
-
 class ExtendedEdit (urwid.Edit):
 
 	hide_edit_text = False

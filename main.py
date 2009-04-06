@@ -20,8 +20,6 @@ import extends
 from extends import *
 from input_history import InputHistory
 
-import debug
-
 """
  -------context-------
 | --inner context---- |
@@ -302,7 +300,7 @@ class MainWindow(object):
 		if text[-1] == "\n":
 			text = text[:-1]
 
-		walker.append (extends.Text.ExtendedText (text))
+		walker.append (urwid.Text (text))
 
 		self.body.scroll_to_bottom (self.ui.get_cols_rows())
 
