@@ -1,11 +1,16 @@
 #!/usr/bin/env python
 
-import urwid.curses_display
-import urwid
+import sys
+
+try:
+	import urwid.curses_display
+	import urwid
+except ImportError, e:
+	print >> sys.stderr, "Failed to import urwid: %s" % (e)
+	print >> sys.stderr, "Do you have urwid installed?"
+	sys.exit(1)
 
 from urwid import Signals, MetaSignals
-
-import sys
 
 import config
 import messages
