@@ -64,11 +64,19 @@ class Tab(object):
 
 class Server(Tab):
 
+	_nick = ""
 	_away = ""
 	_channels = []
 
 	def __init__(self, name):
 		Tab.__init__(self, name)
+
+	@types(nick = str)
+	def set_nick(self, nick):
+		self._nick = nick
+
+	def get_nick(self):
+		return self._nick
 
 	@types(msg = str)
 	def set_away(self, msg):
