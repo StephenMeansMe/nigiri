@@ -11,3 +11,5 @@ install: all
 
 clean:
 	$(RM) -f *.pyc
+	$(RM) -f helper/*.pyc
+	$(RM) -f extends/*.pyc
