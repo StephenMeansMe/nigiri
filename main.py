@@ -147,7 +147,7 @@ class MainWindow(object):
 		self.body = extends.ListBox.ExtendedListBox(self.generic_output_walker)
 
 		# setup attributes
-		self.header = urwid.AttrWrap (self.header, "header")
+		self.header = urwid.AttrWrap (self.header, "divider")
 		self.footer = urwid.AttrWrap (self.footer, "footer")
 		self.divider = urwid.AttrWrap (self.divider, "divider")
 		self.body = urwid.AttrWrap (self.body, "body")
