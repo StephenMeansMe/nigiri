@@ -1,9 +1,20 @@
 from typecheck import types
 
-from urwid import Signals, MetaSignals
+from urwid import Signals, MetaSignals, SimpleListWalker
 
-# TODO:  method to get a generic list of
-# TODO:: tabs. (from tree to list)
+def tree_to_list(input_parents, target = None):
+
+	l = []
+
+	for parent in input_parents:
+
+		if target and parent != target:
+			continue
+
+		for child in target.children:
+			l.append(child)
+
+	return l
 
 class Tab(object):
 
@@ -15,8 +26,15 @@ class Tab(object):
 	_parent = None
 	_status = {}
 
+	children = []
 	input_history = None
-	output_walker = None
+	output_walker = SimpleListWalker([])
+
+	def __repr__(self):
+		return self._name
+
+	def __str__(self):
+		return self._name
 
 	@types(name = str)
 	def __init__(self, name):
@@ -28,9 +46,17 @@ class Tab(object):
 
 	def child_added(self, child):
 		Signals.emit(self, "child_added", child)
+		self.children.append(child)
 
 	def child_removed(self, child):
 		Signals.emit(self, "child_removed", child)
+		try:
+			i = self.children.index(child)
+		except ValueError:
+			pass
+		else:
+			del self.children[i]
+
 
 	def set_parent(self, parent):
 		try:
@@ -66,7 +92,6 @@ class Server(Tab):
 
 	_nick = ""
 	_away = ""
-	_channels = []
 
 	def __init__(self, name):
 		Tab.__init__(self, name)
@@ -81,19 +106,6 @@ class Server(Tab):
 	@types(msg = str)
 	def set_away(self, msg):
 		self._away = msg
-
-	def child_added(self, child):
-		Tab.child_added(self, child)
-		self._channels.append(child)
-
-	def child_removed(self, child):
-		Tab.child_removed(self, child)
-		try:
-			i = self._channels.index(child)
-		except ValueError:
-			pass
-		else:
-			del self._channels[i]
 
 class Channel(Tab):
 

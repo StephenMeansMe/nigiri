@@ -48,13 +48,28 @@ FOOTER = Input line (Ext. Edit)
 NIGIRI_VERSION = "0.0.1"
 
 def switch_to_next_tab (main):
-	# TODO
-	pass
+	tablist = tabs.tree_to_list(main.servers)
 
-def switch_to_previous_world (main):
-	# TODO
-	pass
+	try:
+		current_index = tablist.index (main.current_world)
+	except ValueError:
+		return
 
+	if (current_index + 1) >= len (tablist):
+		current_index = 0
+	else:
+		current_index += 1
+
+	main.switch_to_tab (tablist[current_index])
+
+def switch_to_previous_tab (main):
+	tablist = tabs.tree_to_list(main.servers)
+	try:
+		current_index = tablist (main.current_world)
+	except ValueError:
+		return
+
+	main.switch_to_tab (tablist[current_index - 1])
 
 
 class MainWindow(object):
@@ -242,6 +257,34 @@ class MainWindow(object):
 
 		else:
 			self.context.keypress (size, key)
+
+	def switch_to_tab(self, tab):
+		self.current_tab = tab
+
+		if not tab:
+			self.body.set_body(self.generic_output_walker)
+			self.divider.set_text("Not connected.")
+
+		else:
+			self.body.set_body(tab.output_walker)
+			self.update_divider()
+
+		Signals.emit(self, "tab_switched", tab)
+
+	def add_server(self, server):
+		self.servers.append(server)
+
+		Signals.connect(server, "child_added", self.handle_channel_add)
+		Signals.connect(server, "child_removed", self.handle_channel_remove)
+
+	def remove_server(self, server):
+		pass
+
+	def handle_channel_add(self, server, channel):
+		pass
+
+	def handle_channel_remove(self, server, channel):
+		pass
 
 	def update_divider(self):
 		"""
