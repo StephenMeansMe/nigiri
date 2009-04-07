@@ -49,12 +49,22 @@ def cmd_maki(main_window, argv):
 			print_notification("Connection to maki etablished.")
 		else:
 			print_notification("Connection to maki failed.")
+		main_window.update_divider()
+
+	elif cmd == "disconnect":
+		if no_connection():
+			return
+
+		connection.disconnect()
+		print_notification("Disconnected from maki.")
+		main_window.update_divider()
 
 	elif cmd == "shutdown":
 		if no_connection():
 			return
 
 		connection.sushi.shutdown(config.get("chatting", "quit_message"))
+		main_window.update_divider()
 
 	else:
 		usage()

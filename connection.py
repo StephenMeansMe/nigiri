@@ -68,6 +68,11 @@ def connect():
 
 	return True
 
+def disconnect():
+	global sushi, __connected
+	sushi = None
+	__connected = False
+
 def is_connected():
 	"""
 		Returns True if we are connected to maki.
