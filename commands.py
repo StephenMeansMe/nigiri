@@ -54,7 +54,7 @@ def cmd_maki(main_window, argv):
 		if no_connection():
 			return
 
-		connection.sushi.shutdown()
+		connection.sushi.shutdown(config.get("chatting", "quit_message"))
 
 	else:
 		usage()

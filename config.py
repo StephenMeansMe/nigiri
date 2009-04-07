@@ -68,6 +68,10 @@ def set_defaults():
 	defaults["nigiri"]["keep_alive"] = "True"
 	defaults["nigiri"]["command_char"] = "/"
 
+	defaults["chatting"] = {}
+	defaults["chatting"]["quit_message"] = "Quit."
+	defaults["chatting"]["part_message"] = "Part."
+
 	defaults["messages"] = {}
 	defaults["messages"]["error"] = "window"
 	defaults["messages"]["notification"] = "window"
