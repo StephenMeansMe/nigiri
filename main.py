@@ -16,6 +16,7 @@ import config
 import messages
 import commands
 import connection
+import signals
 import tabs
 
 import extends
@@ -272,11 +273,11 @@ class MainWindow(object):
 
 		if not tab:
 			self.body.set_body(self.generic_output_walker)
-			self.divider.set_text("Not connected.")
 
 		else:
 			self.body.set_body(tab.output_walker)
-			self.update_divider()
+
+		self.update_divider()
 
 		Signals.emit(self, "tab_switched", tab)
 
@@ -352,7 +353,7 @@ class MainWindow(object):
 		markup.append(("divider", "] "))
 
 		if not self.servers:
-			markup.append(("divider", "Not connected."))
+			markup.append(("divider", "Not connected to any server."))
 			self.divider.set_text(markup)
 			return
 
@@ -367,6 +368,7 @@ class MainWindow(object):
 		tablist_len = len(tablist)
 
 		for i in range(tablist_len):
+			tab = tablist[i]
 			name = str(i+1)
 			color = "divider"
 			if tab.has_status("new_action"):

@@ -26,6 +26,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 """
 
+import tabs
+
 sushi = None
 signals = {}
 
@@ -87,7 +89,18 @@ def maki_connected(sushi_interface):
 
 	connect_signal("connect", sushi_connect_attempt)
 	connect_signal("connected", sushi_connected)
-	connect_signal("cannot_join", sushi_cannot_join)
+
+	setup_connected_servers()
+
+def setup_connected_servers():
+	for server in sushi.servers():
+		stab = tabs.Server(name = str(server))
+		main_window.add_server(stab)
+
+		for channel in sushi.channels(server):
+			ctab = tabs.Channel(name = channel,
+				parent = stab)
+	main_window.update_divider()
 
 ####################################################
 
@@ -110,3 +123,4 @@ def sushi_connect_attempt(time, server):
 
 def sushi_connected(time, server):
 	pass
+

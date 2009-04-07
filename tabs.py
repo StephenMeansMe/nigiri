@@ -1,4 +1,5 @@
 from typecheck import types
+from dbus import String
 
 from urwid import Signals, MetaSignals, SimpleListWalker
 
@@ -11,7 +12,7 @@ def tree_to_list(input_parents, target = None):
 		if target and parent != target:
 			continue
 
-		for child in target.children:
+		for child in parent.children:
 			l.append(child)
 
 	return l
@@ -19,7 +20,7 @@ def tree_to_list(input_parents, target = None):
 class Tab(object):
 
 	__metaclass__ = MetaSignals
-	signals = ["add_child", "remove_child"]
+	signals = ["child_added", "child_removed"]
 
 	_valid_stati = ["highlight","highlight_action",
 		"new_action","new_message"]
@@ -34,12 +35,12 @@ class Tab(object):
 	output_walker = SimpleListWalker([])
 
 	def __repr__(self):
-		return self._name
+		return "<tab: %s>" % self._name
 
 	def __str__(self):
 		return self._name
 
-	@types(name = str)
+	@types(name = (String, str))
 	def __init__(self, name):
 		self._name = name
 
@@ -48,11 +49,11 @@ class Tab(object):
 		self._connected = switch
 
 	def child_added(self, child):
-		Signals.emit(self, "child_added", child)
+		Signals.emit(self, "child_added", self, child)
 		self.children.append(child)
 
 	def child_removed(self, child):
-		Signals.emit(self, "child_removed", child)
+		Signals.emit(self, "child_removed", self, child)
 		try:
 			i = self.children.index(child)
 		except ValueError:
@@ -119,7 +120,7 @@ class Channel(Tab):
 	_topic = ""
 	_channels = {}
 
-	@types(name = str)
+	@types(name = (String,str))
 	def __init__(self, name, parent = None):
 		Tab.__init__(self, name)
 		self.set_parent(parent)
