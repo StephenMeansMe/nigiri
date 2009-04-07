@@ -3,9 +3,62 @@ from typecheck import types
 from messages import print_notification, print_error
 import config
 
+import connection
+
+def no_connection():
+	if not connection.is_connected():
+		print_error("No connection to maki.")
+		return True
+	return False
+
+def cmd_connect(main_window, argv):
+	""" /connect <server> """
+	if no_connection():
+		return
+
+	if len(argv) != 2:
+		print_notification("Usage: /connect <server>")
+		return
+
+	if argv[1] not in connection.sushi.server_list("",""):
+		print_error("connect: The server '%(server)s' is not known." % {
+			"server": argv[1]})
+		return
+
+	connection.sushi.connect(argv[1])
+
 def cmd_echo(main_window, argv):
 	""" /echo <text> """
 	main_window.print_text(" ".join(argv[1:])+"\n")
+
+def cmd_maki(main_window, argv):
+	""" /maki [connect|shutdown] """
+	def usage():
+		print_notification("Usage: /maki [connect|shutdown]")
+
+	if len(argv) != 2:
+		usage()
+		return
+
+	cmd = argv[1]
+
+	if cmd == "connect":
+		print_notification("Connection to maki...")
+
+		if connection.connect():
+			print_notification("Connection to maki etablished.")
+		else:
+			print_notification("Connection to maki failed.")
+
+	elif cmd == "shutdown":
+		if no_connection():
+			return
+
+		connection.sushi.shutdown()
+
+	else:
+		usage()
+		return
 
 def cmd_python(main_window, argv):
 	""" /python <code> """
@@ -20,7 +73,9 @@ def cmd_quit(main_window, argv):
 	main_window.quit()
 
 _command_dict = {
+	"connect": cmd_connect,
 	"echo": cmd_echo,
+	"maki": cmd_maki,
 	"python": cmd_python,
 	"quit": cmd_quit,
 }
