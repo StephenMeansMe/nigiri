@@ -78,6 +78,10 @@ class Tab(object):
 	def add_status(self, name):
 		self._name[name] = True
 
+	@types(status = str)
+	def has_status(self, status):
+		return self._status.has_key(status)
+
 	@types(name = str)
 	def remove_status(self, name):
 		try:

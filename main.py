@@ -15,6 +15,8 @@ from urwid import Signals, MetaSignals
 import config
 import messages
 import commands
+import connection
+import tabs
 
 import extends
 from extends import *
@@ -83,13 +85,18 @@ class MainWindow(object):
 			('bold_text', 'light gray', 'black', 'bold'),
 			("body", "text"),
 			("footer", "text"),
-			("header", "text")
+			("header", "text"),
+
+			("div_fg_red", "dark red", "dark cyan"),
+			("div_fg_blue", "dark blue", "dark cyan"),
+			("div_fg_green", "dark green", "dark cyan"),
+			("div_fg_yellow", "yellow", "dark cyan"),
+			("div_fg_magenta", "dark magenta", "dark cyan"),
+			("div_fg_white", "white", "dark cyan"),
+			("div_fg_black", "black", "dark cyan"),
 		]
 
 	def __init__(self):
-		self._divider_template = \
-			"""%(tab_id)d: %(tab_name)s [%(tab_list)s]  %(connected)s"""
-
 		# current active world
 		self.current_tab = None
 		self.servers = []
@@ -104,6 +111,8 @@ class MainWindow(object):
 		size = self.ui.get_cols_rows ()
 
 		self.setup_context()
+
+		self.update_divider()
 
 		self.generic_input_history = InputHistory(
 				text_callback = self.footer.get_edit_text)
@@ -141,7 +150,7 @@ class MainWindow(object):
 		# create widgets
 		self.header = urwid.Text("nigiri version %s" % NIGIRI_VERSION)
 		self.footer = extends.Edit.ExtendedEdit("> ")
-		self.divider = urwid.Text("Not connected.")
+		self.divider = urwid.Text("Initializing.")
 
 		self.generic_output_walker = urwid.SimpleListWalker([])
 		self.body = extends.ListBox.ExtendedListBox(self.generic_output_walker)
@@ -289,6 +298,9 @@ class MainWindow(object):
 	# TODO:  update_divider without color usage
 	# TODO:: for people who can't see colors
 
+	def nc_update_divider(self):
+		pass
+
 	def update_divider(self):
 		"""
 		0: [maki] green or red highlighted
@@ -297,7 +309,60 @@ class MainWindow(object):
 		2: tab name
 		3: tab list with highlights
 		"""
-		pass
+		markup = []
+		tablist = tabs.tree_to_list(self.servers)
+
+		try:
+			tabid = tablist.index(self.current_tab)
+		except ValueError:
+			tabid = -1
+
+		# [maki]
+		markup.append(("divider", "["))
+		if connection.is_connected():
+			markup.append(("div_fg_green","maki"))
+		else:
+			markup.append(("div_fg_red","maki"))
+		markup.append(("divider", "] "))
+
+		if not self.servers:
+			markup.append(("divider", "Not connected."))
+			self.divider.set_text(markup)
+			return
+
+		else:
+			if self.current_tab:
+				markup.append(("divider","%d:%s " % (
+					tabid,self.current_tab.name)))
+			else:
+				markup.append(("divider","-:- "))
+
+		markup.append(("divider", "["))
+		tablist_len = len(tablist)
+
+		for i in range(tablist_len):
+			name = str(i+1)
+			color = "divider"
+			if tab.has_status("new_action"):
+				color = "div_fg_green"
+
+			if tab.has_status("new_message"):
+				color = "div_fg_white"
+
+			if tab.has_status("highlight_action"):
+				color = "div_fg_yellow"
+
+			if tab.has_status("highlight"):
+				color = "div_fg_magenta"
+
+			if i+1 != tablist_len:
+				name += ","
+
+			markup.append((color, name))
+
+		markup.append(("divider", "]"))
+
+		self.divider.set_text(markup)
 
 	def print_text(self, text):
 		"""
