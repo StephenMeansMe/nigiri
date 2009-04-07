@@ -315,15 +315,18 @@ def get_default(section, option=""):
 @types (path=str)
 def check_config_file(path):
 	""" check if config file exists and create it if not """
+	path, file = os.path.split(path)
+
 	if not os.path.exists (path):
 		# create the directories
 		try:
-			os.makedirs (os.path.join (os.path.split (path)[0]))
+			os.makedirs (path)
 		except os.error, e:
 			print "Error while creating neccessary directories: %s"\
 				% (e)
 			return False
 
+	if not os.path.exists(os.path.join(path, file)):
 		try:
 			f = file (path, "w")
 		except BaseException,e:
