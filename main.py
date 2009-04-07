@@ -286,45 +286,16 @@ class MainWindow(object):
 	def handle_channel_remove(self, server, channel):
 		pass
 
+	# TODO:  update_divider without color usage
+	# TODO:: for people who can't see colors
+
 	def update_divider(self):
 		"""
-		update the data in the divider line.
-		The data is:
-		- Index of the current world
-		- A list of the attached worlds
-		- Current world is connected y/n
-
-
-		try:
-			id = self.worlds.index (self.current_tab)
-		except ValueError:
-			self.divider.set_text ("Not connected.")
-			return
-
-		name = self.current_world.name
-
-		world_list = []
-		for world in self.worlds:
-			vname = world.name
-			if self.current_world == world:
-				vname = "*"+vname
-			if not world.is_connected:
-				vname = "'"+vname
-			# TODO: real highlighting here
-			if self.current_world != world and world.has_unread:
-				vname = "_"+vname
-			world_list.append(vname)
-
-		connected_string = ""
-		if not self.current_world.is_connected:
-			connected_string = "(Not connected)"
-
-		self.divider.set_text(self._divider_template % {
-				"world_id": id,
-				"world_name": name,
-				"world_list": ",".join(world_list),
-				"connected": connected_string
-			})
+		0: [maki] green or red highlighted
+		1: "Not connected." or tab id
+		if no connection: abort here.
+		2: tab name
+		3: tab list with highlights
 		"""
 		pass
 
