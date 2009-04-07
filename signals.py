@@ -26,7 +26,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 """
 
-
+sushi = None
 signals = {}
 
 def parse_from (from_str):
@@ -71,3 +71,42 @@ def disconnect_signal (signal, handler):
 		ob.remove()
 		del signals[signal][handler]
 
+
+def setup(mw):
+	""" called by main, mw is the main_window """
+	global main_window
+	main_window = mw
+
+def maki_connected(sushi_interface):
+	""" called by dbus connection handler.
+		sushi is the dbus interface
+	"""
+	global sushi, signals
+	sushi = sushi_interface
+	signals = {}
+
+	connect_signal("connect", sushi_connect_attempt)
+	connect_signal("connected", sushi_connected)
+	connect_signal("cannot_join", sushi_cannot_join)
+
+####################################################
+
+def sushi_connect_attempt(time, server):
+	tab = main_window.find_server(server)
+
+	if not tab:
+		tab = tabs.Server(name = server)
+		main_window.add_server(tab)
+
+		messages.print_tab_notification(tab, "Connecting...")
+
+	elif tab.get_connected():
+		tab.set_connected(False)
+
+		messages.print_tab_notification(tab, "Reconnecting...")
+
+	else:
+		messages.print_tab_notification(tab, "Connecting...")
+
+def sushi_connected(time, server):
+	pass

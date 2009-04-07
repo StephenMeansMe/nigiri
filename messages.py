@@ -31,10 +31,12 @@ provide methods for warnings, notifications, debug and errors
 """
 
 import sys
+import urwid
 
 import config
 #import log
 from typecheck import types
+import tabs
 
 main_window = None
 #generic_log = None
@@ -42,6 +44,11 @@ main_window = None
 class error(object): pass
 class debug(object): pass
 class notification(object): pass
+
+class tab(object): pass
+class tab_error(object): pass
+class tab_notification(object):	pass
+class tab_debug(object): pass
 
 def setup ():
 	try:
@@ -74,10 +81,42 @@ def handle_message (type, message):
 		elif dest == "stdout":
 			print message
 
+@types(msg = str)
+def print_to_tab(dest_tab, msg):
+	if not main_window:
+		return
+
+	tablist = tabs.tree_to_list(main_window.servers)
+
+	try:
+		i = tablist.index(dest_tab)
+	except ValueError:
+		print_error("print_tab to invalid destinaton '%s'." % dest_tab)
+		return
+	else:
+		tablist[i].output_walker.append(urid.Text(msg))
+
 @types (type=type, prefix=str, msg=str)
 def printit (type, prefix, msg, *args, **dargs):
 	msg = prefix + msg
+
+	try:
+		dest_tab = dargs["dest_tab"]
+	except KeyError:
+		pass
+	else:
+		print_to_tab(dest_tab, msg)
+		try:
+			msgtype = dargs["type"]
+		except KeyError:
+			dest_tab.add_status("new_message")
+		else:
+			dest_tab.add_status(msgtype)
+
+	if dargs.has_key("dont_handle") and dargs["dont_handle"]:
+		return
 	handle_message (type, msg)
+
 
 @types (msg=str)
 def print_error (msg, *args, **dargs):
@@ -90,3 +129,24 @@ def print_notification (msg, *args, **dargs):
 @types (msg=str)
 def print_debug (msg, *args, **dargs):
 	printit (debug, "=== Debug: ", msg, *args, **dargs)
+
+
+@types (msg=str)
+def print_tab(dest_tab, msg, *args, **dargs):
+	dargs.update({"dest_tab":dest_tab})
+	printit(tab, "", msg, *args, **dargs)
+
+@types (msg=str)
+def print_tab_error(dest_tab, msg, *args, **dargs):
+	dargs.update({"dest_tab":dest_tab})
+	printit(tab_error, "!!! Error: ", msg, *args, **dargs)
+
+@types (msg=str)
+def print_tab_notification(dest_tab, msg, *args, **dargs):
+	dargs.update({"dest_tab":dest_tab})
+	printit(tab_notification, "*** Notification: ", msg, *args, **dargs)
+
+@types (msg=str)
+def print_tab_debug(dest_tab, msg, *args, **dargs):
+	dargs.update({"dest_tab":dest_tab})
+	printit(tab_debug, "=== Debug: ", msg, *args, **dargs)

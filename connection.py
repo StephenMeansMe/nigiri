@@ -31,6 +31,7 @@ import os
 import dbus
 from dbus.mainloop.glib import DBusGMainLoop
 
+import signals
 from signals import parse_from
 
 dbus_loop = DBusGMainLoop()
@@ -62,6 +63,8 @@ def connect():
 		return False
 
 	sushi = dbus.Interface(proxy, "de.ikkoku.sushi")
+
+	signals.maki_connected(sushi)
 
 	global __connected
 	__connected = True

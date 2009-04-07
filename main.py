@@ -286,8 +286,34 @@ class MainWindow(object):
 		Signals.connect(server, "child_added", self.handle_channel_add)
 		Signals.connect(server, "child_removed", self.handle_channel_remove)
 
+		self.update_divider()
+
+	def find_server(self, server_name):
+		try:
+			i = [n.name.lower() for n in self.servers].index(server_name.lower())
+		except ValueError:
+			return None
+		else:
+			return self.servers[i]
+
+	def find_tab(self, tab_name):
+		tablist = tabs.tree_to_list(self.servers)
+		try:
+			i = [n.name.lower() for n in tablist].index(tab_name.lower())
+		except IndexError:
+			return None
+		else:
+			return tablist[i]
+		return None
+
 	def remove_server(self, server):
-		pass
+		try:
+			i = self.servers.index(server)
+		except ValueError:
+			return
+		else:
+			del self.servers[i]
+			self.update_divider()
 
 	def handle_channel_add(self, server, channel):
 		pass
@@ -397,6 +423,8 @@ if __name__ == "__main__":
 	# TODO: setup locale stuff
 
 	main_window = MainWindow()
+
+	signals.setup(main_window)
 
 	messages.setup()
 

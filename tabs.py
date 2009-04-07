@@ -21,6 +21,9 @@ class Tab(object):
 	__metaclass__ = MetaSignals
 	signals = ["add_child", "remove_child"]
 
+	_valid_stati = ["highlight","highlight_action",
+		"new_action","new_message"]
+
 	_name = ""
 	_connected = False
 	_parent = None
@@ -57,7 +60,6 @@ class Tab(object):
 		else:
 			del self.children[i]
 
-
 	def set_parent(self, parent):
 		try:
 			self._parent.child_removed(self)
@@ -76,7 +78,8 @@ class Tab(object):
 
 	@types(name = str)
 	def add_status(self, name):
-		self._name[name] = True
+		if name in self._valid_stati:
+			self._name[name] = True
 
 	@types(status = str)
 	def has_status(self, status):
