@@ -20,7 +20,7 @@ def tree_to_list(input_parents, target = None):
 class Tab(object):
 
 	__metaclass__ = MetaSignals
-	signals = ["child_added", "child_removed"]
+	signals = ["child_added", "child_removed", "remove"]
 
 	_valid_stati = ["highlight","highlight_action",
 		"new_action","new_message"]
@@ -35,7 +35,7 @@ class Tab(object):
 	output_walker = SimpleListWalker([])
 
 	def __repr__(self):
-		return "<tab: %s>" % self._name
+		return "<tab: %s:%s>" % (self._parent, self._name)
 
 	def __str__(self):
 		return self._name
@@ -62,6 +62,11 @@ class Tab(object):
 			del self.children[i]
 
 	def set_parent(self, parent):
+		if parent in self.children:
+			print "Loop detected in '%s'.set_parent(%s)" % (
+				self, parent)
+			return
+
 		try:
 			self._parent.child_removed(self)
 		except AttributeError:
@@ -76,6 +81,13 @@ class Tab(object):
 
 	def get_parent(self):
 		return self._parent
+
+	def remove(self):
+		""" emit remove signals """
+		for child in self.children:
+			child.remove()
+			self.child_removed(child)
+		Signals.emit("remove", self)
 
 	@types(name = str)
 	def add_status(self, name):

@@ -11,6 +11,16 @@ def no_connection():
 		return True
 	return False
 
+def cmd_close(main_window, argv):
+	""" /close """
+	# close the current tab
+	if not main_window.current_tab:
+		return
+
+	to_delete = main_window.current_tab
+	main_window.switch_to_next_tab()
+	to_delete.remove()
+
 def cmd_connect(main_window, argv):
 	""" /connect <server> """
 	if no_connection():
@@ -83,6 +93,7 @@ def cmd_quit(main_window, argv):
 	main_window.quit()
 
 _command_dict = {
+	"close": cmd_close,
 	"connect": cmd_connect,
 	"echo": cmd_echo,
 	"maki": cmd_maki,
