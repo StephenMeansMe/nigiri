@@ -105,15 +105,16 @@ def printit (type, prefix, msg, *args, **dargs):
 	except KeyError:
 		pass
 	else:
+
 		print_to_tab(dest_tab, msg)
 
 		if main_window.current_tab != dest_tab:
 			try:
 				msgtype = dargs["type"]
 			except KeyError:
-				dest_tab.add_status("message")
-			else:
-				dest_tab.add_status(msgtype)
+				msgtype = "message"
+
+			dest_tab.add_status(msgtype)
 			main_window.update_divider()
 
 	if dargs.has_key("dont_handle") and dargs["dont_handle"]:

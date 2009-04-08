@@ -26,6 +26,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 """
 
+import time
+
+import config
 import tabs
 
 from messages import print_tab, print_error, \
@@ -33,6 +36,20 @@ from messages import print_tab, print_error, \
 
 sushi = None
 signals = {}
+
+def format_message(type, msg, **fmt):
+	template = config.get("formats", type)
+
+	if not template:
+		print_error("No format template for type '%s'." % (type))
+		return
+
+	if not fmt.has_key("datestring"):
+		fmt["datestring"] = time.strftime(config.get("formats","datestring"))
+
+	fmt["message"] = msg
+
+	return template % fmt
 
 def parse_from (from_str):
 	h = from_str.split("!", 2)
@@ -161,4 +178,5 @@ def sushi_message(time, server, sender, target, message):
 			server, target))
 		return
 
-	print_tab(tab, "<%s> %s" % (parse_from(sender)[0], message))
+	msg = format_message("message", message, nick = parse_from(sender)[0])
+	print_tab(tab, msg)
