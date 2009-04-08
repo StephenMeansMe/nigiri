@@ -12,6 +12,8 @@ except ImportError, e:
 
 from urwid import Signals, MetaSignals
 
+import gobject
+
 import config
 import messages
 import commands
@@ -94,8 +96,8 @@ class MainWindow(object):
 		self.generic_input_history = InputHistory(
 				text_callback = self.footer.get_edit_text)
 
-		# main loop
-		while True:
+		# urwid main loop
+		def urwid_main_loop (self, size):
 			self.draw_screen (size)
 
 			try:
@@ -111,11 +113,19 @@ class MainWindow(object):
 
 				else:
 					self.keypress (size, k)
+			return True
+
+		gobject.idle_add(urwid_main_loop, self, size)
+
+		self.gmainloop = gobject.MainLoop()
+		self.gmainloop.run()
 
 	def quit(self):
 		Signals.emit (self, "quit")
 
 		self.ui.stop()
+
+		self.gmainloop.quit()
 
 		config.write_config_file ()
 
@@ -319,6 +329,7 @@ class MainWindow(object):
 		else:
 			self.body.set_body(tab.output_walker)
 
+		tab.reset_status()
 		self.update_divider()
 
 		Signals.emit(self, "tab_switched", tab)
@@ -389,34 +400,45 @@ class MainWindow(object):
 
 		else:
 			# add <nick>@<server>:<current tab>
-			temp = "%(nick)s@%(server)s:%(tab)s"
+			temp = "%(nick)s@%(server)s:%(tab)s (%(id)s) "
 
 			if self.current_tab:
 				subdict = {
 					"tab":str(self.current_tab),
 					"nick":"",
-					"server":""
+					"server":"",
+					"id":""
 				}
 
 				if type(self.current_tab) == tabs.Server:
 					subdict["nick"] = self.current_tab.get_nick() or "-"
 					subdict["server"] = str(self.current_tab)
 				else:
-					subdict["nick"] = self.current_tab.get_parent().get_nick() or "-"
+					subdict["nick"] = self.current_tab.get_parent()\
+						.get_nick() or "-"
 					subdict["server"] = str(self.current_tab.get_parent())
+
+				subdict["id"] = str(tabid+1)
 
 				markup.append(("divider", temp % subdict))
 
 			else:
 				markup.append(("divider", "-@-:-"))
 
+		# display tabnumbers which are active
 		markup.append(("divider", "["))
-		tablist_len = len(tablist)
+		active_tabs = [tab for tab in tablist if tab.status and tab != self.current_tab]
+		active_tabs_len = len(active_tabs)
 
-		for i in range(tablist_len):
-			tab = tablist[i]
-			name = str(i+1)
+		for i in range(active_tabs_len):
+
+			tab = active_tabs[i]
+			try:
+				name = str(tablist.index(tab)+1)
+			except ValueError:
+				name = "UNAVAIL"
 			color = "divider"
+
 			if tab.has_status("new_action"):
 				color = "div_fg_green"
 
@@ -429,10 +451,11 @@ class MainWindow(object):
 			if tab.has_status("highlight"):
 				color = "div_fg_magenta"
 
-			if i+1 != tablist_len:
-				name += ","
 
 			markup.append((color, name))
+
+			if i+1 != active_tabs_len:
+				markup.append(("divider", ","))
 
 		markup.append(("divider", "]"))
 
