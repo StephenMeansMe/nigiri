@@ -31,11 +31,13 @@ import os
 import dbus
 from dbus.mainloop.glib import DBusGMainLoop
 
+from typecheck import types
 import signals
 from signals import parse_from
 
 dbus_loop = DBusGMainLoop()
 bus_address = os.getenv("SUSHI_REMOTE_BUS_ADDRESS")
+
 if bus_address:
 	bus = dbus.bus.BusConnection(bus_address, mainloop=dbus_loop)
 else:
@@ -43,6 +45,15 @@ else:
 
 sushi = None
 __connected = False
+_connect_callbacks = []
+_disconnect_callbacks = []
+
+@types(connect_callbacks = list, disconnect_callbacks = list)
+def setup(connect_callbacks, disconnect_callbacks):
+	""" set callbacks """
+	global _connect_callbacks, _disconnect_callbacks
+	_connect_callbacks = connect_callbacks
+	_disconnect_callbacks = disconnect_callbacks
 
 def connect():
 	"""
@@ -64,7 +75,8 @@ def connect():
 
 	sushi = dbus.Interface(proxy, "de.ikkoku.sushi")
 
-	signals.maki_connected(sushi)
+	for callback in _connect_callbacks:
+		callback(sushi)
 
 	global __connected
 	__connected = True
@@ -75,6 +87,9 @@ def disconnect():
 	global sushi, __connected
 	sushi = None
 	__connected = False
+
+	for callback in _disconnect_callbacks:
+		callback()
 
 def is_connected():
 	"""
