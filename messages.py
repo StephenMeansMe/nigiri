@@ -111,7 +111,7 @@ def printit (type, prefix, msg, *args, **dargs):
 			try:
 				msgtype = dargs["type"]
 			except KeyError:
-				dest_tab.add_status("new_message")
+				dest_tab.add_status("message")
 			else:
 				dest_tab.add_status(msgtype)
 			main_window.update_divider()

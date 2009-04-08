@@ -26,7 +26,7 @@ class Tab(object):
 	signals = ["child_added", "child_removed", "remove"]
 
 	_valid_stati = ["highlight","highlight_action",
-		"new_action","new_message"]
+		"action","message"]
 
 	def __repr__(self):
 		return "<tab: %s:%s:%s>" % (

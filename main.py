@@ -439,10 +439,10 @@ class MainWindow(object):
 				name = "UNAVAIL"
 			color = "divider"
 
-			if tab.has_status("new_action"):
+			if tab.has_status("action"):
 				color = "div_fg_green"
 
-			if tab.has_status("new_message"):
+			if tab.has_status("message"):
 				color = "div_fg_white"
 
 			if tab.has_status("highlight_action"):
