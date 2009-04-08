@@ -147,7 +147,7 @@ def sushi_nick(time, server, old, new):
 
 	if not old or old == stab.get_nick():
 		stab.set_nick(new)
-		if main_window.current_tab in tree_to_list([stab]):
+		if main_window.current_tab in tabs.tree_to_list([stab]):
 			main_window.update_divider()
 
 	else:
