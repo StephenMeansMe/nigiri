@@ -28,6 +28,9 @@ SUCH DAMAGE.
 
 import tabs
 
+from messages import print_tab, print_error, \
+	print_tab_notification, print_tab_error
+
 sushi = None
 signals = {}
 
@@ -90,16 +93,25 @@ def maki_connected(sushi_interface):
 	connect_signal("connect", sushi_connect_attempt)
 	connect_signal("connected", sushi_connected)
 
+	connect_signal("nick", sushi_nick)
+
+	connect_signal("message", sushi_message)
+
 	setup_connected_servers()
 
 def setup_connected_servers():
+	main_window.servers = []
+
 	for server in sushi.servers():
 		stab = tabs.Server(name = str(server))
 		main_window.add_server(stab)
 
+		sushi.nick(server, "")
+
 		for channel in sushi.channels(server):
 			ctab = tabs.Channel(name = channel,
 				parent = stab)
+
 	main_window.update_divider()
 
 ####################################################
@@ -124,3 +136,29 @@ def sushi_connect_attempt(time, server):
 def sushi_connected(time, server):
 	pass
 
+
+def sushi_nick(time, server, old, new):
+	""" old == "" => new == current nick """
+	stab = main_window.find_server(server)
+
+	if not stab:
+		print_error("missing stab '%s'" % server)
+		return
+
+	if not old or old == stab.get_nick():
+		stab.set_nick(new)
+		if main_window.current_tab in tree_to_list([stab]):
+			main_window.update_divider()
+
+	else:
+		# TODO
+		pass
+
+def sushi_message(time, server, sender, target, message):
+	tab = main_window.find_tab(server, target)
+	if not tab:
+		print_error("Missing tab for '%s':'%s'" % (
+			server, target))
+		return
+
+	print_tab(tab, "<%s> %s" % (parse_from(sender)[0], message))

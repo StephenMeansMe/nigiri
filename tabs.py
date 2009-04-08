@@ -1,3 +1,4 @@
+import sys
 from typecheck import types
 from dbus import String
 
@@ -12,6 +13,8 @@ def tree_to_list(input_parents, target = None):
 		if target and parent != target:
 			continue
 
+		l.append(parent)
+
 		for child in parent.children:
 			l.append(child)
 
@@ -25,24 +28,24 @@ class Tab(object):
 	_valid_stati = ["highlight","highlight_action",
 		"new_action","new_message"]
 
-	_name = ""
-	_connected = False
-	_parent = None
-	_status = {}
-
-	children = []
-	input_history = None
-	output_walker = SimpleListWalker([])
-
 	def __repr__(self):
-		return "<tab: %s:%s>" % (self._parent, self._name)
+		return "<tab: %s:%s:%s>" % (
+			type(self).__name__, self._parent, self.name)
 
 	def __str__(self):
-		return self._name
+		return self.name
 
 	@types(name = (String, str))
 	def __init__(self, name):
-		self._name = name
+		self.name = name
+
+		self._connected = False
+		self._parent = None
+		self._status = {}
+
+		self.children = []
+		self.input_history = None
+		self.output_walker = SimpleListWalker([])
 
 	@types(switch = str)
 	def set_connected(self, switch):
@@ -92,7 +95,7 @@ class Tab(object):
 	@types(name = str)
 	def add_status(self, name):
 		if name in self._valid_stati:
-			self._name[name] = True
+			self._status[name] = True
 
 	@types(status = str)
 	def has_status(self, status):
@@ -110,11 +113,11 @@ class Tab(object):
 
 class Server(Tab):
 
-	_nick = ""
-	_away = ""
-
 	def __init__(self, name):
 		Tab.__init__(self, name)
+
+		self._nick = ""
+		self._away = ""
 
 	@types(nick = str)
 	def set_nick(self, nick):
@@ -129,13 +132,11 @@ class Server(Tab):
 
 class Channel(Tab):
 
-	_topic = ""
-	_channels = {}
-
 	@types(name = (String,str))
 	def __init__(self, name, parent = None):
 		Tab.__init__(self, name)
 		self.set_parent(parent)
+		self._topic = ""
 
 	@types(topic = str)
 	def set_topic(self, topic):

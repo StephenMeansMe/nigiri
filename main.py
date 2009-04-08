@@ -208,10 +208,10 @@ class MainWindow(object):
 			self.footer.set_edit_pos (len(next))
 
 		elif key == "ctrl p":
-			switch_to_previous_tab(self)
+			self.switch_to_previous_tab()
 
 		elif key == "ctrl n":
-			switch_to_next_tab(self)
+			self.switch_to_next_tab()
 
 		elif key == "ctrl u":
 			# clear the edit line
@@ -246,17 +246,6 @@ class MainWindow(object):
 
 
 
-	def add_server(self, server):
-		self.servers.append(server)
-
-		Signals.connect(server, "remove",
-			self.handle_server_remove)
-		Signals.connect(server, "child_added",
-			self.handle_channel_add)
-		Signals.connect(server, "child_removed",
-			self.handle_channel_remove)
-
-		self.update_divider()
 
 	def find_server(self, server_name):
 		try:
@@ -266,15 +255,37 @@ class MainWindow(object):
 		else:
 			return self.servers[i]
 
-	def find_tab(self, tab_name):
-		tablist = tabs.tree_to_list(self.servers)
+	def find_tab(self, parent_name, child_name = ""):
 		try:
-			i = [n.name.lower() for n in tablist].index(tab_name.lower())
-		except IndexError:
+			i = [n.name.lower() for n in self.servers].index(parent_name.lower())
+		except ValueError:
 			return None
 		else:
-			return tablist[i]
+			if not child_name:
+				return self.servers[i]
+			else:
+				try:
+					j = [n.name.lower() for n in self.servers[i].children].index(child_name.lower())
+				except ValueError:
+					return None
+				else:
+					return self.servers[i].children[j]
 		return None
+
+	def add_server(self, server_tab):
+		self.servers.append(server_tab)
+
+		Signals.connect(server_tab, "remove",
+			self.handle_server_remove)
+		Signals.connect(server_tab, "child_added",
+			self.handle_channel_add)
+		Signals.connect(server_tab, "child_removed",
+			self.handle_channel_remove)
+
+		server_tab.input_history = InputHistory(
+			text_callback = self.footer.get_edit_text)
+
+		self.update_divider()
 
 	def remove_server(self, server):
 		try:
@@ -288,12 +299,16 @@ class MainWindow(object):
 	def handle_server_remove(self, server):
 		self.remove_server(server)
 
-	def handle_channel_add(self, server, channel):
-		pass
+	def handle_channel_add(self, server_tab, channel_tab):
+		channel_tab.input_history = InputHistory(
+			text_callback = self.footer.get_edit_text)
 
-	def handle_channel_remove(self, server, channel):
+	def handle_channel_remove(self, server_tab, channel_tab):
 		if channel == self.current_tab:
 			self.switch_to_next_tab()
+
+	def handle_maki_disconnect(self):
+		pass
 
 	def switch_to_tab(self, tab):
 		self.current_tab = tab
@@ -308,12 +323,14 @@ class MainWindow(object):
 
 		Signals.emit(self, "tab_switched", tab)
 
-	def switch_to_next_tab (main):
-		tablist = tabs.tree_to_list(main.servers)
+	def switch_to_next_tab (self):
+		tablist = tabs.tree_to_list(self.servers)
 
 		try:
-			current_index = tablist.index (main.current_world)
+			current_index = tablist.index (self.current_tab)
 		except ValueError:
+			if tablist:
+				self.switch_to_tab(tablist[0])
 			return
 
 		if (current_index + 1) >= len (tablist):
@@ -321,16 +338,18 @@ class MainWindow(object):
 		else:
 			current_index += 1
 
-		main.switch_to_tab (tablist[current_index])
+		self.switch_to_tab (tablist[current_index])
 
-	def switch_to_previous_tab (main):
-		tablist = tabs.tree_to_list(main.servers)
+	def switch_to_previous_tab (self):
+		tablist = tabs.tree_to_list(self.servers)
 		try:
-			current_index = tablist (main.current_world)
+			current_index = tablist.index(self.current_tab)
 		except ValueError:
+			if tablist:
+				self.switch_to_tab(tablist[0])
 			return
 
-		main.switch_to_tab (tablist[current_index - 1])
+		self.switch_to_tab (tablist[current_index - 1])
 
 
 	# TODO:  update_divider without color usage
@@ -370,7 +389,7 @@ class MainWindow(object):
 
 		else:
 			# add <nick>@<server>:<current tab>
-			temp = "%(nick)s@%(server)s:%(tab)"
+			temp = "%(nick)s@%(server)s:%(tab)s"
 
 			if self.current_tab:
 				subdict = {
@@ -380,11 +399,11 @@ class MainWindow(object):
 				}
 
 				if type(self.current_tab) == tabs.Server:
-					subdict["nick"] = self.current_tab.get_nick()
+					subdict["nick"] = self.current_tab.get_nick() or "-"
 					subdict["server"] = str(self.current_tab)
 				else:
-					subdict["nick"] = self.current_tab.parent.get_nick()
-					subdict["server"] = str(self.current_tab.parent)
+					subdict["nick"] = self.current_tab.get_parent().get_nick() or "-"
+					subdict["server"] = str(self.current_tab.get_parent())
 
 				markup.append(("divider", temp % subdict))
 
@@ -452,6 +471,9 @@ if __name__ == "__main__":
 	# TODO: setup locale stuff
 
 	main_window = MainWindow()
+
+	connection.setup([signals.maki_connected],
+		[main_window.handle_maki_disconnect])
 
 	signals.setup(main_window)
 
