@@ -60,7 +60,7 @@ def setup ():
 	main_window = mw
 #	generic_log = log.Logger ("nigiri")
 
-@types (type=type, message=str)
+@types (type=type, message=(str, unicode))
 def handle_message (type, message):
 	destinations = config.get_list("messages",type.__name__)
 
@@ -81,7 +81,7 @@ def handle_message (type, message):
 		elif dest == "stdout":
 			print message
 
-@types(msg = str)
+@types(msg = (str,unicode))
 def print_to_tab(dest_tab, msg):
 	if not main_window:
 		return
@@ -94,9 +94,9 @@ def print_to_tab(dest_tab, msg):
 		print_error("print_tab to invalid destinaton '%s'." % dest_tab)
 		return
 	else:
-		tablist[i].output_walker.append(urid.Text(msg))
+		tablist[i].output_walker.append(urwid.Text(msg))
 
-@types (type=type, prefix=str, msg=str)
+@types (type=type, prefix=str, msg=(str,unicode))
 def printit (type, prefix, msg, *args, **dargs):
 	msg = prefix + msg
 
@@ -106,12 +106,15 @@ def printit (type, prefix, msg, *args, **dargs):
 		pass
 	else:
 		print_to_tab(dest_tab, msg)
-		try:
-			msgtype = dargs["type"]
-		except KeyError:
-			dest_tab.add_status("new_message")
-		else:
-			dest_tab.add_status(msgtype)
+
+		if main_window.current_tab != dest_tab:
+			try:
+				msgtype = dargs["type"]
+			except KeyError:
+				dest_tab.add_status("new_message")
+			else:
+				dest_tab.add_status(msgtype)
+			main_window.update_divider()
 
 	if dargs.has_key("dont_handle") and dargs["dont_handle"]:
 		return
@@ -131,22 +134,22 @@ def print_debug (msg, *args, **dargs):
 	printit (debug, "=== Debug: ", msg, *args, **dargs)
 
 
-@types (msg=str)
+@types (msg=(str,unicode))
 def print_tab(dest_tab, msg, *args, **dargs):
 	dargs.update({"dest_tab":dest_tab})
 	printit(tab, "", msg, *args, **dargs)
 
-@types (msg=str)
+@types (msg=(str,unicode))
 def print_tab_error(dest_tab, msg, *args, **dargs):
 	dargs.update({"dest_tab":dest_tab})
 	printit(tab_error, "!!! Error: ", msg, *args, **dargs)
 
-@types (msg=str)
+@types (msg=(str,unicode))
 def print_tab_notification(dest_tab, msg, *args, **dargs):
 	dargs.update({"dest_tab":dest_tab})
 	printit(tab_notification, "*** Notification: ", msg, *args, **dargs)
 
-@types (msg=str)
+@types (msg=(str,unicode))
 def print_tab_debug(dest_tab, msg, *args, **dargs):
 	dargs.update({"dest_tab":dest_tab})
 	printit(tab_debug, "=== Debug: ", msg, *args, **dargs)
