@@ -41,8 +41,8 @@ class Tab(object):
 
 		self._connected = False
 		self._parent = None
-		self._status = {}
 
+		self.status = {}
 		self.children = []
 		self.input_history = None
 		self.output_walker = SimpleListWalker([])
@@ -95,21 +95,21 @@ class Tab(object):
 	@types(name = str)
 	def add_status(self, name):
 		if name in self._valid_stati:
-			self._status[name] = True
+			self.status[name] = True
 
 	@types(status = str)
 	def has_status(self, status):
-		return self._status.has_key(status)
+		return self.status.has_key(status)
 
 	@types(name = str)
 	def remove_status(self, name):
 		try:
-			del self._status[name]
+			del self.status[name]
 		except KeyError:
 			pass
 
 	def reset_status(self):
-		self._status = []
+		self.status = {}
 
 class Server(Tab):
 
@@ -119,7 +119,7 @@ class Server(Tab):
 		self._nick = ""
 		self._away = ""
 
-	@types(nick = str)
+	@types(nick = (str,String))
 	def set_nick(self, nick):
 		self._nick = nick
 
