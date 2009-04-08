@@ -116,6 +116,9 @@ def printit (type, prefix, msg, *args, **dargs):
 
 			dest_tab.add_status(msgtype)
 			main_window.update_divider()
+		else:
+			main_window.body.scroll_to_bottom(
+				main_window.ui.get_cols_rows())
 
 	if dargs.has_key("dont_handle") and dargs["dont_handle"]:
 		return

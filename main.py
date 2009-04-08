@@ -50,7 +50,7 @@ FOOTER = Input line (Ext. Edit)
 """
 
 
-NIGIRI_VERSION = "0.0.1"
+NIGIRI_VERSION = "0.0.2"
 
 
 class MainWindow(object):
