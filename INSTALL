@@ -4,5 +4,8 @@ You will need the Urwid Python module.
 On Debian-based systems this is available in the following package:
 
 * python-urwid (>= 0.9.8)
+* python-gobject
+* python-dbus
+* python-xdg
 
 # vi:textwidth=80:expandtab

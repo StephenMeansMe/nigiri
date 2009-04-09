@@ -12,7 +12,11 @@ except ImportError, e:
 
 from urwid import Signals, MetaSignals
 
-import gobject
+try:
+	import gobject
+except ImportError:
+	print >> sys.stderr, "You need python-gobject installed."
+	sys.exit(1)
 import re
 
 import config
