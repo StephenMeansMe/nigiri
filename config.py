@@ -75,7 +75,7 @@ def set_defaults():
 	defaults["chatting"]["part_message"] = "Part."
 
 	defaults["formats"] = {}
-	defaults["formats"]["datestring"] = "%H:%m"
+	defaults["formats"]["datestring"] = "%H:%M"
 	defaults["formats"]["message"] = "%(datestring)s <%(nick)s> %(message)s"
 	defaults["formats"]["highlight_message"] = "%(datestring)s <%(nick)s> %(message)s"
 	defaults["formats"]["action"] = "%(datestring)s %(message)s"
