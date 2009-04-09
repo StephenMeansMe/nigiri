@@ -4,6 +4,9 @@ You will need the Urwid Python module.
 On Debian-based systems this is available in the following package:
 
 * python-urwid (>= 0.9.8)
+
+Further you'll need the following packages:
+
 * python-gobject
 * python-dbus
 * python-xdg
