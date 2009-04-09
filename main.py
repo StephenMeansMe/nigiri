@@ -13,6 +13,7 @@ except ImportError, e:
 from urwid import Signals, MetaSignals
 
 import gobject
+import re
 
 import config
 import messages
@@ -20,6 +21,7 @@ import commands
 import connection
 import signals
 import tabs
+from typecheck import types
 
 import extends
 from extends import *
@@ -79,6 +81,8 @@ class MainWindow(object):
 		# current active world
 		self.current_tab = None
 		self.servers = []
+		self.shortcut_pattern = re.compile(config.get(
+			"nigiri", "shortcut_pattern"))
 
 	def main(self):
 
@@ -223,6 +227,9 @@ class MainWindow(object):
 		elif key == "ctrl n":
 			self.switch_to_next_tab()
 
+		elif self.shortcut_pattern.match(key):
+			self.switch_to_tabid(int(key[-1]))
+
 		elif key == "ctrl u":
 			# clear the edit line
 			self.footer.set_edit_text ("")
@@ -319,6 +326,18 @@ class MainWindow(object):
 
 	def handle_maki_disconnect(self):
 		pass
+
+	@types(id = int)
+	def switch_to_tabid(self, id):
+		""" this is not for use with indexes! """
+		tablist = tabs.tree_to_list(self.servers)
+		if not config.get_bool("nigiri","server_shortcuts"):
+			tablist = [n for n in tablist if type(n) != tabs.Server]
+		try:
+			tab = tablist[id-1]
+		except IndexError:
+			return
+		self.switch_to_tab(tab)
 
 	def switch_to_tab(self, tab):
 		self.current_tab = tab

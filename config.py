@@ -67,6 +67,7 @@ def set_defaults():
 	defaults["nigiri"]["wrap_input"] = "True"
 	defaults["nigiri"]["keep_alive"] = "True"
 	defaults["nigiri"]["command_char"] = "/"
+	defaults["nigiri"]["shortcut_pattern"] = "meta [0-9]"
 
 	defaults["chatting"] = {}
 	defaults["chatting"]["quit_message"] = "Quit."
