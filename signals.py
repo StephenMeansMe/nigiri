@@ -107,12 +107,41 @@ def maki_connected(sushi_interface):
 	sushi = sushi_interface
 	signals = {}
 
+
+
+	# message receiving
+	connect_signal("action", sushi_action)
+	connect_signal("message", sushi_message)
+	connect_signal("ctcp", sushi_ctcp)
+	connect_signal("notice", sushi_notice)
+
+	# action signals
+	connect_signal("invite", sushi_invite)
+	connect_signal("join", sushi_join)
+	connect_signal("kick", sushi_kick)
+	connect_signal("nick", sushi_nick)
+	connect_signal("mode", sushi_mode)
+	connect_signal("oper", sushi_oper)
+	connect_signal("part", sushi_part)
+	connect_signal("quit", sushi_quit)
+	connect_signal("topic", sushi_topic)
+
+	# informative signals
+	connect_signal("banlist", sushi_banlist)
+	connect_signal("cannot_join", sushi_cannot_join)
+	connect_signal("list", sushi_list)
+	connect_signal("motd", sushi_motd)
+	connect_signal("names", sushi_names)
+	connect_signal("no_such", sushi_no_such)
+	connect_signal("whois", sushi_whois)
+
+	# status signals
 	connect_signal("connect", sushi_connect_attempt)
 	connect_signal("connected", sushi_connected)
-
-	connect_signal("nick", sushi_nick)
-
-	connect_signal("message", sushi_message)
+	connect_signal("away", sushi_away)
+	connect_signal("back", sushi_back)
+	connect_signal("away_message", sushi_away_message)
+	connect_signal("shutdown", sushi_shutdown)
 
 	setup_connected_servers()
 
@@ -132,6 +161,121 @@ def setup_connected_servers():
 	main_window.update_divider()
 
 ####################################################
+
+# message signals
+
+def sushi_action(time, server, sender, target, message):
+	pass
+
+def sushi_message(time, server, sender, target, message):
+	tab = main_window.find_tab(server, target)
+	if not tab:
+		print_error("Missing tab for '%s':'%s'" % (
+			server, target))
+		return
+
+	msg = format_message("message", message, nick = parse_from(sender)[0])
+	print_tab(tab, msg)
+
+def sushi_ctcp(time, server, sender, target, message):
+	pass
+
+def sushi_notice(time, server, sender, target, message):
+	pass
+
+# action signals
+
+
+def sushi_invite(time, server, sender, channel, who):
+	""" sender can be empty """
+	pass
+
+def sushi_join(time, server, sender, channel):
+	pass
+
+def sushi_kick(time, server, sender, channel, who, message):
+	""" message can be empty """
+	pass
+
+def sushi_nick(time, server, old, new):
+	""" old == "" => new == current nick """
+	stab = main_window.find_server(server)
+
+	if not stab:
+		print_error("missing stab '%s'" % server)
+		return
+
+	if not old or old == stab.get_nick():
+		stab.set_nick(new)
+		if main_window.current_tab in tabs.tree_to_list([stab]):
+			main_window.update_divider()
+
+	else:
+		# TODO
+		pass
+
+def sushi_mode(time, server, sender, target, mode, parameter):
+	""" from can be empty, parameter can be empty """
+	pass
+
+def sushi_oper(time, server):
+	pass
+
+def sushi_part(time, server, sender, channel, message):
+	""" message can be empty """
+	pass
+
+def sushi_quit(time, server, sender, message):
+	""" message can be empty """
+	pass
+
+def sushi_topic(time, server, sender, channel, topic):
+	""" sender can be empty """
+	pass
+
+
+# informative signals
+
+def sushi_banlist(time, server, channel, mask, who, when):
+	""" who can be empty (""), when can be empty (0).
+		mask == "" and who == "" and when == -1 => EOL
+	"""
+	pass
+
+def sushi_cannot_join(time, server, channel, reason):
+	""" reason is str:
+		l - channel is full
+		i - channel is invite only
+		b - you're banned
+		k - channel has key set
+	"""
+	pass
+
+def sushi_list(time, server, channel, users, topic):
+	""" channel == "" and users == -1 and topic == "" => EOL """
+	pass
+
+def sushi_motd(time, server, message):
+	""" message == "" => End OR no MOTD """
+	pass
+
+def sushi_names(time, server, channel, nicks, prefix):
+	""" len(nicks) == 0 => EOL """
+	pass
+
+def sushi_no_such(time, server, target, type):
+	""" type is str:
+		n - nick/channel
+		s - server
+		c - channel
+	"""
+	pass
+
+def sushi_whois(time, server, nick, message):
+	""" message == "" => EOL """
+	pass
+
+# status signals
 
 def sushi_connect_attempt(time, server):
 	tab = main_window.find_server(server)
@@ -153,30 +297,16 @@ def sushi_connect_attempt(time, server):
 def sushi_connected(time, server):
 	pass
 
+def sushi_away(time, server):
+	pass
 
-def sushi_nick(time, server, old, new):
-	""" old == "" => new == current nick """
-	stab = main_window.find_server(server)
+def sushi_back(time, server):
+	pass
 
-	if not stab:
-		print_error("missing stab '%s'" % server)
-		return
+def sushi_away_message(time, server, nick, message):
+	pass
 
-	if not old or old == stab.get_nick():
-		stab.set_nick(new)
-		if main_window.current_tab in tabs.tree_to_list([stab]):
-			main_window.update_divider()
+def sushi_shutdown(time):
+	pass
 
-	else:
-		# TODO
-		pass
 
-def sushi_message(time, server, sender, target, message):
-	tab = main_window.find_tab(server, target)
-	if not tab:
-		print_error("Missing tab for '%s':'%s'" % (
-			server, target))
-		return
-
-	msg = format_message("message", message, nick = parse_from(sender)[0])
-	print_tab(tab, msg)
