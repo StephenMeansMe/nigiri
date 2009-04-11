@@ -34,6 +34,7 @@ from dbus.mainloop.glib import DBusGMainLoop
 from typecheck import types
 import signals
 from signals import parse_from
+from messages import print_error
 
 dbus_loop = DBusGMainLoop()
 bus_address = os.getenv("SUSHI_REMOTE_BUS_ADDRESS")
@@ -67,8 +68,8 @@ def connect():
 	try:
 		proxy = bus.get_object("de.ikkoku.sushi", "/de/ikkoku/sushi")
 	except dbus.exceptions.DBusException, e:
-		print e
-		print "Is maki running?"
+		print_error("Error while connecting to maki: %s" % (e))
+		print_error("Is maki running?")
 
 	if not proxy:
 		return False
