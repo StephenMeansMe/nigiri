@@ -23,7 +23,7 @@ def tree_to_list(input_parents, target = None):
 class Tab(object):
 
 	__metaclass__ = MetaSignals
-	signals = ["child_added", "child_removed", "remove"]
+	signals = ["child_added", "child_removed", "remove", "connected"]
 
 	_valid_stati = ["highlight","highlight_action",
 		"action","message"]
@@ -50,6 +50,11 @@ class Tab(object):
 	@types(switch = str)
 	def set_connected(self, switch):
 		self._connected = switch
+
+		for child in self.children:
+			child.set_connected(switch)
+
+		Signals.emit(self, "connected", switch)
 
 	def child_added(self, child):
 		Signals.emit(self, "child_added", self, child)
@@ -135,8 +140,13 @@ class Channel(Tab):
 	@types(name = (String,str))
 	def __init__(self, name, parent = None):
 		Tab.__init__(self, name)
+		self.joined = False
 		self.set_parent(parent)
 		self._topic = ""
+
+	@types(switch = bool)
+	def set_joined(self, switch):
+		self.joined = switch
 
 	@types(topic = str)
 	def set_topic(self, topic):
