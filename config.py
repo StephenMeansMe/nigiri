@@ -76,10 +76,15 @@ def set_defaults():
 
 	defaults["formats"] = {}
 	defaults["formats"]["datestring"] = "%H:%M"
+ 	# normal messages
 	defaults["formats"]["message"] = "%(datestring)s <%(nick)s> %(message)s"
 	defaults["formats"]["highlight_message"] = "%(datestring)s <%(nick)s> %(message)s"
-	defaults["formats"]["action"] = "%(datestring)s %(message)s"
-	defaults["formats"]["highlight_action"] = "%(datestring)s %(message)s"
+	# /me <text>
+	defaults["formats"]["action"] = "%(datestring)s * %(nick)s %(message)s"
+	defaults["formats"]["highlight_action"] = "%(datestring)s * %(nick)s %(message)s"
+	# status changes, like kicks or modes
+	defaults["formats"]["status"] = "%(datestring)s %(message)s"
+	defaults["formats"]["highlight_status"] = "%(datestring)s %(message)s"
 
 	defaults["messages"] = {}
 	defaults["messages"]["error"] = "window"
