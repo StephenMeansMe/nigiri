@@ -185,7 +185,9 @@ class MainWindow(object):
 			if not commands.parse (self, input):
 				# no parsable command, sending RAW
 				if self.current_tab:
-					# TODO
+					# TODO:  send!
+					# TODO:: also, check if joined and connected
+					# TODO:: and stuff...
 					pass
 
 			if self.current_tab:

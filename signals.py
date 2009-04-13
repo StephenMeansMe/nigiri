@@ -157,24 +157,123 @@ def setup_connected_servers():
 		for channel in sushi.channels(server):
 			ctab = tabs.Channel(name = channel,
 				parent = stab)
+			ctab.set_joined(True)
 
 	main_window.update_divider()
 
 ####################################################
 
+def find_target_tab(server, target):
+	""" Return a query-tab if target is a user,
+		return a channel-tab if target is a channel
+	"""
+
+	def find_parent(server, target):
+		parent = main_window.find_server(server)
+		if not parent:
+			print_error("parent server '%s' for '%s' not found." % (
+				server, target))
+			return None
+		return parent
+
+	tab = main_window.find_tab(server, target)
+
+	if target[0] not in connection.sushi.support_prefix(server):
+		# we got a query here
+
+		if tab:
+			return tab
+
+		parent = find_parent(server, target)
+
+		if not parent:
+			return
+
+		tab = tabs.Query(name = target, parent = parent)
+		return tab
+
+	else:
+		if tab:
+			return tab
+
+		parent = find_parent(server, target)
+
+		if not parent:
+			return
+
+		tab = tabs.Channel(name = target, parent = parent)
+		return tab
+
+
+	print_error("No tab found for '%s' on '%s'." % (target, server))
+	return None
+
+def is_highlighted(server, message):
+	words = config.get_list("chatting", "highlight_words")
+	server_tab = main_window.find_server(server)
+
+	if not server_tab:
+		print_error("No server tab for server '%s'!" % (server))
+		return False
+
+	words.extend(server_tab.get_nick())
+	words = [n.lower() for n in words if n]
+
+	lower_message = message.lower()
+
+	for word in words:
+		try:
+			lower_message.index(word)
+		except ValueError:
+			continue
+		else:
+			return True
+	return False
+
+def current_server_tab_print(server, message):
+	""" for server related notifications.
+		print the message to the current active tab
+		if the tab belongs to the given server.
+		If no tab of the given server is active, print
+		it to the server tab.
+	"""
+	current_tab = main_window.current_tab
+
+	if (not current_tab
+		or (type(current_tab) == tabs.Server and current_tab.name != server)
+		or (current_tab.get_parent().name != server)):
+		# print it to the server tab
+		tab = main_window.find_server(server)
+		print_tab(tab, message)
+	else:
+		print_tab(current_tab, message)
+
 # message signals
 
 def sushi_action(time, server, sender, target, message):
-	pass
+	tab = find_target_tab(server, target)
 
-def sushi_message(time, server, sender, target, message):
-	tab = main_window.find_tab(server, target)
 	if not tab:
-		print_error("Missing tab for '%s':'%s'" % (
-			server, target))
 		return
 
-	msg = format_message("message", message, nick = parse_from(sender)[0])
+	type = "action"
+	if is_highlighted(server, message):
+		type = "highlight_action"
+
+	msg = format_message(type, message, nick = parse_from(sender)[0])
+	print_tab(tab, msg)
+
+def sushi_message(time, server, sender, target, message):
+	tab = find_target_tab(server, target)
+
+	if not tab:
+		return
+
+	type = "message"
+	if is_highlighted(server, message):
+		type = "highlight_message"
+
+	msg = format_message(type, message, nick = parse_from(sender)[0])
 	print_tab(tab, msg)
 
 def sushi_ctcp(time, server, sender, target, message):
@@ -188,10 +287,54 @@ def sushi_notice(time, server, sender, target, message):
 
 def sushi_invite(time, server, sender, channel, who):
 	""" sender can be empty """
-	pass
+	# TODO: gettext
+
+	if sender:
+		sender_name = parse_from(sender)[0]
+	else:
+		sender_name = "Somebody"
+
+	msg = "%(sender)s invited %(who)s to %(channel)s" % {
+		"sender": sender_name,
+		"channel": channel,
+		"who": who}
+
+	msg = format_message("status", msg)
+
+	current_server_tab_print(server, msg)
 
 def sushi_join(time, server, sender, channel):
-	pass
+
+	server_tab = main_window.find_server(server)
+
+	if not server_tab:
+		print_error("Missing server tab for '%s'." % (server))
+		return
+
+	tab = main_window.find_tab(server, channel)
+
+	if sender == server_tab.get_nick():
+		# we join
+		if not tab:
+			tab = tabs.Channel(name = channel, parent = server_tab)
+
+		else:
+			tab.set_joined(True)
+
+		msg = "You joined %(channel)s." % {
+			"channel": channel}
+		msg = format_message("highlight_status", msg)
+		print_tab(tab, msg)
+
+	else:
+		# somebody joined
+		msg = "%(nick)s (%(host)s) joined %(channel)s." % {
+			"nick": parse_from(sender)[0],
+			"host": sender,
+			"channel": channel
+		}
+		msg = format_message("status", msg)
+		print_tab(tab, msg)
 
 def sushi_kick(time, server, sender, channel, who, message):
 	""" message can be empty """
@@ -207,12 +350,22 @@ def sushi_nick(time, server, old, new):
 
 	if not old or old == stab.get_nick():
 		stab.set_nick(new)
+
 		if main_window.current_tab in tabs.tree_to_list([stab]):
 			main_window.update_divider()
 
+		msg = "You are now known as %(new_nick)s." % {
+			"new_nick": new}
+
+		current_server_tab_print(server, msg)
+
 	else:
-		# TODO
-		pass
+		# print status message in channel tab
+		msg = "%(old_nick)s is now known as %(new_nick)s." % {
+			"old_nick": old,
+			"new_nick": new}
+
+		current_server_tab_print(server, msg)
 
 def sushi_mode(time, server, sender, target, mode, parameter):
 	""" from can be empty, parameter can be empty """
@@ -223,11 +376,37 @@ def sushi_oper(time, server):
 
 def sushi_part(time, server, sender, channel, message):
 	""" message can be empty """
-	pass
+	tab = find_tab(server, channel)
+
+	if not tab:
+		print_error("No tab for channel '%s' on '%s'." % (channel, server))
+		return
+
+	if find_tab.get_parent().get_nick() == parse_from(sender)[0]:
+		# we parted
+		tab.set_joined(False)
+		msg = "You left %(channel)s." % {
+			"channel": channel}
+		msg = format_message("highlight_status", msg)
+		print_tab(tab, msg)
+
+	else:
+		msg = "%(nick)s has left %(channel)s." % {
+			"nick": parse_from(sender)[0],
+			"channel": channel}
+		msg = format_message("status", msg)
+		print_tab(tab, msg)
 
 def sushi_quit(time, server, sender, message):
 	""" message can be empty """
-	pass
+	server_tab = main_window.find_server(server)
+
+	if not server_tab:
+		print_error("No server tab for server '%s'." % (server))
+		return
+
+	server_tab.set_connected(False)
+	current_server_tab_print("You have quit %s." % (server))
 
 def sushi_topic(time, server, sender, channel, topic):
 	""" sender can be empty """
