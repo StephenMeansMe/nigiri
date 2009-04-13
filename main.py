@@ -325,10 +325,12 @@ class MainWindow(object):
 	def handle_channel_add(self, server_tab, channel_tab):
 		channel_tab.input_history = InputHistory(
 			text_callback = self.footer.get_edit_text)
+		self.update_divider()
 
 	def handle_channel_remove(self, server_tab, channel_tab):
 		if channel == self.current_tab:
 			self.switch_to_next_tab()
+		self.update_divider()
 
 	def handle_maki_disconnect(self):
 		pass
