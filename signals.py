@@ -178,7 +178,7 @@ def find_target_tab(server, target):
 
 	tab = main_window.find_tab(server, target)
 
-	if target[0] not in connection.sushi.support_prefix(server):
+	if target[0] not in sushi.support_prefix(server):
 		# we got a query here
 
 		if tab:
