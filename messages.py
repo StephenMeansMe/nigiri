@@ -32,6 +32,7 @@ provide methods for warnings, notifications, debug and errors
 
 import sys
 import urwid
+import urwid.util
 
 import config
 #import log
@@ -44,6 +45,7 @@ main_window = None
 class error(object): pass
 class debug(object): pass
 class notification(object): pass
+class normal(object): pass
 
 class tab(object): pass
 class tab_error(object): pass
@@ -61,7 +63,7 @@ def setup ():
 #	generic_log = log.Logger ("nigiri")
 
 @types (type=type, message=(str, unicode))
-def handle_message (type, message):
+def handle_message (type, org_message, **dargs):
 	destinations = config.get_list("messages",type.__name__)
 
 	if not destinations:
@@ -69,6 +71,13 @@ def handle_message (type, message):
 		return
 
 	for dest in destinations:
+		if dest != "window" and dargs.has_key("markup"):
+			# text is markupped, convert it to plain text
+			message, attr = urwid.util.decompose_tagmarkup(message)
+		else:
+			# window output can display markupped messages
+			message = org_message
+
 		if dest == "window":
 			if not main_window and "stdout" not in destinations:
 				print message
@@ -96,9 +105,14 @@ def print_to_tab(dest_tab, msg):
 	else:
 		tablist[i].output_walker.append(urwid.Text(msg))
 
-@types (type=type, prefix=str, msg=(str,unicode))
-def printit (type, prefix, msg, *args, **dargs):
-	msg = prefix + msg
+@types (mclass=type, prefix=str, msg=(str,unicode,list))
+def printit (mclass, prefix, msg, *args, **dargs):
+
+	if type(msg) == list:
+		dargs["markup"] = True
+		msg = [prefix] + msg
+	else:
+		msg = prefix + msg
 
 	try:
 		dest_tab = dargs["dest_tab"]
@@ -122,38 +136,34 @@ def printit (type, prefix, msg, *args, **dargs):
 
 	if dargs.has_key("dont_handle") and dargs["dont_handle"]:
 		return
-	handle_message (type, msg)
 
+	handle_message (mclass, msg, **dargs)
 
-@types (msg=str)
+def print_normal(msg, *args, **dargs):
+	printit(normal, "", msg, *args, **dargs)
+
 def print_error (msg, *args, **dargs):
 	printit (error, "!!! Error: ", msg, *args, **dargs)
 
-@types (msg=str)
 def print_notification (msg, *args, **dargs):
 	printit (notification, "*** Notification: ", msg, *args, **dargs)
 
-@types (msg=str)
 def print_debug (msg, *args, **dargs):
 	printit (debug, "=== Debug: ", msg, *args, **dargs)
 
 
-@types (msg=(str,unicode))
 def print_tab(dest_tab, msg, *args, **dargs):
 	dargs.update({"dest_tab":dest_tab})
 	printit(tab, "", msg, *args, **dargs)
 
-@types (msg=(str,unicode))
 def print_tab_error(dest_tab, msg, *args, **dargs):
 	dargs.update({"dest_tab":dest_tab})
 	printit(tab_error, "!!! Error: ", msg, *args, **dargs)
 
-@types (msg=(str,unicode))
 def print_tab_notification(dest_tab, msg, *args, **dargs):
 	dargs.update({"dest_tab":dest_tab})
 	printit(tab_notification, "*** Notification: ", msg, *args, **dargs)
 
-@types (msg=(str,unicode))
 def print_tab_debug(dest_tab, msg, *args, **dargs):
 	dargs.update({"dest_tab":dest_tab})
 	printit(tab_debug, "=== Debug: ", msg, *args, **dargs)

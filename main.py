@@ -488,13 +488,11 @@ class MainWindow(object):
 
 		self.divider.set_text(markup)
 
+	@types(text = (str, unicode, list))
 	def print_text(self, text):
 		"""
 		print the given text in the _current_ window
 		"""
-
-		if not text or type(text) != str:
-			raise TypeError, "text must be of type str"
 
 		if self.current_tab:
 			walker = self.current_tab.output_walker
