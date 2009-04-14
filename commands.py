@@ -1,6 +1,6 @@
 
 from typecheck import types
-from messages import print_notification, print_error
+from messages import print_notification, print_error, print_normal
 import config
 
 import connection
@@ -10,6 +10,35 @@ def no_connection():
 		print_error("No connection to maki.")
 		return True
 	return False
+
+def cmd_add_server(main_window, argv):
+	""" /add_server <name> <address> <port> <nick> <real> """
+	if no_connection():
+		return
+
+	if len(argv) != 6:
+		print_notification("Usage: /add_server <name> <address> "\
+			"<port> <nick> <real>")
+		return
+
+	cmd, server_name, address, port, nick, name = argv
+
+	try:
+		port = int(port)
+	except ValueError:
+		print_error("Invalid value for 'port' given.")
+		return
+
+	if server_name in connection.sushi.server_list("",""):
+		print_error("Server with name '%s' already existing." % (name))
+		return
+
+	keys = (("address", address), ("port", port), ("nick", nick),
+		("name", name))
+	for key,value in pairs:
+		connection.sushi.server_set(server_name, "server", key, value)
+
+	print_notification("Server '%s' successfully added." % (server_name))
 
 def cmd_close(main_window, argv):
 	""" /close """
@@ -86,19 +115,55 @@ def cmd_python(main_window, argv):
 	try:
 		exec(" ".join(argv[1:]))
 	except BaseException,e:
-		print_error ("python:  Error: %s\n" % (e))
+		print_error ("python: %s\n" % (e))
 
 def cmd_quit(main_window, argv):
 	""" /quit """
 	main_window.quit()
 
+def cmd_remove_server(main_window, argv):
+	""" /remove_server <name> """
+	if no_connection():
+		return
+
+	if len(argv) != 2:
+		print_notification("Usage: /remove_server <name>")
+		return
+
+	name = argv[1]
+
+	if not name in connection.sushi.server_list("", ""):
+		print_error("Server '%s' not known to maki." % (name))
+		return
+
+	connection.sushi.server_remove(name, "", "")
+	print_notification("Server '%s' successfully removed." % (name))
+
+def cmd_servers(main_window, argv):
+	""" /servers """
+	if no_connection():
+		return
+
+	active_servers = connection.sushi.servers()
+
+	print_normal("Servers known to maki: ")
+	for name in connection.sushi.server_list("",""):
+		if name in active_servers:
+			connected = "connected"
+		else:
+			connected = "not connected"
+		print_normal("- '%s' (%s)" % (name, connected))
+
 _command_dict = {
+	"add_server": cmd_add_server,
 	"close": cmd_close,
 	"connect": cmd_connect,
 	"echo": cmd_echo,
 	"maki": cmd_maki,
 	"python": cmd_python,
 	"quit": cmd_quit,
+	"remove_server": cmd_remove_server,
+	"servers": cmd_servers
 }
 
 _builtins = _command_dict.keys()
