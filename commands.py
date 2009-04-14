@@ -148,6 +148,41 @@ def cmd_maki(main_window, argv):
 		usage()
 		return
 
+def cmd_overview(main_window, argv):
+	""" /overview [<server>] """
+	if no_connection():
+		return
+
+	if len(argv) == 2:
+		if argv[1] not in [n.name for n in main_window.servers]:
+			print_error("Server '%s' not found." % (argv[1]))
+			return
+		server_list = [main_window.find_server(argv[1])]
+	else:
+		server_list = main_window.servers
+
+	print_normal("Begin overview.")
+
+	for server in server_list:
+		if server.connected:
+			connected = "connected"
+		else:
+			connected = "not connected"
+
+		print_normal("Server '%s' (%s)" % (server, connected))
+
+		for child in server.children:
+			if type(child) == tabs.Channel:
+				if child.joined:
+					joined = "joined"
+				else:
+					joined = "not joined"
+				print_normal("- Channel '%s' (%s)" % (child.name, joined))
+			else:
+				print_normal("- Query '%s'" % (child.name))
+
+	print_normal("End of overview.")
+
 def cmd_python(main_window, argv):
 	""" /python <code> """
 	print_notification ("python: Executing...\n")
@@ -200,6 +235,7 @@ _command_dict = {
 	"echo": cmd_echo,
 	"join": cmd_join,
 	"maki": cmd_maki,
+	"overview": cmd_overview,
 	"python": cmd_python,
 	"quit": cmd_quit,
 	"remove_server": cmd_remove_server,
