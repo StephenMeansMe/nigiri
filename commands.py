@@ -1,4 +1,5 @@
 
+import tabs
 from typecheck import types
 from messages import print_notification, print_error, print_normal
 import config
@@ -24,16 +25,16 @@ def cmd_add_server(main_window, argv):
 	cmd, server_name, address, port, nick, name = argv
 
 	try:
-		port = int(port)
+		int(port)
 	except ValueError:
 		print_error("Invalid value for 'port' given.")
 		return
 
 	if server_name in connection.sushi.server_list("",""):
-		print_error("Server with name '%s' already existing." % (name))
+		print_error("Server with name '%s' already existing." % (server_name))
 		return
 
-	keys = (("address", address), ("port", port), ("nick", nick),
+	pairs = (("address", address), ("port", port), ("nick", nick),
 		("name", name))
 	for key,value in pairs:
 		connection.sushi.server_set(server_name, "server", key, value)
@@ -69,6 +70,26 @@ def cmd_connect(main_window, argv):
 def cmd_echo(main_window, argv):
 	""" /echo <text> """
 	main_window.print_text(" ".join(argv[1:])+"\n")
+
+def cmd_join(main_window, argv):
+	""" /join <channel> [<key>] """
+	if len(argv) == 3:
+		cmd, channel, key = argv
+	elif len(argv) == 2:
+		cmd, channel = argv
+		key = ""
+	else:
+		print_notification("Usage: /join <channel> [<key>]")
+		return
+
+	server_tab = tabs.get_server(main_window.current_tab)
+
+	if not server_tab:
+		print_error("No tab active.")
+		return
+
+	connection.sushi.join(server_tab.name, channel, key)
+	print_notification("Joining channel '%s'." % (channel))
 
 def cmd_maki(main_window, argv):
 	""" /maki [connect|shutdown] """
@@ -159,6 +180,7 @@ _command_dict = {
 	"close": cmd_close,
 	"connect": cmd_connect,
 	"echo": cmd_echo,
+	"join": cmd_join,
 	"maki": cmd_maki,
 	"python": cmd_python,
 	"quit": cmd_quit,
