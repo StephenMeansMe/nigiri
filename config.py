@@ -87,6 +87,7 @@ def set_defaults():
 	defaults["formats"]["highlight_status"] = "%(datestring)s %(message)s"
 
 	defaults["messages"] = {}
+	defaults["messages"]["normal"] = "window"
 	defaults["messages"]["error"] = "window"
 	defaults["messages"]["notification"] = "window"
 	defaults["messages"]["debug"] = "window"
