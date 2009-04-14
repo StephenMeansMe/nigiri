@@ -182,12 +182,9 @@ class MainWindow(object):
 			self.footer.set_edit_text("")
 
 			if not commands.parse (self, input):
-				# no parsable command, sending RAW
+				# no parsable command, send text
 				if self.current_tab:
-					# TODO:  send!
-					# TODO:: also, check if joined and connected
-					# TODO:: and stuff...
-					pass
+					commands.send_text(self.current_tab, input)
 
 			if self.current_tab:
 				history = self.current_tab.input_history
