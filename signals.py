@@ -181,7 +181,7 @@ def setup_connected_servers():
 
 ####################################################
 
-def find_target_tab(server, target):
+def find_target_tab(server, target, sender):
 	""" Return a query-tab if target is a user,
 		return a channel-tab if target is a channel
 	"""
@@ -269,7 +269,7 @@ def current_server_tab_print(server, message):
 # message signals
 
 def sushi_action(time, server, sender, target, message):
-	tab = find_target_tab(server, target)
+	tab = find_target_tab(server, target, sender)
 
 	if not tab:
 		return
@@ -282,7 +282,7 @@ def sushi_action(time, server, sender, target, message):
 	print_tab(tab, msg)
 
 def sushi_message(time, server, sender, target, message):
-	tab = find_target_tab(server, target)
+	tab = find_target_tab(server, target, sender)
 
 	if not tab:
 		return
