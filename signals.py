@@ -196,7 +196,7 @@ def find_target_tab(server, target, sender):
 
 	tab = main_window.find_tab(server, target)
 
-	if target[0] not in sushi.support_prefix(server):
+	if not target[0] in sushi.support_chantypes(server):
 		# we got a query here
 
 		if tab:
@@ -207,7 +207,7 @@ def find_target_tab(server, target, sender):
 		if not parent:
 			return
 
-		tab = tabs.Query(name = target, parent = parent)
+		tab = tabs.Query(name = parse_from(sender)[0], parent = parent)
 		return tab
 
 	else:
@@ -259,7 +259,7 @@ def current_server_tab_print(server, message):
 
 	if (not current_tab
 		or (type(current_tab) == tabs.Server and current_tab.name != server)
-		or (current_tab.get_parent().name != server)):
+		or (current_tab.parent.name != server)):
 		# print it to the server tab
 		tab = main_window.find_server(server)
 		print_tab(tab, message)
@@ -287,11 +287,19 @@ def sushi_message(time, server, sender, target, message):
 	if not tab:
 		return
 
-	type = "message"
+	mtype = "message"
 	if is_highlighted(server, message):
-		type = "highlight_message"
+		mtype = "highlight_message"
 
-	msg = format_message(type, message, nick = parse_from(sender)[0])
+	nick = parse_from(sender)[0]
+
+	if type(tab) == tabs.Channel:
+		template = config.get("formats", "nick")
+		nick = template % {
+			"nick": nick,
+			"prefix": sushi.user_channel_prefix(server, target, nick)}
+
+	msg = format_message(mtype, message, nick = nick)
 	print_tab(tab, msg)
 
 def sushi_ctcp(time, server, sender, target, message):
@@ -330,14 +338,14 @@ def sushi_join(time, server, sender, channel):
 		return
 
 	tab = main_window.find_tab(server, channel)
+	nick = parse_from(sender)[0]
 
-	if sender == server_tab.get_nick():
+	if nick == server_tab.get_nick():
 		# we join
 		if not tab:
 			tab = tabs.Channel(name = channel, parent = server_tab)
 
-		else:
-			tab.set_joined(True)
+		tab.set_joined(True)
 
 		msg = "You joined %(channel)s." % {
 			"channel": channel}
@@ -347,7 +355,7 @@ def sushi_join(time, server, sender, channel):
 	else:
 		# somebody joined
 		msg = "%(nick)s (%(host)s) joined %(channel)s." % {
-			"nick": parse_from(sender)[0],
+			"nick": nick,
 			"host": sender,
 			"channel": channel
 		}
@@ -400,7 +408,7 @@ def sushi_part(time, server, sender, channel, message):
 		print_error("No tab for channel '%s' on '%s'." % (channel, server))
 		return
 
-	if find_tab.get_parent().get_nick() == parse_from(sender)[0]:
+	if find_tab.parent.get_nick() == parse_from(sender)[0]:
 		# we parted
 		tab.set_joined(False)
 		msg = "You left %(channel)s." % {
@@ -483,7 +491,7 @@ def sushi_connect_attempt(time, server):
 
 		print_tab_notification(tab, "Connecting...")
 
-	elif tab.get_connected():
+	elif tab.connected:
 		tab.set_connected(False)
 
 		print_tab_notification(tab, "Reconnecting...")
