@@ -164,9 +164,9 @@ class Channel(Tab):
 	def set_joined(self, switch):
 		self.joined = switch
 
-	@types(topic = str)
+	@types(topic = (String, unicode, str))
 	def set_topic(self, topic):
-		self._topic = topic
+		self._topic = str(topic)
 
 	def get_topic(self):
 		return self._topic

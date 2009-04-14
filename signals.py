@@ -169,11 +169,13 @@ def setup_connected_servers():
 
 			if ctab:
 				ctab.set_joined(True)
+				sushi.topic(server, channel, "")
 				continue
 
 			ctab = tabs.Channel(name = channel,
 				parent = stab)
 			ctab.set_joined(True)
+			sushi.topic(server, channel, "")
 
 		stab.set_connected(True)
 
@@ -436,8 +438,31 @@ def sushi_quit(time, server, sender, message):
 
 def sushi_topic(time, server, sender, channel, topic):
 	""" sender can be empty """
-	pass
+	tab = main_window.find_tab(server, channel)
 
+	if not tab:
+		print_error("No tab '%s' on '%s' for topic setting." % (channel, server))
+		return
+
+	tab.set_topic(topic)
+
+	if parse_from(sender)[0] == tab.parent.get_nick():
+		mtype = "highlight_status"
+		nick = "You"
+	else:
+		mtype = "status"
+		nick = parse_from(sender)[0]
+
+	if nick:
+		msg = "%(nick)s changed the topic to '%(topic)s'." % {
+			"nick": nick,
+			"topic": topic}
+		msg = format_message(mtype, msg)
+		print_tab(tab, msg)
+
+	if tab == main_window.current_tab:
+		# update topic bar
+		main_window.header.set_text(tab.get_topic())
 
 # informative signals
 

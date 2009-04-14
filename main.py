@@ -351,8 +351,13 @@ class MainWindow(object):
 
 		else:
 			self.body.set_body(tab.output_walker)
+			tab.reset_status()
 
-		tab.reset_status()
+			if type(tab) == tabs.Channel:
+				self.header.set_text(tab.get_topic())
+			else:
+				self.header.set_text("")
+
 		self.update_divider()
 
 		Signals.emit(self, "tab_switched", tab)
