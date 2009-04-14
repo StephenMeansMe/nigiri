@@ -52,19 +52,21 @@ class tab_error(object): pass
 class tab_notification(object):	pass
 class tab_debug(object): pass
 
-def setup ():
-	try:
-		from __main__ import main_window as mw
-	except ImportError,e:
-		print "Error while initializing messages module: '%s'" % (e)
-		sys.exit (1)
+def setup (mw):
 	global main_window#, generic_log
 	main_window = mw
 #	generic_log = log.Logger ("nigiri")
 
-@types (type=type, message=(str, unicode))
-def handle_message (type, org_message, **dargs):
-	destinations = config.get_list("messages",type.__name__)
+@types (mclass=type, message=(str, unicode))
+def handle_message (mclass, org_message, **dargs):
+	""" associate the message class to the
+		configured destinations and leave the
+		message there.
+		If the given message is markupped, the
+		markup is striped if the destination
+		is not "window".
+	"""
+	destinations = config.get_list("messages", mclass.__name__)
 
 	if not destinations:
 		# no destionations are given, no print

@@ -525,6 +525,6 @@ if __name__ == "__main__":
 
 	signals.setup(main_window)
 
-	messages.setup()
+	messages.setup(main_window)
 
 	main_window.main()
