@@ -12,6 +12,24 @@ def no_connection():
 		return True
 	return False
 
+def send_text(tab, text):
+	if no_connection() or type(tab) == tabs.Server:
+		return
+
+	server_name = tab.parent.name
+
+	if not tab.connected:
+		print_error("Not connected to server "\
+			"'%s'." % (server_name))
+		return
+
+	if type(tab) == tabs.Channel and not tab.joined:
+		print_error("You are not on the channel "\
+			"'%s'." % (tab.name))
+		return
+
+	connection.sushi.message(server_name, tab.name, text)
+
 def cmd_add_server(main_window, argv):
 	""" /add_server <name> <address> <port> <nick> <real> """
 	if no_connection():
