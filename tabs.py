@@ -47,7 +47,7 @@ class Tab(object):
 		self.input_history = None
 		self.output_walker = SimpleListWalker([])
 
-	@types(switch = str)
+	@types(switch = bool)
 	def set_connected(self, switch):
 		self._connected = switch
 
