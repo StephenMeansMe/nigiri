@@ -440,9 +440,8 @@ class MainWindow(object):
 					subdict["nick"] = self.current_tab.get_nick() or "-"
 					subdict["server"] = str(self.current_tab)
 				else:
-					subdict["nick"] = self.current_tab.get_parent()\
-						.get_nick() or "-"
-					subdict["server"] = str(self.current_tab.get_parent())
+					subdict["nick"] = self.current_tab.parent.get_nick() or "-"
+					subdict["server"] = str(self.current_tab.parent.name)
 
 				subdict["id"] = str(tabid+1)
 
