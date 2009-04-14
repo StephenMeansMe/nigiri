@@ -463,15 +463,15 @@ def sushi_connect_attempt(time, server):
 		tab = tabs.Server(name = server)
 		main_window.add_server(tab)
 
-		messages.print_tab_notification(tab, "Connecting...")
+		print_tab_notification(tab, "Connecting...")
 
 	elif tab.get_connected():
 		tab.set_connected(False)
 
-		messages.print_tab_notification(tab, "Reconnecting...")
+		print_tab_notification(tab, "Reconnecting...")
 
 	else:
-		messages.print_tab_notification(tab, "Connecting...")
+		print_tab_notification(tab, "Connecting...")
 
 def sushi_connected(time, server):
 	pass
