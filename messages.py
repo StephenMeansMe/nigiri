@@ -121,6 +121,9 @@ def printit (mclass, prefix, msg, *args, **dargs):
 	except KeyError:
 		pass
 	else:
+		if not dest_tab:
+			print_error("dest_tab is None. ('%s')" % (msg))
+			return
 
 		print_to_tab(dest_tab, msg)
 
