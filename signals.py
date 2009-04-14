@@ -99,15 +99,21 @@ def setup(mw):
 	global main_window
 	main_window = mw
 
+def maki_disconnected():
+	for signal in signals:
+		for handler in signals[signal]:
+			signals[signal][handler].remove()
+
 def maki_connected(sushi_interface):
 	""" called by dbus connection handler.
 		sushi is the dbus interface
 	"""
 	global sushi, signals
+
+	maki_disconnected()
+
 	sushi = sushi_interface
 	signals = {}
-
-
 
 	# message receiving
 	connect_signal("action", sushi_action)
@@ -146,18 +152,30 @@ def maki_connected(sushi_interface):
 	setup_connected_servers()
 
 def setup_connected_servers():
-	main_window.servers = []
-
 	for server in sushi.servers():
+		stab = main_window.find_server(server)
+
+		if stab:
+			stab.set_connected(True)
+			continue
+
 		stab = tabs.Server(name = str(server))
 		main_window.add_server(stab)
 
 		sushi.nick(server, "")
 
 		for channel in sushi.channels(server):
+			ctab = main_window.find_tab(server, channel)
+
+			if ctab:
+				ctab.set_joined(True)
+				continue
+
 			ctab = tabs.Channel(name = channel,
 				parent = stab)
 			ctab.set_joined(True)
+
+		stab.set_connected(True)
 
 	main_window.update_divider()
 

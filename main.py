@@ -58,7 +58,6 @@ FOOTER = Input line (Ext. Edit)
 
 NIGIRI_VERSION = "0.0.2"
 
-
 class MainWindow(object):
 
 	__metaclass__ = MetaSignals
@@ -521,7 +520,7 @@ if __name__ == "__main__":
 	main_window = MainWindow()
 
 	connection.setup([signals.maki_connected],
-		[main_window.handle_maki_disconnect])
+		[main_window.handle_maki_disconnect,signals.maki_disconnected])
 
 	signals.setup(main_window)
 

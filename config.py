@@ -76,6 +76,7 @@ def set_defaults():
 
 	defaults["formats"] = {}
 	defaults["formats"]["datestring"] = "%H:%M"
+	defaults["formats"]["nick"] = "%(prefix)s%(nick)s"
  	# normal messages
 	defaults["formats"]["message"] = "%(datestring)s <%(nick)s> %(message)s"
 	defaults["formats"]["highlight_message"] = "%(datestring)s <%(nick)s> %(message)s"
