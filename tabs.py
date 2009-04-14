@@ -20,6 +20,18 @@ def tree_to_list(input_parents, target = None):
 
 	return l
 
+def get_server(tab):
+	if not tab:
+		return None
+	if type(tab) == Server:
+		return tab
+	else:
+		parent = tab.parent
+		if not parent:
+			return None
+		return tab.parent
+	return None
+
 class Tab(object):
 
 	__metaclass__ = MetaSignals
@@ -35,7 +47,8 @@ class Tab(object):
 	def __str__(self):
 		return self.name
 
-	@types(name = (String, str))
+
+	@types(name = (String, str, unicode))
 	def __init__(self, name):
 		self.name = name
 
@@ -49,6 +62,7 @@ class Tab(object):
 
 	@types(switch = bool)
 	def set_connected(self, switch):
+		from messages import print_debug
 		self._connected = switch
 
 		for child in self.children:
@@ -56,8 +70,11 @@ class Tab(object):
 
 		Signals.emit(self, "connected", switch)
 
+	connected = property(lambda x: x._connected, set_connected)
+
 	def child_added(self, child):
 		Signals.emit(self, "child_added", self, child)
+		child.set_connected(self.connected)
 		self.children.append(child)
 
 	def child_removed(self, child):
@@ -87,8 +104,7 @@ class Tab(object):
 		except AttributeError:
 			pass
 
-	def get_parent(self):
-		return self._parent
+	parent = property(lambda x: x._parent, set_parent)
 
 	def remove(self):
 		""" emit remove signals """
