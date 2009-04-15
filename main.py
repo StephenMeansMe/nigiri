@@ -27,6 +27,8 @@ import signals
 import tabs
 import plugin_control
 
+from helper.iowatch import IOWatch
+import helper.log
 from typecheck import types
 
 import extends
@@ -57,8 +59,7 @@ DIVIDER = Divider with information (urwid.Text)
 FOOTER = Input line (Ext. Edit)
 """
 
-
-NIGIRI_VERSION = "0.0.2"
+NIGIRI_VERSION = "0.0.3"
 
 class MainWindow(object):
 
@@ -85,6 +86,8 @@ class MainWindow(object):
 	def __init__(self):
 		# current active world
 		self.current_tab = None
+		self.ready_to_use = False
+		self.had_error = False
 		self.servers = []
 		self.shortcut_pattern = re.compile(config.get(
 			"nigiri", "shortcut_pattern"))
@@ -109,6 +112,9 @@ class MainWindow(object):
 		def urwid_main_loop (self, size):
 			self.draw_screen (size)
 
+			if not self.ready_to_use:
+				self.ready_to_use = True
+
 			try:
 				keys = self.ui.get_input ()
 			except KeyboardInterrupt:
@@ -122,14 +128,21 @@ class MainWindow(object):
 
 				else:
 					self.keypress (size, k)
+
 			return True
 
 		gobject.idle_add(urwid_main_loop, self, size)
 
 		self.gmainloop = gobject.MainLoop()
-		self.gmainloop.run()
 
-	def quit(self):
+		try:
+			self.gmainloop.run()
+		except KeyboardInterrupt:
+			self.quit()
+
+	def quit(self, exit=True):
+		self.ready_to_use = False
+
 		Signals.emit (self, "quit")
 
 		self.ui.stop()
@@ -138,7 +151,8 @@ class MainWindow(object):
 
 		config.write_config_file ()
 
-		sys.exit(0)
+		if exit:
+			sys.exit(0)
 
 	def setup_context(self):
 		""" setup the widgets to display """
@@ -264,9 +278,6 @@ class MainWindow(object):
 
 		else:
 			self.context.keypress (size, key)
-
-
-
 
 	def find_server(self, server_name):
 		try:
@@ -513,14 +524,26 @@ class MainWindow(object):
 		canvas = self.context.render (size, focus=True)
 		self.ui.draw_screen (size, canvas)
 
+def error_callback(msg_part):
+	global error_log
+
+	if main_window.ready_to_use:
+		main_window.quit(exit=False)
+		main_window.had_error = True
+	error_log.write(msg_part)
+
 if __name__ == "__main__":
-	global main_window
+	global main_window, stderr, error_log
 
 	config.setup()
 
 	# TODO: setup locale stuff
 
 	main_window = MainWindow()
+
+	stderr = sys.stderr
+	error_log = helper.log.Logger("error.log")
+	sys.stderr = IOWatch([error_callback])
 
 	connection.setup([signals.maki_connected],
 		[main_window.handle_maki_disconnect,signals.maki_disconnected])
@@ -530,3 +553,9 @@ if __name__ == "__main__":
 	messages.setup(main_window)
 
 	main_window.main()
+
+	if main_window.had_error:
+		print "An error occured, main window was closed.\n"\
+			"See %s for details." % (error_log.get_path())
+
+	error_log.close()
