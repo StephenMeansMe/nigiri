@@ -13,7 +13,7 @@ def no_connection():
 	return False
 
 def send_text(tab, text):
-	if no_connection() or type(tab) == tabs.Server:
+	if no_connection() or type(tab) == tabs.Server or not text:
 		return
 
 	server_name = tab.parent.name
