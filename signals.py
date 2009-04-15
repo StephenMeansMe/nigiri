@@ -383,7 +383,7 @@ def sushi_join(time, server, sender, channel):
 	else:
 		# somebody joined
 
-		tab.nicklist.add_nick(nick, sender)
+		tab.nicklist.add_nick(nick)
 
 		msg = "%(nick)s (%(host)s) joined %(channel)s." % {
 			"nick": nick,
@@ -591,6 +591,8 @@ def sushi_names(time, server, channel, nicks, prefixes, _call_count = {"n":0}):
 		width = 0
 		msg = ""
 		for nick in nicks:
+			tab.nicklist.add_nick(nick)
+
 			prefix = prefixes[width]
 			msg += prefix+nick+" "
 

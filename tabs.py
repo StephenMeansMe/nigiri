@@ -156,8 +156,11 @@ class NickList(dict):
 	def __init__(self):
 		dict.__init__(self)
 
-	def add_nick(self, nick, hostmask):
-		self[nick] = hostmask
+	def add_nick(self, nick):
+		# TODO:  would be nice to have
+		# TODO:: the hostmask as value but names()
+		# TODO:: does not support this yet
+		self[nick] = 1
 
 	def get_hostmask(self, nick):
 		return self[nick]
