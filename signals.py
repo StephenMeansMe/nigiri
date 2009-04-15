@@ -442,14 +442,20 @@ def sushi_part(time, server, sender, channel, message):
 
 def sushi_quit(time, server, sender, message):
 	""" message can be empty """
+	nick = parse_from(sender)[0]
 	server_tab = main_window.find_server(server)
 
 	if not server_tab:
 		print_error("No server tab for server '%s'." % (server))
 		return
 
-	server_tab.set_connected(False)
-	current_server_tab_print("You have quit %s." % (server))
+	if nick == server_tab.get_nick():
+		# we quit
+		server_tab.set_connected(False)
+		current_server_tab_print(server, "You have quit %s." % (server))
+	else:
+		# another one quit
+		pass
 
 def sushi_topic(time, server, sender, channel, topic):
 	""" sender can be empty """
