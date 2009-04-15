@@ -251,7 +251,7 @@ def is_highlighted(server, message):
 		print_error("No server tab for server '%s'!" % (server))
 		return False
 
-	words.extend(server_tab.get_nick())
+	words.append(server_tab.get_nick())
 	words = [n.lower() for n in words if n]
 
 	lower_message = message.lower()
@@ -310,13 +310,18 @@ def sushi_message(time, server, sender, target, message):
 
 	nick = parse_from(sender)[0]
 
+	if nick == tab.parent.get_nick():
+		c = "own"
+	else:
+		c = "chat"
+
 	if type(tab) == tabs.Channel:
 		template = config.get("formats", "nick")
 		nick = template % {
 			"nick": nick,
 			"prefix": sushi.user_channel_prefix(server, target, nick)}
 
-	msg = format_message(mtype, message, nick = nick)
+	msg = format_message(mtype, message, nick = nick, nick_color = c)
 	print_tab(tab, msg)
 
 def sushi_ctcp(time, server, sender, target, message):

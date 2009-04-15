@@ -58,20 +58,82 @@ def setup (mw):
 	main_window = mw
 #	generic_log = log.Logger ("nigiri")
 
+def get_nick_color(nick):
+	"""
+	Returns a static color for the nick given.
+	The returned color depends on the color list
+	set in config module.
+	"""
+	#return colors[sum([ord(n) for n in nick])%len(colors)]
+	pass
 
-def format_message(type, msg, **fmt):
-	template = config.get("formats", type)
+color_tab = {
+	"30": "text_fg_black",
+	"31": "text_fg_red",
+	"32": "text_fg_green",
+	"33": "text_fg_yellow",
+	"34": "text_fg_blue",
+	"35": "text_fg_magenta",
+	"36": "text_fg_cyan",
+	"37": "text_fg_white",
+
+	"1": "bold_text",
+	"0": "body" # normal
+	}
+
+def parse_markup(input):
+	"""
+	search in input for \e and translate the ansi color
+	number to the urwid color string.
+	Parses \e[xm as well as \e[x;y;zm
+	"""
+	markup = []
+
+	split = input.split ("\033")
+
+	if split[0]:
+		markup.append (("body",split[0]))
+
+	for sub in split[1:]:
+		if not sub:
+			continue
+
+		color,text = sub.split ("m", 1)
+
+		for subcolor in color.split (";"):
+			subcolor = subcolor.lstrip ("[")
+
+			try:
+				attr = color_tab[subcolor]
+			except KeyError:
+				attr = "body"
+
+		markup.append ((attr, text))
+
+	return markup
+
+def format_message(mtype, msg, **fmt):
+	template = config.get("formats", mtype)
 
 	if not template:
-		print_error("No format template for type '%s'." % (type))
+		print_error("No format template for type '%s'." % (mtype))
 		return
 
 	if not fmt.has_key("datestring"):
 		fmt["datestring"] = time.strftime(config.get("formats","datestring"))
 
+	if (mtype == "message"
+		and fmt.has_key("nick_color")
+		and fmt.has_key("nick")):
+
+		if fmt["nick_color"] == "own":
+			fmt["nick"] = "\033[31m%s\033[0m" % fmt["nick"]
+		elif fmt["nick_color"] == "chat":
+			pass
+
 	fmt["message"] = msg
 
-	return template % fmt
+	return parse_markup(template % fmt)
 
 @types (mclass=type, message=(str, unicode))
 def handle_message (mclass, org_message, **dargs):
