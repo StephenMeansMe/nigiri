@@ -524,12 +524,18 @@ class MainWindow(object):
 		canvas = self.context.render (size, focus=True)
 		self.ui.draw_screen (size, canvas)
 
-def error_callback(msg_part):
+def error_callback(msg_part, _msg={"printed":False}):
 	global error_log
 
 	if main_window.ready_to_use:
 		main_window.quit(exit=False)
 		main_window.had_error = True
+	else:
+		if not _msg["printed"]:
+			print "An error occured.\n"\
+				"Please see the logfile '%s' for details." % (
+				error_log.get_path())
+			_msg["printed"] = True
 	error_log.write(msg_part)
 
 if __name__ == "__main__":
