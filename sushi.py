@@ -6,6 +6,9 @@ import tabs
 import messages
 import __main__
 
+# XXX:  maybe better proxy both, commands and signals,
+# XXX:: to catch errors in the error code.
+
 class Plugin (object):
 
 	def __init__(self, plugin_name):

@@ -1,0 +1,3 @@
+- better error handling (stderr destroys the display)
+- implement commands
+- implement signals
