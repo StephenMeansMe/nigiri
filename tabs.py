@@ -110,7 +110,8 @@ class Tab(object):
 		for child in self.children:
 			child.remove()
 			self.child_removed(child)
-		Signals.emit("remove", self)
+		Signals.emit(self, "remove")
+		self.set_parent(None)
 
 	@types(name = str)
 	def add_status(self, name):
