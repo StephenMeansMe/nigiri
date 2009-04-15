@@ -73,15 +73,21 @@ class MainWindow(object):
 			("body", "text"),
 			("footer", "text"),
 			("header", "text"),
-
-			("div_fg_red", "dark red", "dark cyan"),
-			("div_fg_blue", "dark blue", "dark cyan"),
-			("div_fg_green", "dark green", "dark cyan"),
-			("div_fg_yellow", "yellow", "dark cyan"),
-			("div_fg_magenta", "dark magenta", "dark cyan"),
-			("div_fg_white", "white", "dark cyan"),
-			("div_fg_black", "black", "dark cyan"),
 		]
+
+	for type, bg in (
+			("div_fg_", "dark cyan"),
+			("text_fg_", "black")):
+		for name, color in (
+				("red","dark red"),
+				("blue", "dark blue"),
+				("green", "dark green"),
+				("yellow", "yellow"),
+				("magenta", "dark magenta"),
+				("white", "white"),
+				("black", "black")):
+			_palette.append( (type + name, color, bg) )
+
 
 	def __init__(self):
 		# current active world
