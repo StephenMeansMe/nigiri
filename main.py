@@ -343,8 +343,12 @@ class MainWindow(object):
 		self.update_divider()
 
 	def handle_channel_remove(self, server_tab, channel_tab):
-		if channel == self.current_tab:
+		if channel_tab == self.current_tab:
 			self.switch_to_next_tab()
+
+		if connection.is_connected() and channel_tab.joined:
+			connection.sushi.part(server_tab.name, channel_tab.name, "")
+
 		self.update_divider()
 
 	def handle_maki_disconnect(self):
