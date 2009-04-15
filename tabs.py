@@ -165,7 +165,7 @@ class Channel(Tab):
 
 	@types(topic = (String, unicode, str))
 	def set_topic(self, topic):
-		self._topic = str(topic)
+		self._topic = unicode(topic)
 
 	def get_topic(self):
 		return self._topic
