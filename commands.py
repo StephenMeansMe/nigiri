@@ -164,6 +164,16 @@ def cmd_maki(main_window, argv):
 		usage()
 		return
 
+def cmd_names(main_window, argv):
+	""" /names """
+	if no_connection():
+		return
+	ct = main_window.current_tab
+	if type(ct) != tabs.Channel:
+		print_error("You must be on a channel to use /names.")
+		return
+	connection.sushi.names(ct.parent.name, ct.name)
+
 def cmd_overview(main_window, argv):
 	""" /overview [<server>] """
 	if no_connection():
@@ -267,6 +277,7 @@ _command_dict = {
 	"join": cmd_join,
 	"load": cmd_load,
 	"maki": cmd_maki,
+	"names": cmd_names,
 	"overview": cmd_overview,
 	"python": cmd_python,
 	"quit": cmd_quit,

@@ -504,9 +504,37 @@ def sushi_motd(time, server, message):
 	""" message == "" => End OR no MOTD """
 	pass
 
-def sushi_names(time, server, channel, nicks, prefix):
+def sushi_names(time, server, channel, nicks, prefix, _call_count = {"n":0}):
 	""" len(nicks) == 0 => EOL """
-	pass
+	tab = find_channel_tab(server, channel)
+
+	if not tab:
+		return
+
+	if _call_count["n"] == 0:
+		msg = format_message("status", "Begin of names.")
+		print_tab(tab, msg)
+
+	if len(nicks) != 0:
+		max_width = 5
+		width = 0
+		msg = ""
+		for nick in nicks:
+			prefix = sushi.user_channel_prefix(server, channel, nick)
+			msg += prefix+nick+" "
+
+			if width == max_width:
+				msg += "\n"
+				width = 0
+			width += 1
+		msg = format_message("status", msg)
+		print_tab(tab, msg)
+		_call_count["n"] += 1
+
+	else:
+		msg = format_message("status", "End of names.")
+		print_tab(tab, msg)
+		_call_count["n"] = 0
 
 def sushi_no_such(time, server, target, type):
 	""" type is str:
