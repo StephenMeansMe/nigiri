@@ -19,3 +19,4 @@ clean:
 	$(RM) -f *.pyc
 	$(RM) -f helper/*.pyc
 	$(RM) -f extends/*.pyc
+	$(RM) -f plugins/*.pyc
