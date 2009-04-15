@@ -33,6 +33,7 @@ provide methods for warnings, notifications, debug and errors
 import sys
 import urwid
 import urwid.util
+import time
 
 import config
 #import log
@@ -56,6 +57,21 @@ def setup (mw):
 	global main_window#, generic_log
 	main_window = mw
 #	generic_log = log.Logger ("nigiri")
+
+
+def format_message(type, msg, **fmt):
+	template = config.get("formats", type)
+
+	if not template:
+		print_error("No format template for type '%s'." % (type))
+		return
+
+	if not fmt.has_key("datestring"):
+		fmt["datestring"] = time.strftime(config.get("formats","datestring"))
+
+	fmt["message"] = msg
+
+	return template % fmt
 
 @types (mclass=type, message=(str, unicode))
 def handle_message (mclass, org_message, **dargs):

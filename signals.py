@@ -25,31 +25,17 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 """
-
-import time
+import inspect
 
 import config
 import tabs
 
 from messages import print_tab, print_error, \
-	print_tab_notification, print_tab_error
+	print_tab_notification, print_tab_error, \
+	format_message
 
 sushi = None
 signals = {}
-
-def format_message(type, msg, **fmt):
-	template = config.get("formats", type)
-
-	if not template:
-		print_error("No format template for type '%s'." % (type))
-		return
-
-	if not fmt.has_key("datestring"):
-		fmt["datestring"] = time.strftime(config.get("formats","datestring"))
-
-	fmt["message"] = msg
-
-	return template % fmt
 
 def parse_from (from_str):
 	h = from_str.split("!", 2)
@@ -176,6 +162,7 @@ def setup_connected_servers():
 				parent = stab)
 			ctab.set_joined(True)
 			sushi.topic(server, channel, "")
+			sushi.names(server, channel)
 
 		stab.set_connected(True)
 
@@ -183,50 +170,78 @@ def setup_connected_servers():
 
 ####################################################
 
-def find_target_tab(server, target, sender):
-	""" Return a query-tab if target is a user,
+def find_parent_tab(server, target):
+	parent = main_window.find_server(server)
+	if not parent:
+		print_error("parent server '%s' for '%s' not found." % (
+			server, target))
+		return None
+	return parent
+
+def no_tab_error(msg):
+	def dec(fun):
+		def subdec(*args, **kwargs):
+			parameters = inspect.getargspec(fun)[0]
+			param_dict = {}
+
+			for i in range (len(args[:len(parameters)])):
+				param_dict[parameters[i]] = args[i]
+			param_dict.update (kwargs)
+
+			tab = fun(*args, **kwargs)
+			if not tab:
+				print_error(msg % param_dict)
+
+			return tab
+		return subdec
+	return dec
+
+@no_tab_error ("No tab found for %(target)s on %(server)s. (nick = %(nick)s)")
+def find_target_tab(server, target, nick):
+	""" server: current server,
+		target: target of the action,
+		nick: causes the action
+
+		Return a query-tab if target is a user,
 		return a channel-tab if target is a channel
 	"""
-
-	def find_parent(server, target):
-		parent = main_window.find_server(server)
-		if not parent:
-			print_error("parent server '%s' for '%s' not found." % (
-				server, target))
-			return None
-		return parent
-
-	tab = main_window.find_tab(server, target)
-
 	if not target[0] in sushi.support_chantypes(server):
 		# we got a query here
-
-		if tab:
-			return tab
-
-		parent = find_parent(server, target)
-
-		if not parent:
-			return
-
-		tab = tabs.Query(name = parse_from(sender)[0], parent = parent)
-		return tab
+		return find_query_tab(server, nick)
 
 	else:
-		if tab:
-			return tab
+		return find_channel_tab(server, target)
+	return None
 
-		parent = find_parent(server, target)
+@no_tab_error ("No tab for %(partner)s on %(server)s found.")
+def find_query_tab(server, partner):
+	tab = main_window.find_tab(server, partner)
 
-		if not parent:
-			return
-
-		tab = tabs.Channel(name = target, parent = parent)
+	if tab:
 		return tab
 
+	parent = find_parent(server, partner)
 
-	print_error("No tab found for '%s' on '%s'." % (target, server))
-	return None
+	if not parent:
+		return None
+
+	tab = tabs.Query(name = partner, parent = parent)
+	return tab
+
+@no_tab_error ("No tab for channel %(channel)s on %(server)s found.")
+def find_channel_tab(server, channel):
+	tab = main_window.find_tab(server, channel)
+
+	if tab:
+		return tab
+
+	parent = find_parent(server, target)
+
+	if not parent:
+		return None
+
+	tab = tabs.Channel(name = target, parent = parent)
+	return tab
 
 def is_highlighted(server, message):
 	words = config.get_list("chatting", "highlight_words")
@@ -271,7 +286,7 @@ def current_server_tab_print(server, message):
 # message signals
 
 def sushi_action(time, server, sender, target, message):
-	tab = find_target_tab(server, target, sender)
+	tab = find_target_tab(server, target, parse_from(sender)[0])
 
 	if not tab:
 		return
@@ -284,7 +299,7 @@ def sushi_action(time, server, sender, target, message):
 	print_tab(tab, msg)
 
 def sushi_message(time, server, sender, target, message):
-	tab = find_target_tab(server, target, sender)
+	tab = find_target_tab(server, target, parse_from(sender)[0])
 
 	if not tab:
 		return
