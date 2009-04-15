@@ -525,7 +525,14 @@ def sushi_connect_attempt(time, server):
 		print_tab_notification(tab, "Connecting...")
 
 def sushi_connected(time, server):
-	pass
+	tab = main_window.find_server(server)
+
+	if not tab:
+		tab = tabs.Server(name = server)
+		main_window.add_server(tab)
+
+	print_tab_notification(tab, "Connected.")
+	tab.set_connected(True)
 
 def sushi_away(time, server):
 	pass
