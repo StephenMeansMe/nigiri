@@ -1,3 +1,4 @@
 - better error handling (stderr destroys the display)
+- colored nicks
 - implement commands
 - implement signals
