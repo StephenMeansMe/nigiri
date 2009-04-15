@@ -62,7 +62,6 @@ class Tab(object):
 
 	@types(switch = bool)
 	def set_connected(self, switch):
-		from messages import print_debug
 		self._connected = switch
 
 		for child in self.children:

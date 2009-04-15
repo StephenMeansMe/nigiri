@@ -69,6 +69,7 @@ def set_defaults():
 	defaults["nigiri"]["command_char"] = "/"
 	defaults["nigiri"]["shortcut_pattern"] = "meta [0-9]"
 	defaults["nigiri"]["server_shortcuts"] = "true"
+	defaults["nigiri"]["plugin_dirs"] = os.path.join(prefix, "plugins")
 
 	defaults["chatting"] = {}
 	defaults["chatting"]["quit_message"] = "Quit."
@@ -92,6 +93,8 @@ def set_defaults():
 	defaults["messages"]["error"] = "window"
 	defaults["messages"]["notification"] = "window"
 	defaults["messages"]["debug"] = "window"
+
+	defaults["autoload_plugins"] = {}
 
 	# Add default sections to config parser
 	# so setting is easier

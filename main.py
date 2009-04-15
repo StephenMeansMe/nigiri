@@ -25,6 +25,8 @@ import commands
 import connection
 import signals
 import tabs
+import plugin_control
+
 from typecheck import types
 
 import extends

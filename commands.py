@@ -1,10 +1,10 @@
-
-import tabs
 from typecheck import types
 from messages import print_notification, print_error, print_normal
-import config
 
+import tabs
+import config
 import connection
+import plugin_control
 
 def no_connection():
 	if not connection.is_connected():
@@ -108,6 +108,22 @@ def cmd_join(main_window, argv):
 
 	connection.sushi.join(server_tab.name, channel, key)
 	print_notification("Joining channel '%s'." % (channel))
+
+def cmd_load(main_window, argv):
+	if len(argv) != 2:
+		print_notification("Usage: /load <filename>")
+		return
+
+	name = argv[1]
+
+	if plugin_control.is_loaded(name):
+		print_notification("Plugin '%s' already loaded." % (name))
+		return
+
+	if plugin_control.load(name):
+		print_notification("Plugin '%s' successfully loaded." % (name))
+	else:
+		print_notification("Error while loading plugin '%s'." % (name))
 
 def cmd_maki(main_window, argv):
 	""" /maki [connect|shutdown] """
@@ -228,18 +244,35 @@ def cmd_servers(main_window, argv):
 			connected = "not connected"
 		print_normal("- '%s' (%s)" % (name, connected))
 
+def cmd_unload(main_window, argv):
+	if len(argv) != 2:
+		print_notification("Usage: /unload <filename>")
+		return
+	name = argv[1]
+
+	if not plugin_control.is_loaded(name):
+		print_error("Plugin '%s' is not loaded." % (name))
+		return
+
+	if not plugin_control.unload(name):
+		print_error("Failed to unload plugin '%s'." % (name))
+	else:
+		print_notification("Plugin '%s' successfully unloaded." % (name))
+
 _command_dict = {
 	"add_server": cmd_add_server,
 	"close": cmd_close,
 	"connect": cmd_connect,
 	"echo": cmd_echo,
 	"join": cmd_join,
+	"load": cmd_load,
 	"maki": cmd_maki,
 	"overview": cmd_overview,
 	"python": cmd_python,
 	"quit": cmd_quit,
 	"remove_server": cmd_remove_server,
-	"servers": cmd_servers
+	"servers": cmd_servers,
+	"unload": cmd_unload
 }
 
 _builtins = _command_dict.keys()
@@ -282,6 +315,7 @@ def add_command(name, fun):
 	if _command_dict.has_key (name):
 		return False
 	_command_dict[name] = fun
+	return True
 
 @types (name=str)
 def remove_command(name):
