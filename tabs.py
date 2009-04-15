@@ -151,6 +151,27 @@ class Server(Tab):
 	def set_away(self, msg):
 		self._away = msg
 
+class NickList(dict):
+
+	def __init__(self):
+		dict.__init__(self)
+
+	def add_nick(self, nick, hostmask):
+		self[nick] = hostmask
+
+	def get_hostmask(self, nick):
+		return self[nick]
+
+	def rename_nick(self, old, new):
+		self[new] = self[old]
+		del self[old]
+
+	def remove_nick(self, nick):
+		del self[nick]
+
+	def has_nick(self, nick):
+		self.has_key(nick)
+
 class Channel(Tab):
 
 	@types(name = (String,str))
@@ -159,6 +180,7 @@ class Channel(Tab):
 		self.joined = False
 		self.set_parent(parent)
 		self._topic = ""
+		self.nicklist = NickList()
 
 	@types(switch = bool)
 	def set_joined(self, switch):

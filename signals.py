@@ -382,17 +382,50 @@ def sushi_join(time, server, sender, channel):
 
 	else:
 		# somebody joined
+
+		tab.nicklist.add_nick(nick, sender)
+
 		msg = "%(nick)s (%(host)s) joined %(channel)s." % {
 			"nick": nick,
 			"host": sender,
 			"channel": channel
 		}
+
 		msg = format_message("status", msg)
 		print_tab(tab, msg)
 
 def sushi_kick(time, server, sender, channel, who, message):
 	""" message can be empty """
-	pass
+	stab = main_window.find_server(server)
+
+	if not stab:
+		print_error("missing stab '%s'" % (server))
+		return
+
+	nick = parse_from(sender)[0]
+
+	if who == stab.get_nick():
+		# we got kicked
+		pass
+
+	else:
+		if nick == stab.get_nick():
+			nick = "You"
+
+		if message:
+			msg = "%(nick)s has kicked %(who)s from %(channel)s. "\
+				"(%(reason)s)"
+		else:
+			msg = "%(nick)s has kicked %(who)s from %(channel)s."
+
+		msg = msg % {"nick": nick, "who": who, "channel": channel,
+			"reason": message}
+		msg = format_message("status", msg)
+
+		for child in server.children:
+			if type(child) == tabs.Channel and child.nicklist.has_nick(who):
+				child.nicklist.remove_nick(who)
+				print_tab(child, msg)
 
 def sushi_nick(time, server, old, new):
 	""" old == "" => new == current nick """
@@ -410,6 +443,7 @@ def sushi_nick(time, server, old, new):
 
 		msg = "You are now known as %(new_nick)s." % {
 			"new_nick": new}
+		msg = format_message("status", msg)
 
 		current_server_tab_print(server, msg)
 
@@ -418,8 +452,12 @@ def sushi_nick(time, server, old, new):
 		msg = "%(old_nick)s is now known as %(new_nick)s." % {
 			"old_nick": old,
 			"new_nick": new}
+		msg = format_message("status", msg)
 
-		current_server_tab_print(server, msg)
+		for tab in stab.children:
+			if type(tab) == tabs.Channel and tab.nicklist.has_nick(old):
+				tab.nicklist.rename_nick(new)
+				print_tab(tab, msg)
 
 def sushi_mode(time, server, sender, target, mode, parameter):
 	""" from can be empty, parameter can be empty """
@@ -430,13 +468,14 @@ def sushi_oper(time, server):
 
 def sushi_part(time, server, sender, channel, message):
 	""" message can be empty """
-	tab = find_tab(server, channel)
+	tab = main_window.find_tab (server, channel)
 
 	if not tab:
-		print_error("No tab for channel '%s' on '%s'." % (channel, server))
+		# ignore this cause it could be this tab was
+		# closed recently
 		return
 
-	if find_tab.parent.get_nick() == parse_from(sender)[0]:
+	if tab.parent.get_nick() == parse_from(sender)[0]:
 		# we parted
 		tab.set_joined(False)
 		msg = "You left %(channel)s." % {
@@ -445,28 +484,43 @@ def sushi_part(time, server, sender, channel, message):
 		print_tab(tab, msg)
 
 	else:
+		nick = parse_from(sender)[0]
+
+		tab.nicklist.remove_nick(nick)
+
 		msg = "%(nick)s has left %(channel)s." % {
-			"nick": parse_from(sender)[0],
+			"nick": nick,
 			"channel": channel}
 		msg = format_message("status", msg)
 		print_tab(tab, msg)
 
 def sushi_quit(time, server, sender, message):
 	""" message can be empty """
-	nick = parse_from(sender)[0]
 	server_tab = main_window.find_server(server)
 
 	if not server_tab:
 		print_error("No server tab for server '%s'." % (server))
 		return
 
+	nick = parse_from(sender)[0]
+
 	if nick == server_tab.get_nick():
 		# we quit
 		server_tab.set_connected(False)
 		current_server_tab_print(server, "You have quit %s." % (server))
+
 	else:
-		# another one quit
-		pass
+		if message:
+			msg = "%(nick)s has quit (%(message)s)."
+		else:
+			msg = "%(nick)s has quit."
+		msg = msg % {"message": message, "nick": nick}
+		msg = format_message("status", msg)
+
+		for tab in server_tab.children:
+			if type(tab) == tabs.Server and tab.nicklist.has_nick(nick):
+				tab.nicklist.remove_nick(nick)
+				print_tab(tab, msg)
 
 def sushi_topic(time, server, sender, channel, topic):
 	""" sender can be empty """
