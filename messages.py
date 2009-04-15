@@ -91,7 +91,7 @@ def handle_message (mclass, org_message, **dargs):
 	for dest in destinations:
 		if dest != "window" and dargs.has_key("markup"):
 			# text is markupped, convert it to plain text
-			message, attr = urwid.util.decompose_tagmarkup(message)
+			message, attr = urwid.util.decompose_tagmarkup(org_message)
 		else:
 			# window output can display markupped messages
 			message = org_message
@@ -108,7 +108,7 @@ def handle_message (mclass, org_message, **dargs):
 		elif dest == "stdout":
 			print message
 
-@types(msg = (str,unicode))
+@types(msg = (str,unicode,list))
 def print_to_tab(dest_tab, msg):
 	if not main_window:
 		return
