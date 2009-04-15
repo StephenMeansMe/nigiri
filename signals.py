@@ -207,20 +207,23 @@ def find_target_tab(server, target, nick):
 	"""
 	if not target[0] in sushi.support_chantypes(server):
 		# we got a query here
-		return find_query_tab(server, nick)
+		return find_query_tab(server, nick, create = True)
 
 	else:
-		return find_channel_tab(server, target)
+		return find_channel_tab(server, target, create = False)
 	return None
 
 @no_tab_error ("No tab for %(partner)s on %(server)s found.")
-def find_query_tab(server, partner):
+def find_query_tab(server, partner, create = True):
 	tab = main_window.find_tab(server, partner)
 
 	if tab:
 		return tab
 
-	parent = find_parent(server, partner)
+	if not create:
+		return None
+
+	parent = find_parent_tab(server, partner)
 
 	if not parent:
 		return None
@@ -229,18 +232,21 @@ def find_query_tab(server, partner):
 	return tab
 
 @no_tab_error ("No tab for channel %(channel)s on %(server)s found.")
-def find_channel_tab(server, channel):
+def find_channel_tab(server, channel, create = False):
 	tab = main_window.find_tab(server, channel)
 
 	if tab:
 		return tab
 
-	parent = find_parent(server, target)
+	if not create:
+		return None
+
+	parent = find_parent_tab(server, channel)
 
 	if not parent:
 		return None
 
-	tab = tabs.Channel(name = target, parent = parent)
+	tab = tabs.Channel(name = channel, parent = parent)
 	return tab
 
 def is_highlighted(server, message):
