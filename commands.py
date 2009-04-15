@@ -209,6 +209,23 @@ def cmd_overview(main_window, argv):
 
 	print_normal("End of overview.")
 
+def cmd_part(main_window, argv):
+	""" /part [<reason>] """
+	if no_connection():
+		return
+
+	if len(argv) == 2:
+		reason = argv[1]
+	else:
+		reason = ""
+
+	ct = main_window.current_tab
+	if type(ct) in (tabs.Server, tabs.Query):
+		print_error("The current tab is not a channel.")
+		return
+	else:
+		connection.sushi.part(ct.parent.name, ct.name, reason)
+
 def cmd_python(main_window, argv):
 	""" /python <code> """
 	print_notification ("python: Executing...\n")
@@ -279,6 +296,7 @@ _command_dict = {
 	"maki": cmd_maki,
 	"names": cmd_names,
 	"overview": cmd_overview,
+	"part": cmd_part,
 	"python": cmd_python,
 	"quit": cmd_quit,
 	"remove_server": cmd_remove_server,
