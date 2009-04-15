@@ -332,9 +332,9 @@ def get_default(section, option=""):
 	return None
 
 @types (path=str)
-def check_config_file(path):
+def check_config_file(whole_path):
 	""" check if config file exists and create it if not """
-	path, file = os.path.split(path)
+	path, file = os.path.split(whole_path)
 
 	if not os.path.exists (path):
 		# create the directories
@@ -345,9 +345,9 @@ def check_config_file(path):
 				% (e)
 			return False
 
-	if not os.path.exists(os.path.join(path, file)):
+	if not os.path.exists(whole_path):
 		try:
-			f = file (path, "w")
+			f = open (whole_path, "w")
 		except BaseException,e:
 			print "Error while creating config file: %s" % (e)
 			return False
