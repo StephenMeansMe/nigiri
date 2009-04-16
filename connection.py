@@ -37,6 +37,7 @@ from signals import parse_from
 from messages import print_error
 
 dbus_loop = DBusGMainLoop()
+required_version = (1, 0, 0)
 bus_address = os.getenv("SUSHI_REMOTE_BUS_ADDRESS")
 
 if bus_address:
@@ -75,6 +76,12 @@ def connect():
 		return False
 
 	sushi = dbus.Interface(proxy, "de.ikkoku.sushi")
+
+	version = tuple([int(v) for v in sushi.version()])
+
+	if not version or version < required_version:
+		sushi = None
+		return False
 
 	for callback in _connect_callbacks:
 		callback(sushi)
