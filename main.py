@@ -11,7 +11,6 @@ except ImportError, e:
 	sys.exit(1)
 
 from urwid import Signals, MetaSignals
-from threading import Thread
 
 try:
 	import gobject
@@ -116,10 +115,11 @@ class MainWindow(object):
 				text_callback = self.footer.get_edit_text)
 
 		# urwid main loop
-		def urwid_main_loop (self, size, _c = {"size": None}):
-			if _c["size"] == None:
-				_c["size"] = size
-			size = _c["size"]
+		def urwid_main_loop (self, size):
+			try:
+				size = urwid_main_loop.size
+			except AttributeError:
+				urwid_main_loop.size = size
 
 			self.draw_screen (size)
 
@@ -133,7 +133,7 @@ class MainWindow(object):
 
 			for k in keys:
 				if k == "window resize":
-					size = _c["size"] = self.ui.get_cols_rows()
+					urwid_main_loop.size = size = self.ui.get_cols_rows()
 					self.keypress (size, k)
 					continue
 
