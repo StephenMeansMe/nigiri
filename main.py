@@ -59,7 +59,7 @@ DIVIDER = Divider with information (urwid.Text)
 FOOTER = Input line (Ext. Edit)
 """
 
-NIGIRI_VERSION = "0.0.3"
+NIGIRI_VERSION = "@SUSHI_VERSION@"
 
 class MainWindow(object):
 
@@ -164,7 +164,7 @@ class MainWindow(object):
 		""" setup the widgets to display """
 
 		# create widgets
-		self.header = urwid.Text("nigiri version %s" % NIGIRI_VERSION)
+		self.header = urwid.Text("nigiri %s" % NIGIRI_VERSION)
 		self.footer = extends.Edit.ExtendedEdit("> ")
 		self.divider = urwid.Text("Initializing.")
 
