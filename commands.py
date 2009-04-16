@@ -96,8 +96,10 @@ def cmd_join(main_window, argv):
 	elif len(argv) == 2:
 		cmd, channel = argv
 		key = ""
+	elif len(argv) == 1 and type(main_window.current_tab) == tabs.Channel:
+		channel = main_window.current_tab.name
 	else:
-		print_notification("Usage: /join <channel> [<key>]")
+		print_notification("Usage: /join [<channel> [<key>]]")
 		return
 
 	server_tab = tabs.get_server(main_window.current_tab)
@@ -215,7 +217,7 @@ def cmd_part(main_window, argv):
 		return
 
 	if len(argv) == 2:
-		reason = argv[1]
+		reason = " ".join(argv[1:])
 	else:
 		reason = ""
 
