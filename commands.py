@@ -130,7 +130,7 @@ def cmd_load(main_window, argv):
 def cmd_maki(main_window, argv):
 	""" /maki [connect|shutdown] """
 	def usage():
-		print_notification("Usage: /maki [connect|shutdown]")
+		print_notification("Usage: /maki [connect|disconnect|shutdown]")
 
 	if len(argv) != 2:
 		usage()

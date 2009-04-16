@@ -352,7 +352,7 @@ class MainWindow(object):
 		self.update_divider()
 
 	def handle_maki_disconnect(self):
-		pass
+		self.update_divider()
 
 	@types(id = int)
 	def switch_to_tabid(self, id):
@@ -480,8 +480,10 @@ class MainWindow(object):
 		if self.current_tab:
 			if type(self.current_tab) == tabs.Channel:
 				# check if joined
-				if not self.current_tab.joined:
+				if not self.current_tab.connected:
 					markup.append(("divider", "(not joined) "))
+				elif not self.current_tab.joined:
+					markup.append(("divider", "(not connected "))
 			else:
 				# check if connected
 				if not self.current_tab.connected:
