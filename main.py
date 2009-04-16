@@ -426,7 +426,8 @@ class MainWindow(object):
 		1: "Not connected." or tab id
 		if no connection: abort here.
 		2: tab name
-		3: tab list with highlights
+		3: status of the tab (joined / connected)
+		4: tab list with highlights
 		"""
 		markup = []
 		tablist = tabs.tree_to_list(self.servers)
@@ -473,7 +474,18 @@ class MainWindow(object):
 				markup.append(("divider", temp % subdict))
 
 			else:
-				markup.append(("divider", "-@-:-"))
+				markup.append(("divider", "-@-:- "))
+
+		# tab status (joined / connected)
+		if self.current_tab:
+			if type(self.current_tab) == tabs.Channel:
+				# check if joined
+				if not self.current_tab.joined:
+					markup.append(("divider", "(not joined) "))
+			else:
+				# check if connected
+				if not self.current_tab.connected:
+					markup.append(("divider", "(not connected) "))
 
 		# display tabnumbers which are active
 		markup.append(("divider", "["))
