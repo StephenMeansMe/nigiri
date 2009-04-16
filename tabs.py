@@ -156,24 +156,31 @@ class NickList(dict):
 	def __init__(self):
 		dict.__init__(self)
 
+	@types(nick = (str, unicode, String))
 	def add_nick(self, nick):
 		# TODO:  would be nice to have
 		# TODO:: the hostmask as value but names()
 		# TODO:: does not support this yet
-		self[nick] = 1
+		self[unicode(nick)] = 1
 
+	@types(nick = (str, unicode, String))
 	def get_hostmask(self, nick):
-		return self[nick]
+		return self[unicode(nick)]
 
+	@types(old = (str, unicode, String),
+		new = (str, unicode, String))
 	def rename_nick(self, old, new):
-		self[new] = self[old]
-		del self[old]
+		u_old = unicode(old)
+		self[unicode(new)] = self[u_old]
+		del self[u_old]
 
+	@types(nick = (str, unicode, String))
 	def remove_nick(self, nick):
-		del self[nick]
+		del self[unicode(nick)]
 
+	@types(nick = (str, unicode, String))
 	def has_nick(self, nick):
-		self.has_key(nick)
+		return self.has_key(unicode(nick))
 
 class Channel(Tab):
 
