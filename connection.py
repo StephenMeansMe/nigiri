@@ -47,6 +47,7 @@ else:
 
 sushi = None
 __connected = False
+_shutdown_handler = None
 _connect_callbacks = []
 _disconnect_callbacks = []
 
@@ -63,7 +64,7 @@ def connect():
 		Returns True if the connection attempt
 		was succesful.
 	"""
-	global sushi
+	global sushi, _shutdown_handler
 
 	proxy = None
 	try:
@@ -89,15 +90,20 @@ def connect():
 	global __connected
 	__connected = True
 
+	_shutdown_handler = sushi.connect_to_signal (
+		"shutdown", lambda time: disconnect())
+
 	return True
 
 def disconnect():
-	global sushi, __connected
+	global sushi, __connected, _shutdown_handler
 	sushi = None
 	__connected = False
 
 	for callback in _disconnect_callbacks:
 		callback()
+
+	_shutdown_handler.remove()
 
 def is_connected():
 	"""
