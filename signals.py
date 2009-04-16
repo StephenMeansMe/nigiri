@@ -374,6 +374,7 @@ def sushi_join(time, server, sender, channel):
 			tab = tabs.Channel(name = channel, parent = server_tab)
 
 		tab.set_joined(True)
+		main_window.update_divider()
 
 		msg = "You joined %(channel)s." % {
 			"channel": channel}
@@ -478,8 +479,11 @@ def sushi_part(time, server, sender, channel, message):
 	if tab.parent.get_nick() == parse_from(sender)[0]:
 		# we parted
 		tab.set_joined(False)
+		main_window.update_divider()
+
 		msg = "You left %(channel)s." % {
 			"channel": channel}
+
 		msg = format_message("highlight_status", msg)
 		print_tab(tab, msg)
 
@@ -488,9 +492,16 @@ def sushi_part(time, server, sender, channel, message):
 
 		tab.nicklist.remove_nick(nick)
 
-		msg = "%(nick)s has left %(channel)s." % {
+		if message:
+			msg = "%(nick)s has left %(channel)s. (%(reason)s)"
+		else:
+			msg = "%(nick)s has left %(channel)s."
+
+		msg = msg % {
+			"reason": message,
 			"nick": nick,
 			"channel": channel}
+
 		msg = format_message("status", msg)
 		print_tab(tab, msg)
 
@@ -506,8 +517,12 @@ def sushi_quit(time, server, sender, message):
 
 	if nick == server_tab.get_nick():
 		# we quit
+
 		server_tab.set_connected(False)
-		current_server_tab_print(server, "You have quit %s." % (server))
+
+		msg = format_message("status", "You have quit %s." % (server))
+		for child in server_tab.children:
+			print_tab(child, msg)
 
 	else:
 		if message:
@@ -518,8 +533,11 @@ def sushi_quit(time, server, sender, message):
 		msg = format_message("status", msg)
 
 		for tab in server_tab.children:
-			if type(tab) == tabs.Server and tab.nicklist.has_nick(nick):
+			if type(tab) == tabs.Channel and tab.nicklist.has_nick(nick):
 				tab.nicklist.remove_nick(nick)
+				print_tab(tab, msg)
+			elif (type(tab) == tabs.Query
+				and tab.name.lower() == nick.lower()):
 				print_tab(tab, msg)
 
 def sushi_topic(time, server, sender, channel, topic):
