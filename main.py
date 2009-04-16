@@ -486,9 +486,9 @@ class MainWindow(object):
 			if type(self.current_tab) == tabs.Channel:
 				# check if joined
 				if not self.current_tab.connected:
-					markup.append(("divider", "(not joined) "))
+					markup.append(("divider", "(not connected) "))
 				elif not self.current_tab.joined:
-					markup.append(("divider", "(not connected "))
+					markup.append(("divider", "(not joined) "))
 			else:
 				# check if connected
 				if not self.current_tab.connected:
