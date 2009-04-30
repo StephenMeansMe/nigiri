@@ -321,6 +321,7 @@ _command_dict = {
 	"close": cmd_close,
 	"connect": cmd_connect,
 	"echo": cmd_echo,
+	"j": cmd_join,
 	"join": cmd_join,
 	"load": cmd_load,
 	"maki": cmd_maki,
