@@ -70,6 +70,7 @@ def set_defaults():
 	defaults["nigiri"]["command_char"] = "/"
 	defaults["nigiri"]["shortcut_pattern"] = "meta [0-9]"
 	defaults["nigiri"]["server_shortcuts"] = "true"
+	defaults["nigiri"]["locale_dir"] = os.path.join(prefix, "..", "..", "locale")
 	defaults["nigiri"]["plugin_dirs"] = os.path.join(prefix, "plugins")
 
 	defaults["chatting"] = {}

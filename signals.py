@@ -25,6 +25,8 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 """
+from gettext import gettext as _
+
 import inspect
 
 import config
@@ -376,7 +378,7 @@ def sushi_join(time, server, sender, channel):
 		tab.set_joined(True)
 		main_window.update_divider()
 
-		msg = "You joined %(channel)s." % {
+		msg = _(u"» You have joined %(channel)s.") % {
 			"channel": channel}
 		msg = format_message("highlight_status", msg)
 		print_tab(tab, msg)
@@ -386,7 +388,7 @@ def sushi_join(time, server, sender, channel):
 
 		tab.nicklist.add_nick(nick)
 
-		msg = "%(nick)s (%(host)s) joined %(channel)s." % {
+		msg = _(u"» %(nick)s (%(host)s) has joined %(channel)s.") % {
 			"nick": nick,
 			"host": sender,
 			"channel": channel
@@ -411,13 +413,13 @@ def sushi_kick(time, server, sender, channel, who, message):
 
 	else:
 		if nick == stab.get_nick():
+			# FIXME
 			nick = "You"
 
 		if message:
-			msg = "%(nick)s has kicked %(who)s from %(channel)s. "\
-				"(%(reason)s)"
+			msg = _(u"« %(nick)s has kicked %(who)s from %(channel)s (%(reason)s).")
 		else:
-			msg = "%(nick)s has kicked %(who)s from %(channel)s."
+			msg = _(u"« %(nick)s has kicked %(who)s from %(channel)s.")
 
 		msg = msg % {"nick": nick, "who": who, "channel": channel,
 			"reason": message}
@@ -442,7 +444,7 @@ def sushi_nick(time, server, old, new):
 		if main_window.current_tab in tabs.tree_to_list([stab]):
 			main_window.update_divider()
 
-		msg = "You are now known as %(new_nick)s." % {
+		msg = _(u"• You are now known as %(new_nick)s.") % {
 			"new_nick": new}
 		msg = format_message("status", msg)
 
@@ -450,7 +452,7 @@ def sushi_nick(time, server, old, new):
 
 	else:
 		# print status message in channel tab
-		msg = "%(old_nick)s is now known as %(new_nick)s." % {
+		msg = _(u"• %(old_nick)s is now known as %(new_nick)s.") % {
 			"old_nick": old,
 			"new_nick": new}
 		msg = format_message("status", msg)
@@ -481,7 +483,7 @@ def sushi_part(time, server, sender, channel, message):
 		tab.set_joined(False)
 		main_window.update_divider()
 
-		msg = "You left %(channel)s." % {
+		msg = _(u"« You have left %(channel)s.") % {
 			"channel": channel}
 
 		msg = format_message("highlight_status", msg)
@@ -493,9 +495,9 @@ def sushi_part(time, server, sender, channel, message):
 		tab.nicklist.remove_nick(nick)
 
 		if message:
-			msg = "%(nick)s has left %(channel)s. (%(reason)s)"
+			msg = _(u"« %(nick)s has left %(channel)s (%(reason)s).")
 		else:
-			msg = "%(nick)s has left %(channel)s."
+			msg = _(u"« %(nick)s has left %(channel)s.")
 
 		msg = msg % {
 			"reason": message,
@@ -520,15 +522,16 @@ def sushi_quit(time, server, sender, message):
 
 		server_tab.set_connected(False)
 
+		# FIXME
 		msg = format_message("status", "You have quit %s." % (server))
 		for child in server_tab.children:
 			print_tab(child, msg)
 
 	else:
 		if message:
-			msg = "%(nick)s has quit (%(message)s)."
+			msg = _(u"« %(nick)s has quit (%(message)s).")
 		else:
-			msg = "%(nick)s has quit."
+			msg = _(u"« %(nick)s has quit.")
 		msg = msg % {"message": message, "nick": nick}
 		msg = format_message("status", msg)
 
@@ -552,13 +555,14 @@ def sushi_topic(time, server, sender, channel, topic):
 
 	if parse_from(sender)[0] == tab.parent.get_nick():
 		mtype = "highlight_status"
+		# FIXME
 		nick = "You"
 	else:
 		mtype = "status"
 		nick = parse_from(sender)[0]
 
 	if nick:
-		msg = "%(nick)s changed the topic to '%(topic)s'." % {
+		msg = _(u"• %(nick)s changed the topic to '%(topic)s'.") % {
 			"nick": nick,
 			"topic": topic}
 		msg = format_message(mtype, msg)

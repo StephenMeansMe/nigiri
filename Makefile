@@ -19,7 +19,11 @@ install: all
 	$(LN) -sf '$(sharedir)/sushi/nigiri/main.py' '$(DESTDIR)$(bindir)/nigiri'
 	$(SED) 's#@SUSHI_VERSION@#$(SUSHI_VERSION)#' 'nigiri.1.in' | $(GZIP) > '$(DESTDIR)$(mandir)/man1/nigiri.1.gz'
 
+	$(MAKE) -C po $@
+
 clean:
+	$(MAKE) -C po $@
+
 	$(RM) -f *.pyc
 	$(RM) -f helper/*.pyc
 	$(RM) -f extends/*.pyc

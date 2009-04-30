@@ -46,6 +46,10 @@ except ImportError:
 	sys.exit(1)
 import re
 
+import locale
+import gettext
+from gettext import gettext as _
+
 import config
 import messages
 import commands
@@ -599,7 +603,14 @@ if __name__ == "__main__":
 
 	config.setup()
 
-	# TODO: setup locale stuff
+	# setup locale stuff
+	try:
+		locale.setlocale(locale.LC_ALL, "")
+	except:
+		pass
+
+	gettext.bindtextdomain("nigiri", config.get("nigiri","locale_dir"))
+	gettext.textdomain("nigiri")
 
 	main_window = MainWindow()
 
