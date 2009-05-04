@@ -28,6 +28,7 @@ SUCH DAMAGE.
 """
 
 import sys
+import traceback
 
 try:
 	import urwid.curses_display
@@ -123,8 +124,6 @@ class MainWindow(object):
 	def __init__(self):
 		# current active world
 		self.current_tab = None
-		self.ready_to_use = False
-		self.had_error = False
 		self.servers = []
 		self.shortcut_pattern = re.compile(config.get(
 			"nigiri", "shortcut_pattern"))
@@ -154,9 +153,6 @@ class MainWindow(object):
 
 			self.draw_screen (size)
 
-			if not self.ready_to_use:
-				self.ready_to_use = True
-
 			try:
 				keys = self.ui.get_input ()
 			except KeyboardInterrupt:
@@ -183,8 +179,6 @@ class MainWindow(object):
 			self.quit()
 
 	def quit(self, exit=True):
-		self.ready_to_use = False
-
 		Signals.emit (self, "quit")
 
 		self.ui.stop()
@@ -584,22 +578,22 @@ class MainWindow(object):
 		canvas = self.context.render (size, focus=True)
 		self.ui.draw_screen (size, canvas)
 
-def error_callback(msg_part, _msg={"printed":False}):
-	global error_log
-
-	if main_window.ready_to_use:
+def except_hook(extype, exobj, extb):
+	try:
 		main_window.quit(exit=False)
-		main_window.had_error = True
-	else:
-		if not _msg["printed"]:
-			print "An error occured.\n"\
-				"Please see the logfile '%s' for details." % (
-				error_log.get_path())
-			_msg["printed"] = True
-	error_log.write(msg_part)
+	except NameError:
+		pass
+
+	message = _("An error occured:\n%(divider)s\n%(traceback)s\n"\
+		"%(exception)s\n%(divider)s" % {
+			"divider": 20*"-",
+			"traceback": "".join(traceback.format_tb(extb)),
+			"exception": extype.__name__+": "+str(exobj)
+		})
+	print >> sys.stderr, message
 
 if __name__ == "__main__":
-	global main_window, stderr, error_log
+	global main_window, stderr
 
 	config.setup()
 
@@ -614,9 +608,7 @@ if __name__ == "__main__":
 
 	main_window = MainWindow()
 
-	stderr = sys.stderr
-	error_log = helper.log.Logger("error.log")
-	sys.stderr = IOWatch([error_callback])
+	sys.excepthook = except_hook
 
 	connection.setup([signals.maki_connected],
 		[main_window.handle_maki_disconnect,signals.maki_disconnected])
@@ -626,9 +618,3 @@ if __name__ == "__main__":
 	messages.setup(main_window)
 
 	main_window.main()
-
-	if main_window.had_error:
-		print "An error occured, main window was closed.\n"\
-			"See %s for details." % (error_log.get_path())
-
-	error_log.close()
