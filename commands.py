@@ -113,6 +113,29 @@ def cmd_connect(main_window, argv):
 
 	connection.sushi.connect(argv[1])
 
+def cmd_dcc(main_window, argv):
+	"""
+	/dcc chat <target>
+	/dcc send <target> <path>
+	"""
+	if no_connection():
+		return
+
+	if len(argv) < 2:
+		print_notification("Usage: /dcc chat|send")
+		return
+
+	server_tab = tabs.get_server(main_window.current_tab)
+
+	if argv[1] == "send":
+		if len(argv) < 4:
+			print_notification("Usage: /dcc send <target> <path>")
+			return
+
+		connection.sushi.dcc_send(server_tab.name, argv[2], argv[3])
+	elif argv[1] == "chat":
+		pass
+
 def cmd_echo(main_window, argv):
 	""" /echo <text> """
 	main_window.print_text(" ".join(argv[1:])+"\n")
@@ -320,6 +343,7 @@ _command_dict = {
 	"add_server": cmd_add_server,
 	"close": cmd_close,
 	"connect": cmd_connect,
+	"dcc": cmd_dcc,
 	"echo": cmd_echo,
 	"j": cmd_join,
 	"join": cmd_join,
