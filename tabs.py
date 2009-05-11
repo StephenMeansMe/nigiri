@@ -30,7 +30,7 @@ import sys
 from typecheck import types
 from dbus import String
 
-from urwid import Signals, MetaSignals, SimpleListWalker
+from urwid import Signals, MetaSignals, SimpleListWalker, Text
 
 def tree_to_list(input_parents, target = None):
 
@@ -87,6 +87,20 @@ class Tab(object):
 		self.children = []
 		self.input_history = None
 		self.output_walker = SimpleListWalker([])
+
+		self.read_line_index = -1
+
+	def set_readline(self):
+		if self.read_line_index != -1:
+			try:
+				del self.output_walker[self.read_line_index]
+			except IndexError:
+				pass
+
+		line = Text("-"*30)
+		line.set_align_mode ("center")
+		self.output_walker.append(line)
+		self.read_line_index = len(self.output_walker)-1
 
 	@types(switch = bool)
 	def set_connected(self, switch):

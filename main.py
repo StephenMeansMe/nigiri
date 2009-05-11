@@ -397,6 +397,9 @@ class MainWindow(object):
 		self.switch_to_tab(tab)
 
 	def switch_to_tab(self, tab):
+		if self.current_tab:
+			self.current_tab.set_readline()
+
 		self.current_tab = tab
 
 		if not tab:
