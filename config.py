@@ -29,7 +29,7 @@ SUCH DAMAGE.
 import os
 import sys
 
-from xdg.BaseDirectory import xdg_config_home
+from xdg.BaseDirectory import xdg_config_home, xdg_data_home
 import ConfigParser
 
 from typecheck import types
@@ -74,7 +74,12 @@ def set_defaults():
 	defaults["nigiri"]["shortcut_pattern"] = "meta [0-9]"
 	defaults["nigiri"]["server_shortcuts"] = "true"
 	defaults["nigiri"]["locale_dir"] = get_path("..", "..", "locale")
-	defaults["nigiri"]["plugin_dirs"] = escape_join(",", (get_path("plugins"), get_path("..", "plugins")))
+	defaults["nigiri"]["plugin_dirs"] = escape_join(",", (
+			os.path.join(xdg_data_home, "sushi", "nigiri", "plugins"),
+			os.path.join(xdg_data_home, "sushi", "plugins"),
+			get_path("plugins"),
+			get_path("..", "plugins")
+		))
 
 	defaults["chatting"] = {}
 	defaults["chatting"]["quit_message"] = "Quit."
