@@ -34,13 +34,16 @@ import ConfigParser
 
 from typecheck import types
 from messages import print_debug
-from helper.escape import unescape_split
+from helper.escape import unescape_split, escape_join
 
 prefix = ""
 defaults = {}
 
 config_parser = None
 config_file = ""
+
+def get_path(*c):
+	return os.path.abspath(os.path.join(prefix, *c))
 
 def set_defaults():
 	"""
@@ -70,8 +73,8 @@ def set_defaults():
 	defaults["nigiri"]["command_char"] = "/"
 	defaults["nigiri"]["shortcut_pattern"] = "meta [0-9]"
 	defaults["nigiri"]["server_shortcuts"] = "true"
-	defaults["nigiri"]["locale_dir"] = os.path.join(prefix, "..", "..", "locale")
-	defaults["nigiri"]["plugin_dirs"] = os.path.join(prefix, "plugins")
+	defaults["nigiri"]["locale_dir"] = get_path("..", "..", "locale")
+	defaults["nigiri"]["plugin_dirs"] = escape_join(",", (get_path("plugins"), get_path("..", "plugins")))
 
 	defaults["chatting"] = {}
 	defaults["chatting"]["quit_message"] = "Quit."
@@ -181,7 +184,7 @@ def set_list(section, option, l):
 	by , and set it as value to option.
 	Return False on error, else True
 	"""
-	s = ",".join([n.replace("\\","\\\\").replace(",","\\,") for n in l if n])
+	s = escape_join(",", l)
 
 	if not s:
 		return False
