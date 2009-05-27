@@ -1,4 +1,4 @@
-include ../../Makefile.common
+include ../Makefile.common
 
 LANGUAGES =
 PO        = $(LANGUAGES:%=%.po)
@@ -8,7 +8,7 @@ all:
 
 install: $(PO:%.po=%.mo)
 	for file in $+; do \
-		INSTALL='$(INSTALL)' ../../tools/install-mo.sh nigiri "$${file}" '$(DESTDIR)$(localedir)'; \
+		INSTALL='$(INSTALL)' ../tools/install-mo.sh nigiri "$${file}" '$(DESTDIR)$(localedir)'; \
 	done
 
 clean:
