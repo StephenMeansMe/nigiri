@@ -117,12 +117,14 @@ def cmd_dcc(main_window, argv):
 	"""
 	/dcc chat <target>
 	/dcc send <target> <path>
+	/dcc list <type>
+	/dcc remove <type> <id>
 	"""
 	if no_connection():
 		return
 
 	if len(argv) < 2:
-		print_notification("Usage: /dcc chat|send")
+		print_notification("Usage: /dcc chat|send|list|remove")
 		return
 
 	server_tab = tabs.get_server(main_window.current_tab)
@@ -135,6 +137,35 @@ def cmd_dcc(main_window, argv):
 		connection.sushi.dcc_send(server_tab.name, argv[2], argv[3])
 	elif argv[1] == "chat":
 		pass
+	elif argv[1] == "list":
+		if len(argv) < 3:
+			print_notification("Usage: /dcc list chat|send")
+			return
+
+		if argv[2] == "send":
+			ids, servers, froms, filenames, sizes, progresses, speeds, statuses = connection.sushi.dcc_sends()
+
+			for i in range(len(ids)):
+				print_normal("#%(id)d: %(filename)s from/to %(from)s [%(server)s]: %(progress)d/%(size)d @ %(speed)d" % {
+						"id": ids[i],
+						"filename": filenames[i],
+						"from": froms[i],
+						"server": servers[i],
+						"progress": progresses[i],
+						"size": sizes[i],
+						"speed": speeds[i]
+					})
+		elif argv[2] == "chat":
+			pass
+	elif argv[1] == "remove":
+		if len(argv) < 4:
+			print_notification("Usage: /dcc remove <type> <id>")
+			return
+
+		if argv[2] == "send":
+			connection.sushi.dcc_send_remove(int(argv[3]))
+		elif argv[2] == "chat":
+			pass
 
 def cmd_echo(main_window, argv):
 	""" /echo <text> """
