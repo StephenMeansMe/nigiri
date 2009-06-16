@@ -11,7 +11,7 @@ nigiri \- Terminal IRC client
 \fBnigiri\fP provides a terminal IRC client that uses \fBmaki\fP.
 
 .SH SEE ALSO
-\fBmaki\fP(1), \fBtekka\fP(1), \fBmaki-remote\fP(1), \fBsushi-remote\fP(1)
+\fBmaki\fP(1), \fBtekka\fP(1), \fBsushi-remote\fP(1)
 
 .SH AUTHOR
 Marian Tietz
