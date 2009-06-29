@@ -35,7 +35,7 @@ import connection
 import plugin_control
 
 def no_connection():
-	if not connection.is_connected():
+	if not connection.sushi.connected:
 		print_error("No connection to maki.")
 		return True
 	return False
@@ -86,6 +86,15 @@ def cmd_add_server(main_window, argv):
 		connection.sushi.server_set(server_name, "server", key, value)
 
 	print_notification("Server '%s' successfully added." % (server_name))
+
+def cmd_clear(main_window, argv):
+	""" /clear [<markup>] """
+	if len(argv) == 2 and argv[1] == "markup":
+		for tab in tabs.tree_to_list(main_window.servers):
+			tab.reset_status()
+		main_window.update_divider()
+	else:
+		del main_window.body.body[0:]
 
 def cmd_close(main_window, argv):
 	""" /close """
@@ -372,6 +381,7 @@ def cmd_unload(main_window, argv):
 
 _command_dict = {
 	"add_server": cmd_add_server,
+	"clear": cmd_clear,
 	"close": cmd_close,
 	"connect": cmd_connect,
 	"dcc": cmd_dcc,
