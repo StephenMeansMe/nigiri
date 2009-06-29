@@ -324,13 +324,42 @@ def sushi_message(time, server, sender, target, message):
 	print_tab(tab, msg)
 
 def sushi_ctcp(time, server, sender, target, message):
-	pass
+	own_nick = main_window.find_server(server).get_nick()
+	nick = parse_from(sender)[0]
+
+	msg = format_message("messages", "ctcp",
+		{"nick": nick,
+		 "target": target,
+		 "message": message},
+		own = (nick == own_nick),
+		highlight = is_highlighted(server, message))
+
+	if target[0] in sushi.support_chantypes(server):
+		tab = find_target_tab(server, target)
+		if not tab:
+			current_server_tab_print(server, msg)
+	else:
+		current_server_tab_print(server, msg)
 
 def sushi_notice(time, server, sender, target, message):
-	pass
+	own_nick = main_window.find_server(server).get_nick()
+	nick = parse_from(sender)[0]
+
+	msg = format_message("messages", "notice",
+		{"nick": nick,
+		 "target": target,
+		 "message": message},
+		own = (nick == own_nick),
+		highlight = is_highlighted(server, message))
+
+	if target[0] in sushi.support_chantypes(server):
+		tab = find_target_tab(server, target)
+		if not tab:
+			current_server_tab_print(server, msg)
+	else:
+		current_server_tab_print(server, msg)
 
 # action signals
-
 
 def sushi_invite(time, server, sender, channel, who):
 	""" sender can be empty """
@@ -442,12 +471,32 @@ def sushi_nick(time, server, old, new):
 				tab.nicklist.rename_nick(new)
 				print_tab(tab, msg)
 
-def sushi_mode(time, server, sender, target, mode, parameter):
-	""" from can be empty, parameter can be empty """
-	pass
+def sushi_mode(time, server, sender, target, mode, param):
+	""" sender can be empty, param can be empty """
+	if sender == "":
+		# mode listing
+		msg = format_message("actions", "mode_list",
+			{"target": target, "mode": mode},
+			own = (target == main_window.find_server(server).get_nick()),
+			highlight = False)
+		current_server_tab_print(server, msg)
+
+	else:
+		nick = parse_from(sender)[0]
+		msg = format_message("actions", "mode",
+			{"nick": nick,
+			 "mode": mode,
+			 "param": param,
+			 "target": target},
+			own = (nick == main_window.find_server(server).get_nick()),
+			highlight = (target == main_window.find_server(server).get_nick()))
 
 def sushi_oper(time, server):
-	pass
+	msg = format_message("actions", "oper",
+		{"nick": main_window.find_server(server).get_nick()},
+		own = True,
+		highlight = False)
+	current_server_tab_print(server, msg)
 
 def sushi_part(time, server, sender, channel, message):
 	""" message can be empty """
