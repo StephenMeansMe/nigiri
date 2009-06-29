@@ -37,27 +37,14 @@ import urwid.util
 import time
 
 import config
-#import log
 from typecheck import types
 import tabs
 
 main_window = None
-#generic_log = None
-
-class error(object): pass
-class debug(object): pass
-class notification(object): pass
-class normal(object): pass
-
-class tab(object): pass
-class tab_error(object): pass
-class tab_notification(object):	pass
-class tab_debug(object): pass
 
 def setup (mw):
-	global main_window#, generic_log
+	global main_window
 	main_window = mw
-#	generic_log = log.Logger ("nigiri")
 
 def get_nick_color(nick):
 	"""
@@ -113,7 +100,23 @@ def parse_markup(input):
 
 	return markup
 
-@types (tID=basestring, values=dict)
+class FormattedMessage(object):
+
+	@types( category = basestring, template = basestring,
+			values = dict, highlight = bool, own = bool )
+	def __init__(self, category, template, values, base_color,
+				 highlight = False, own = False):
+		self.category = category
+		self.template = template
+		self.values = values
+		self.highlight = highlight
+		self.base_color = base_color
+		self.own = own 	# we triggered that/we are meant by it
+
+	def __str__(self):
+		return self.template % self.values
+
+@types (mtype=basestring, template_id=basestring, values=dict)
 def format_message(mtype, template_id, values, highlight = False, own = False):
 	if highlight:
 		generic_type = mtype + "_highlight"
@@ -129,123 +132,58 @@ def format_message(mtype, template_id, values, highlight = False, own = False):
 	template = config.get("templates", template_id)
 #	main_window.print_text("base_color = %s, own = %s, mtype = %s\n" % (base_color, own, generic_type))
 
+	msg = FormattedMessage(mtype, template, values, base_color, highlight, own)
+
 	if None == template:
-		return "TEMPLATE_ERROR(%s)" % template_id
+		msg.template = "TEMPLATE_ERROR(%s)" % template_id
 
-	return [(base_color, template % values)]
+	return msg
 
-@types (mclass=type, message=(str, unicode))
-def handle_message (mclass, org_message, **dargs):
-	""" associate the message class to the
-		configured destinations and leave the
-		message there.
-		If the given message is markupped, the
-		markup is striped if the destination
-		is not "window".
-	"""
-	destinations = config.get_list("messages", mclass.__name__)
-
-	if not destinations:
-		# no destionations are given, no print
-		return
-
-	for dest in destinations:
-		if dest != "window" and dargs.has_key("markup"):
-			# text is markupped, convert it to plain text
-			message, attr = urwid.util.decompose_tagmarkup(org_message)
-		else:
-			# window output can display markupped messages
-			message = org_message
-
-		if dest == "window":
-			if not main_window and "stdout" not in destinations:
-				print message
-			elif main_window:
-				main_window.print_text (message)
-
-#		elif dest == "log":
-#			generic_log.write (message)
-
-		elif dest == "stdout":
-			print message
-
-@types(msg = (str,unicode,list,tuple))
-def print_to_tab(dest_tab, msg):
+@types(msg = (basestring, list, FormattedMessage))
+def print_tab(dest_tab, msg):
 	if not main_window:
-		return
+		raise ValueError, "No main_window found."
 
 	tablist = tabs.tree_to_list(main_window.servers)
 
 	try:
 		i = tablist.index(dest_tab)
+
 	except ValueError:
 		print_error("print_tab to invalid destinaton '%s'." % dest_tab)
 		return
+
 	else:
-		tablist[i].output_walker.append(urwid.Text(msg))
+		if isinstance(msg, FormattedMessage):
+			markup = [(msg.base_color, unicode(msg))]
+		else:
+			markup = msg
 
-@types (mclass=type, prefix=str, msg=(str,unicode,list,tuple))
-def printit (mclass, prefix, msg, *args, **dargs):
-
-	if type(msg) == list:
-		dargs["markup"] = True
-		msg = [prefix] + msg
-	else:
-		msg = prefix + msg
-
-	try:
-		dest_tab = dargs["dest_tab"]
-	except KeyError:
-		pass
-	else:
-		if not dest_tab:
-			print_error("dest_tab is None. ('%s')" % (msg))
-			return
-
-		print_to_tab(dest_tab, msg)
+		tablist[i].output_walker.append(urwid.Text(markup))
 
 		if main_window.current_tab != dest_tab:
-			try:
-				msgtype = dargs["type"]
-			except KeyError:
-				msgtype = "message"
-
-			dest_tab.add_status(msgtype)
+			dest_tab.add_status(msg.category)
 			main_window.update_divider()
 		else:
 			main_window.body.scroll_to_bottom(
 				main_window.ui.get_cols_rows())
 
-	if dargs.has_key("dont_handle") and dargs["dont_handle"]:
-		return
+def print_tab_notification(tab, msg):
+	print_tab(tab, "*** Notification: " + msg)
 
-	handle_message (mclass, msg, **dargs)
+def print_tab_error(tab, msg):
+	print_tab(tab, "!!! Error: " + msg)
 
 def print_normal(msg, *args, **dargs):
-	printit(normal, "", msg, *args, **dargs)
+	main_window.print_text(msg)
 
 def print_error (msg, *args, **dargs):
-	printit (error, "!!! Error: ", msg, *args, **dargs)
+	main_window.print_text("!!! Error: " + msg)
 
-def print_notification (msg, *args, **dargs):
-	printit (notification, "*** Notification: ", msg, *args, **dargs)
+def print_notification (msg):
+	main_window.print_text("*** Notification: " + msg)
 
 def print_debug (msg, *args, **dargs):
-	printit (debug, "=== Debug: ", msg, *args, **dargs)
-
-
-def print_tab(dest_tab, msg, *args, **dargs):
-	dargs.update({"dest_tab":dest_tab})
-	printit(tab, "", msg, *args, **dargs)
-
-def print_tab_error(dest_tab, msg, *args, **dargs):
-	dargs.update({"dest_tab":dest_tab})
-	printit(tab_error, "!!! Error: ", msg, *args, **dargs)
-
-def print_tab_notification(dest_tab, msg, *args, **dargs):
-	dargs.update({"dest_tab":dest_tab})
-	printit(tab_notification, "*** Notification: ", msg, *args, **dargs)
-
-def print_tab_debug(dest_tab, msg, *args, **dargs):
-	dargs.update({"dest_tab":dest_tab})
-	printit(tab_debug, "=== Debug: ", msg, *args, **dargs)
+	if not config.get_bool("nigiri", "show_debug"):
+		return
+	main_window.print_text("=== Debug: " + msg)

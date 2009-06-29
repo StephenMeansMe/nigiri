@@ -65,8 +65,10 @@ class Tab(object):
 	__metaclass__ = MetaSignals
 	signals = ["child_added", "child_removed", "remove", "connected"]
 
-	_valid_stati = ["highlight","highlight_action",
-		"action","message"]
+	_valid_stati = [
+		"informative",
+		"actions", "actions_highlight","actions_own",
+		"messages","messages_highlight","messages_own"]
 
 	def __repr__(self):
 		return "<tab: %s:%s:%s>" % (

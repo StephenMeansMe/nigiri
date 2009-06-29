@@ -69,10 +69,10 @@ def set_defaults():
 
 	defaults["nigiri"] = {}
 	defaults["nigiri"]["wrap_input"] = "True"
-	defaults["nigiri"]["keep_alive"] = "True"
 	defaults["nigiri"]["command_char"] = "/"
 	defaults["nigiri"]["shortcut_pattern"] = "meta [0-9]"
 	defaults["nigiri"]["server_shortcuts"] = "true"
+	defaults["nigiri"]["show_debug"] = "True"
 	defaults["nigiri"]["locale_dir"] = get_path("..", "..", "locale")
 	defaults["nigiri"]["plugin_dirs"] = escape_join(",", (
 			os.path.join(xdg_data_home, "sushi", "nigiri", "plugins"),
@@ -100,7 +100,7 @@ def set_defaults():
 	defaults["templates"]["action"] = "%(time)s %(nick)s %(message)s"
 	defaults["templates"]["action_own"] = "%(time)s %(nick)s %(message)s"
 	defaults["templates"]["message"] = "%(time)s <%(prefix)s%(nick)s> %(message)s"
-	defaults["templates"]["message_own"] = "%(time)s <%(prefix)s%(nick)s %(message)s"
+	defaults["templates"]["message_own"] = "%(time)s <%(prefix)s%(nick)s> %(message)s"
 	defaults["templates"]["ctcp"] = "%(time)s -%(nick)s/%(target)s- %(message)s"
 	defaults["templates"]["ctcp_own"] = "%(time)s -%(nick)s/%(target)s- %(message)s"
 	defaults["templates"]["notice"] = "%(time)s *%(nick)s/%(target)s* %(message)s"

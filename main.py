@@ -537,17 +537,20 @@ class MainWindow(object):
 				name = "UNAVAIL"
 			color = "divider"
 
-			if tab.has_status("action"):
-				color = "div_fg_green"
+			if tab.has_status("actions") or tab.has_status("actions_own"):
+				color = "div_fg_gray"
 
-			if tab.has_status("message"):
+			if tab.has_status("messages") or tab.has_status("messages_own"):
 				color = "div_fg_white"
 
-			if tab.has_status("highlight_action"):
+			if tab.has_status("actions_highlight"):
 				color = "div_fg_yellow"
 
-			if tab.has_status("highlight"):
+			if tab.has_status("messages_highlight"):
 				color = "div_fg_magenta"
+
+			if tab.has_status("informative"):
+				color = "div_fg_yellow"
 
 
 			markup.append((color, name))

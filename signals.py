@@ -33,7 +33,6 @@ import config
 import tabs
 
 from messages import print_tab, print_error, \
-	print_tab_notification, print_tab_error, \
 	format_message
 
 sushi = None
