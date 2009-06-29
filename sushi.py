@@ -95,10 +95,10 @@ class Plugin (object):
 
 		return config.set(section, name, value)
 
-	def get_config(self, name):
+	def get_config(self, name, default = None):
 		section = "plugin_%s" % (self._plugin_name)
 
-		return config.get(section, name)
+		return config.get(section, name, default)
 
 	def display_error(self, error):
 		messages.print_error("%s: %s" % (self._plugin_name,error))
