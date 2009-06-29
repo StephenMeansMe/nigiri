@@ -31,7 +31,9 @@ import os
 import dbus
 from dbus.mainloop.glib import DBusGMainLoop
 
+from types import NoneType
 from typecheck import types
+
 import signals
 from signals import parse_from
 from messages import print_error
@@ -45,8 +47,49 @@ if bus_address:
 else:
 	bus = dbus.SessionBus(mainloop=dbus_loop)
 
-sushi = None
-__connected = False
+class SushiWrapper (object):
+
+	@types (sushi_interface = (dbus.Interface, NoneType))
+	def __init__(self, sushi_interface):
+		self._set_interface(sushi_interface)
+
+	@types (connected = bool)
+	def _set_connected(self, connected):
+		self._connected = connected
+
+	@types (interface = (dbus.Interface, NoneType))
+	def _set_interface(self, interface):
+		self._set_connected(interface != None)
+		self._sushi = interface
+
+	def __getattr__(self, attr):
+		def dummy(*args, **kwargs):
+			dialog = InlineMessageDialog(_("tekka could not contact maki."),
+				_("There's no connection to maki, so the recent "
+				"action was not performed. Try to reconnect to "
+				"maki to solve this problem."))
+			dialog.connect("response", lambda w,i: w.destroy())
+			gui_control.showInlineDialog(dialog)
+
+		if attr[0] == "_" or attr == "connected":
+			# return my attributes
+			return object.__getattr__(self, attr)
+		else:
+			if not self._sushi:
+				return dummy
+			else:
+				if attr in dir(self._sushi):
+					# return local from Interface
+					return eval("self._sushi.%s" % attr)
+				else:
+					# return dbus proxy method
+					return self._sushi.__getattr__(attr)
+		raise AttributeError(attr)
+
+	connected = property(lambda s: s._connected, _set_connected)
+
+sushi = SushiWrapper(None)
+
 _shutdown_handler = None
 _connect_callbacks = []
 _disconnect_callbacks = []
@@ -76,20 +119,16 @@ def connect():
 	if not proxy:
 		return False
 
-	sushi = dbus.Interface(proxy, "de.ikkoku.sushi")
+	sushi._set_interface(dbus.Interface(proxy, "de.ikkoku.sushi"))
 
 	version = tuple([int(v) for v in sushi.version()])
 
 	if not version or version < required_version:
-		# FIXME
-		sushi = None
+		sushi._set_interface(None)
 		return False
 
 	for callback in _connect_callbacks:
 		callback(sushi)
-
-	global __connected
-	__connected = True
 
 	_shutdown_handler = sushi.connect_to_signal (
 		"shutdown", lambda time: disconnect())
@@ -98,17 +137,10 @@ def connect():
 
 def disconnect():
 	global sushi, __connected, _shutdown_handler
-	sushi = None
-	__connected = False
+	sushi._set_interface(None)
 
 	for callback in _disconnect_callbacks:
 		callback()
 
 	_shutdown_handler.remove()
-
-def is_connected():
-	"""
-		Returns True if we are connected to maki.
-	"""
-	return __connected
 
