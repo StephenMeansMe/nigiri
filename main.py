@@ -116,6 +116,7 @@ class MainWindow(object):
 				("green", "dark green"),
 				("yellow", "yellow"),
 				("magenta", "dark magenta"),
+				("gray", "light gray"),
 				("white", "white"),
 				("black", "black")):
 			_palette.append( (type + name, color, bg) )
@@ -376,7 +377,7 @@ class MainWindow(object):
 		if channel_tab == self.current_tab:
 			self.switch_to_next_tab()
 
-		if connection.is_connected() and channel_tab.joined:
+		if connection.sushi.connected and channel_tab.joined:
 			connection.sushi.part(server_tab.name, channel_tab.name, "")
 
 		self.update_divider()
@@ -472,7 +473,7 @@ class MainWindow(object):
 
 		# [maki]
 		markup.append(("divider", "["))
-		if connection.is_connected():
+		if connection.sushi.connected:
 			markup.append(("div_fg_blue","maki"))
 		else:
 			markup.append(("div_fg_red","maki"))

@@ -85,26 +85,65 @@ def set_defaults():
 	defaults["chatting"]["quit_message"] = "Quit."
 	defaults["chatting"]["part_message"] = "Part."
 
-	defaults["formats"] = {}
-	defaults["formats"]["datestring"] = "%H:%M"
-	defaults["formats"]["nick"] = "%(prefix)s%(nick)s"
- 	# normal messages
-	defaults["formats"]["message"] = "%(datestring)s <%(nick)s> %(message)s"
-	defaults["formats"]["highlight_message"] = "%(datestring)s <%(nick)s> %(message)s"
-	# /me <text>
-	defaults["formats"]["action"] = "%(datestring)s * %(nick)s %(message)s"
-	defaults["formats"]["highlight_action"] = "%(datestring)s * %(nick)s %(message)s"
-	# status changes, like kicks or modes
-	defaults["formats"]["status"] = "%(datestring)s %(message)s"
-	defaults["formats"]["highlight_status"] = "%(datestring)s %(message)s"
+	defaults["colors"] = {}
+	defaults["colors"]["messages"] = "text_fg_gray"
+	defaults["colors"]["messages_own"] = "text_fg_white"
+	defaults["colors"]["messages_highlight"] = "text_fg_red"
+	defaults["colors"]["actions"] = "text_fg_gray"
+	defaults["colors"]["actions_own"] = "text_fg_green"
+	defaults["colors"]["informative"] = "text_fg_gray"
 
-	defaults["messages"] = {}
-	defaults["messages"]["normal"] = "window"
-	defaults["messages"]["error"] = "window"
-	defaults["messages"]["notification"] = "window"
-	defaults["messages"]["debug"] = "window"
+	defaults["templates"] = {}
+	# misc
+	defaults["templates"]["datestring"] = "%H:%M"
+	# messages
+	defaults["templates"]["action"] = "%(time)s %(nick)s %(message)s"
+	defaults["templates"]["action_own"] = "%(time)s %(nick)s %(message)s"
+	defaults["templates"]["message"] = "%(time)s <%(prefix)s%(nick)s> %(message)s"
+	defaults["templates"]["message_own"] = "%(time)s <%(prefix)s%(nick)s %(message)s"
+	defaults["templates"]["ctcp"] = "%(time)s -%(nick)s/%(target)s- %(message)s"
+	defaults["templates"]["ctcp_own"] = "%(time)s -%(nick)s/%(target)s- %(message)s"
+	defaults["templates"]["notice"] = "%(time)s *%(nick)s/%(target)s* %(message)s"
+	defaults["templates"]["notice_own"] = "%(time)s *%(nick)s/%(target)s* %(message)s"
 
-	defaults["autoload_plugins"] = {}
+	# actions
+	defaults["templates"]["invite"] = "%(time)s * %(nick)s invites %(who)s to %(channel)s"
+	defaults["templates"]["invite_own"] = "%(time)s * You were invited by %(nick)s to %(channel)s."
+	defaults["templates"]["join"] = "%(time)s * %(nick)s (%(host)s) has joined %(channel)s."
+	defaults["templates"]["join_own"] = "%(time)s * You have joined %(channel)s."
+	defaults["templates"]["kick"] = "%(time)s * %(who)s got kicked from %(channel)s by %(nick)s (%(reason)s)"
+	defaults["templates"]["kick_own"] = "%(time)s * You got kicked from %(channel)s by %(nick)s (%(reason)s)"
+	defaults["templates"]["nick"] = "%(time)s * %(nick)s is now known as %(new_nick)s."
+	defaults["templates"]["nick_own"] = "%(time)s * You are now known as %(new_nick)s."
+	defaults["templates"]["mode_list"] = "%(time)s * Modes for %(target)s: %(modes)s."
+	defaults["templates"]["mode_list_own"] = "%(time)s * Modes set on you: %(modes)s."
+	defaults["templates"]["mode"] = "%(time)s %(nick)s set %(mode)%(param)s on %(target)s."
+	defaults["templates"]["mode_own"] = "%(time)s %(nick)s set %(mode)s%(param)s on you."
+	defaults["templates"]["oper"] = "%(time)s * %(nick)s is now an OPER."
+	defaults["templates"]["oper_own"] = "%(time)s * You are now an OPER."
+	defaults["templates"]["part"] = "%(time)s * %(nick)s has left %(channel)s (%(reason)s)."
+	defaults["templates"]["part_own"] = "%(time)s * You have left %(channel)s (%(reason)s)."
+	defaults["templates"]["quit"] = "%(time)s * %(nick)s has quit (%(reason)s)."
+	defaults["templates"]["quit_own"] = "%(time)s * You have quit (%(reason)s)."
+	defaults["templates"]["topic"] = "%(time)s * %(nick)s has set the topic on %(channel)s to \"%(topic)s\"."
+	defaults["templates"]["topic_own"] = "%(time)s * You have set the topic on %(channel)s to \"%(topic)s\"."
+	defaults["templates"]["topic_anonymous"] = "* Topic of %(channel)s: %(topic)s"
+
+	# informative
+	defaults["templates"]["banlist_begin"] = "%(time)s Begin of banlist on channel %(channel)s."
+	defaults["templates"]["banlist_item"] = ">> %(who)s %(mask)s %(when)s"
+	defaults["templates"]["banlist_end"] = "%(time)s End of banlist. (%(channel)s)"
+	defaults["templates"]["cannot_join"] = "%(time)s Can't join channel %(channel)s: %(reason)s"
+	defaults["templates"]["list_begin"] = "%(time)s Begin of list."
+	defaults["templates"]["list_item"] = ">> %(channel)s %(user)s %(topic)s"
+	defaults["templates"]["list_end"] = "%(time)s End of list."
+	defaults["templates"]["names_begin"] = "%(time)s Begin of names (%(channel)s)."
+	defaults["templates"]["names_item"] = "%(row)s"
+	defaults["templates"]["names_end"] = "%(time)s End of names."
+	defaults["templates"]["no_such"] = "%(time)s No such %(type)s: %(target)s."
+	defaults["templates"]["whois_begin"] = "%(time)s Begin of whois (%(target)s)."
+	defaults["templates"]["whois_item"] = ">> %(nick)s: %(message)s"
+	defaults["templates"]["whois_end"] = "%(time)s End of whois."
 
 	# Add default sections to config parser
 	# so setting is easier

@@ -113,28 +113,26 @@ def parse_markup(input):
 
 	return markup
 
-def format_message(mtype, msg, **fmt):
-	template = config.get("formats", mtype)
+@types (tID=basestring, values=dict)
+def format_message(mtype, template_id, values, highlight = False, own = False):
+	if highlight:
+		generic_type = mtype + "_highlight"
+	elif own:
+		generic_type = mtype + "_own"
+		template_id = template_id + "_own"
+	else:
+		generic_type = mtype
 
-	if not template:
-		print_error("No format template for type '%s'." % (mtype))
-		return
+	values["time"] = time.strftime(config.get("templates", "datestring"))
 
-	if not fmt.has_key("datestring"):
-		fmt["datestring"] = time.strftime(config.get("formats","datestring"))
+	base_color = config.get("colors", generic_type, "text_fg_gray")
+	template = config.get("templates", template_id)
+#	main_window.print_text("base_color = %s, own = %s, mtype = %s\n" % (base_color, own, generic_type))
 
-	if (mtype == "message"
-		and fmt.has_key("nick_color")
-		and fmt.has_key("nick")):
+	if None == template:
+		return "TEMPLATE_ERROR(%s)" % template_id
 
-		if fmt["nick_color"] == "own":
-			fmt["nick"] = "\033[31m%s\033[0m" % fmt["nick"]
-		elif fmt["nick_color"] == "chat":
-			pass
-
-	fmt["message"] = msg
-
-	return parse_markup(template % fmt)
+	return [(base_color, template % values)]
 
 @types (mclass=type, message=(str, unicode))
 def handle_message (mclass, org_message, **dargs):
@@ -171,7 +169,7 @@ def handle_message (mclass, org_message, **dargs):
 		elif dest == "stdout":
 			print message
 
-@types(msg = (str,unicode,list))
+@types(msg = (str,unicode,list,tuple))
 def print_to_tab(dest_tab, msg):
 	if not main_window:
 		return
@@ -186,7 +184,7 @@ def print_to_tab(dest_tab, msg):
 	else:
 		tablist[i].output_walker.append(urwid.Text(msg))
 
-@types (mclass=type, prefix=str, msg=(str,unicode,list))
+@types (mclass=type, prefix=str, msg=(str,unicode,list,tuple))
 def printit (mclass, prefix, msg, *args, **dargs):
 
 	if type(msg) == list:
