@@ -114,7 +114,11 @@ class FormattedMessage(object):
 		self.own = own 	# we triggered that/we are meant by it
 
 	def __str__(self):
-		return self.template % self.values
+		try:
+			return self.template % self.values
+		except KeyError,e:
+			return "TEMPLATE_MISSING_KEY(%s)" % (e)
+
 
 @types (mtype=basestring, template_id=basestring, values=dict)
 def format_message(mtype, template_id, values, highlight = False, own = False):
