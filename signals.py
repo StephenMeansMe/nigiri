@@ -28,6 +28,7 @@ SUCH DAMAGE.
 from gettext import gettext as _
 
 import inspect
+import time
 
 import config
 import tabs
@@ -162,8 +163,12 @@ def setup_connected_servers():
 			ctab = tabs.Channel(name = channel,
 				parent = stab)
 			ctab.set_joined(True)
-			sushi.topic(server, channel, "")
+
 			sushi.names(server, channel)
+
+			topic = sushi.channel_topic(server, channel)
+
+			sushi_topic(time.time(), server, "", channel, topic)
 
 		stab.set_connected(True)
 
@@ -562,7 +567,8 @@ def sushi_topic(time, server, sender, channel, topic):
 	tab = main_window.find_tab(server, channel)
 
 	if not tab:
-		print_error("No tab '%s' on '%s' for topic setting." % (channel, server))
+		print_error("No tab '%s' on '%s' for topic setting." % (
+			channel, server))
 		return
 
 	tab.set_topic(topic)
