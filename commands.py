@@ -123,8 +123,7 @@ def cmd_connect(main_window, argv):
 	connection.sushi.connect(argv[1])
 
 def cmd_dcc(main_window, argv):
-	"""
-	/dcc chat <target>
+	""" /dcc chat <target>
 	/dcc send <target> <path>
 	/dcc list <type>
 	/dcc remove <type> <id>
@@ -179,6 +178,31 @@ def cmd_dcc(main_window, argv):
 def cmd_echo(main_window, argv):
 	""" /echo <text> """
 	main_window.print_text(" ".join(argv[1:])+"\n")
+
+def cmd_help(main_window, argv):
+	""" /help [<command>] """
+	if len(argv) == 2:
+		sCmd = argv[1]
+	else:
+		sCmd = None
+
+	msg = ""
+
+	for (name, value) in globals().items():
+		cmd_name = name[4:]
+
+		if name[0:4] == "cmd_":
+			if sCmd and sCmd != cmd_name:
+				continue
+
+			msg += "%s:\n %s\n" % (cmd_name,
+				(value.__doc__
+				or "No documentation yet.").replace("\t", "   "))
+
+			if sCmd and sCmd == cmd_name:
+				break
+
+	print_normal(msg)
 
 def cmd_join(main_window, argv):
 	""" /join <channel> [<key>] """
@@ -386,6 +410,7 @@ _command_dict = {
 	"connect": cmd_connect,
 	"dcc": cmd_dcc,
 	"echo": cmd_echo,
+	"help": cmd_help,
 	"j": cmd_join,
 	"join": cmd_join,
 	"load": cmd_load,
