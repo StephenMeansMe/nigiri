@@ -630,7 +630,7 @@ def sushi_names(time, server, channel, nicks, prefixes, _call_count = {"n":0}):
 		print_tab(tab, msg)
 
 	if len(nicks) != 0:
-		max_width = 5
+		max_width = 7
 		width = 0
 		msg = ""
 		for nick in nicks:
@@ -639,12 +639,15 @@ def sushi_names(time, server, channel, nicks, prefixes, _call_count = {"n":0}):
 			prefix = prefixes[width]
 			msg += prefix+nick+" "
 
-			if width+1 % max_width == 0:
-				msg += "\n"
+			if (width+1) % max_width == 0 or (width+1) == len(nicks):
+				msg = msg[:-1]
+				msg = format_message("informative", "names_item",
+					{"row": msg})
+				print_tab(tab, msg)
+				msg = ""
+
 			width += 1
-		msg = format_message("informative", "names_item",
-			{"row": msg})
-		print_tab(tab, msg)
+
 		_call_count["n"] += 1
 
 	else:

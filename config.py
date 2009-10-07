@@ -138,7 +138,7 @@ def set_defaults():
 	defaults["templates"]["list_item"] = ">> %(channel)s %(user)s %(topic)s"
 	defaults["templates"]["list_end"] = "%(time)s End of list."
 	defaults["templates"]["names_begin"] = "%(time)s Begin of names (%(channel)s)."
-	defaults["templates"]["names_item"] = "%(row)s"
+	defaults["templates"]["names_item"] = "[ %(row)s ]"
 	defaults["templates"]["names_end"] = "%(time)s End of names."
 	defaults["templates"]["no_such"] = "%(time)s No such %(type)s: %(target)s."
 	defaults["templates"]["whois_begin"] = "%(time)s Begin of whois (%(target)s)."
