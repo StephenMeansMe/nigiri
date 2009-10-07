@@ -183,7 +183,7 @@ def write_config_file():
 	config_parser.write(f)
 	f.close()
 
-@types (section=str)
+@types (section=basestring)
 def create_section(section):
 	"""
 		creates config section `section`.
@@ -193,7 +193,7 @@ def create_section(section):
 	config_parser.add_section(section)
 	return True
 
-@types (section=str)
+@types (section=basestring)
 def remove_section(section):
 	"""
 		removes the section
@@ -204,7 +204,7 @@ def remove_section(section):
 	config_parser.remove_section(section)
 	return True
 
-@types (section=str, option=str)
+@types (section=basestring, option=basestring)
 #@on_fail (print_debug, "ConfigError while setting %s:%s to %s")
 def set(section, option, value):
 	"""
@@ -221,30 +221,30 @@ def set(section, option, value):
 	else:
 		return True
 
-@types (section=str, option=str, l=list)
+@types (section=basestring, option=basestring, l=list)
 def set_list(section, option, l):
 	"""
-	join the list l to a string seperated
+	join the list l to a string separated
 	by , and set it as value to option.
-	Return False on error, else True
+	Return False on error, else True.
 	"""
 	s = escape_join(",", l)
 
-	if not s:
+	if None == s:
 		return False
 
-	set(section,option,s)
+	return set(section, option, s)
 
-@types (section=str, option=str, value=str)
+@types (section=basestring, option=basestring, value=basestring)
 def append_list(section, option, value):
 	"""
 	add value to the list identified by option
 	"""
-	v = get_list(section, option)
+	v = get_list(section, option, [])
 	v.append(value)
-	set_list(section, option, v)
+	return set_list(section, option, v)
 
-@types (section=str, option=str)
+@types (section=basestring, option=basestring)
 def unset(section, option):
 	"""
 		Removes the option in the section.
@@ -254,15 +254,12 @@ def unset(section, option):
 		return False
 	try:
 		config_parser.remove_option(section, option)
-	except BaseException,e:
-		# TODO: use more specified exception here
-		# TODO:: instead of catching everything
-		print "Exception occured while unsetting ('%s','%s'): %s"\
-			% (section,option,e)
+	except ConfigParser.NoSectionError,e:
+		print "Unsetting ('%s','%s') failed: %s" % (section,option,e)
 		return False
 	return True
 
-@types (section=str, option=str)
+@types (section=basestring, option=basestring)
 def get(section, option="", default=None):
 	"""
 		Returns the value for option in section, on
@@ -327,8 +324,8 @@ def get(section, option="", default=None):
 	# usually this is not reached
 	return default
 
-@types (section=str, option=str)
-def get_list(section, option, default=[]):
+@types (section=basestring, option=basestring)
+def get_list(section, option, default):
 	"""
 		Splits the option in the section for ","
 		and returns a list if the splitting was
@@ -340,13 +337,13 @@ def get_list(section, option, default=[]):
 	if res == default:
 		return default
 
-	list = unescape_split(",", res)
+	l = unescape_split(",", res)
 
-	if not list:
+	if not l:
 		return default
-	return list
+	return list(l)
 
-@types (section=str, option=str)
+@types (section=basestring, option=basestring)
 def get_bool(section, option, default=False):
 	"""
 		Returns True or False if the value is
@@ -362,7 +359,7 @@ def get_bool(section, option, default=False):
 
 	return default
 
-@types (section=str, option=str)
+@types (section=basestring, option=basestring)
 def get_default(section, option=""):
 	"""
 	Returns the default value for the option
@@ -380,23 +377,20 @@ def get_default(section, option=""):
 				return defaults[section][option]
 	return None
 
-@types (path=str)
-def check_config_file(whole_path):
+@types (path=basestring)
+def check_config_file(path):
 	""" check if config file exists and create it if not """
-	path, file = os.path.split(whole_path)
-
 	if not os.path.exists (path):
 		# create the directories
 		try:
-			os.makedirs (path)
-		except os.error, e:
+			os.makedirs (os.path.join (os.path.split (path)[0]))
+		except os.error:
 			print "Error while creating neccessary directories: %s"\
-				% (e)
+				% (os.error)
 			return False
 
-	if not os.path.exists(whole_path):
 		try:
-			f = open (whole_path, "w")
+			f = file (path, "w")
 		except BaseException,e:
 			print "Error while creating config file: %s" % (e)
 			return False

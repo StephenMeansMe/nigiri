@@ -256,7 +256,7 @@ def find_channel_tab(server, channel, create = False):
 	return tab
 
 def is_highlighted(server, message):
-	words = config.get_list("chatting", "highlight_words")
+	words = config.get_list("chatting", "highlight_words", [])
 	server_tab = main_window.find_server(server)
 
 	if not server_tab:
