@@ -574,7 +574,7 @@ class MainWindow(object):
 		else:
 			walker = self.generic_output_walker
 
-		if text[-1] == "\n":
+		if text and text[-1] == "\n":
 			text = text[:-1]
 
 		walker.append (urwid.Text (text))
