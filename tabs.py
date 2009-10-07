@@ -181,7 +181,7 @@ class Server(Tab):
 	def __init__(self, name):
 		Tab.__init__(self, name)
 
-		self._nick = ""
+		self._nick = None
 		self._away = ""
 
 	@types(nick = (str,String))
