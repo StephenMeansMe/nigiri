@@ -60,6 +60,9 @@ def strip_suffix(filename):
 	""" foo.py -> foo """
 	return os.path.split(filename)[-1].split(".")[0]
 
+def get_plugin_config_section(filename):
+	return "plugin_"+strip_suffix(filename)
+
 def is_loaded(filename):
 	""" returns True if the plugin is loaded, otherwise False """
 	return _plugins.has_key(filename)
@@ -254,6 +257,60 @@ def get_info(filename):
 		_unload_module(modname)
 
 		return info
+
+	return None
+
+def _check_options_tuple(options):
+	if type(options) != tuple:
+		return False
+
+	for x in options:
+		# name, label and type are required
+		if type(x) != tuple or len(x) < 3:
+			return False
+
+	return True
+
+def get_options(filename):
+	""" Return the configurable options and the input
+		types associated with every option.
+		If no options are found, None is returned.
+
+		e.g. ( 	("pass", "some label", sushi.TYPE_PASSWORD, ""),
+				("name", "another label", sushi.TYPE_ENTRY, "default"))
+	"""
+	global _plugins
+
+	def retrieve_options(plugin):
+		try:
+			options = plugin.plugin_options
+		except AttributeError:
+			return None
+
+		if not _check_options_tuple(options):
+			return None
+
+		return options
+
+	if _plugins.has_key(filename):
+		return retrieve_options(_plugins[filename][PLUGIN_MODULE])
+
+	else:
+		mod_info = _find_module(filename)
+
+		if not mod_info:
+			return None
+
+		modname, plugin = _load_module(filename, mod_info)
+
+		if not plugin:
+			return None
+
+		options = retrieve_options(plugin)
+
+		_unload_module(modname)
+
+		return options
 
 	return None
 
