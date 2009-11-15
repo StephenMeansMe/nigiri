@@ -12,15 +12,14 @@ def configure (conf):
 	conf.check_tool('gnu_dirs')
 	conf.check_tool('misc')
 
+	conf.find_program('gzip', var = 'GZIP')
+
 	conf.env.VERSION = VERSION
 
 	conf.sub_config('po')
 
 def build (bld):
 	bld.add_subdirs('po')
-
-	# FIXME Waf 1.5.9 bug
-	bld.new_task_gen()
 
 	bld.install_files('${DATAROOTDIR}/sushi/nigiri', bld.glob('*.py'))
 	bld.install_files('${DATAROOTDIR}/sushi/nigiri/extends', bld.glob('extends/*.py'))
@@ -39,11 +38,17 @@ def build (bld):
 	)
 
 	for man in ('nigiri.1',):
-		# FIXME gzip
 		bld.new_task_gen(
 			features = 'subst',
 			source = '%s.in' % (man),
 			target = man,
-			install_path = '${MANDIR}/man1',
+			install_path = None,
 			dict = {'SUSHI_VERSION': bld.env.VERSION}
+		)
+
+		bld.new_task_gen(
+			source = man,
+			target = '%s.gz' % (man),
+			rule = '${GZIP} -c ${SRC} > ${TGT}',
+			install_path = '${MANDIR}/man1'
 		)
