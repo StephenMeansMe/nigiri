@@ -46,6 +46,9 @@ def build (bld):
 			dict = {'SUSHI_VERSION': bld.env.VERSION}
 		)
 
+	bld.add_group()
+
+	for man in ('nigiri.1',):
 		bld.new_task_gen(
 			source = man,
 			target = '%s.gz' % (man),
