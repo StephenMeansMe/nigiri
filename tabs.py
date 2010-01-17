@@ -30,7 +30,8 @@ import sys
 from typecheck import types
 from dbus import String
 
-from urwid import Signals, MetaSignals, SimpleListWalker, Text
+import urwid
+from urwid import MetaSignals, SimpleListWalker, Text
 
 def tree_to_list(input_parents, target = None):
 
@@ -111,17 +112,17 @@ class Tab(object):
 		for child in self.children:
 			child.set_connected(switch)
 
-		Signals.emit(self, "connected", switch)
+		urwid.emit_signal(self, "connected", switch)
 
 	connected = property(lambda x: x._connected, set_connected)
 
 	def child_added(self, child):
-		Signals.emit(self, "child_added", self, child)
+		urwid.emit_signal(self, "child_added", self, child)
 		child.set_connected(self.connected)
 		self.children.append(child)
 
 	def child_removed(self, child):
-		Signals.emit(self, "child_removed", self, child)
+		urwid.emit_signal(self, "child_removed", self, child)
 		try:
 			i = self.children.index(child)
 		except ValueError:
@@ -154,7 +155,7 @@ class Tab(object):
 		for child in self.children:
 			child.remove()
 			self.child_removed(child)
-		Signals.emit(self, "remove")
+		urwid.emit_signal(self, "remove")
 		self.set_parent(None)
 
 	@types(name = str)

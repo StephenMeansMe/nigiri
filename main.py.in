@@ -38,7 +38,20 @@ except ImportError, e:
 	print >> sys.stderr, "Do you have urwid installed?"
 	sys.exit(1)
 
-from urwid import Signals, MetaSignals
+
+# XXX: dirty 0.9.9 hack
+versionSplit = urwid.__version__.split(".")
+if versionSplit[0] == "0" and versionSplit[1] == "9" and int(versionSplit[2]) < 9:
+	# we got a 0.9.[0-8] here, create {connect,disconnect,emit}_signal
+	# in urwid which are introduced in 0.9.9 and replace the methods
+	# from the Signals module
+	from urwid import Signals
+	urwid.emit_signal = Signals.emit
+	urwid.connect_signal = Signals.connect
+	urwid.disconnect_signal = Signals.disconnect
+
+
+from urwid import MetaSignals
 
 try:
 	import gobject
@@ -182,7 +195,7 @@ class MainWindow(object):
 			self.quit()
 
 	def quit(self, exit=True):
-		Signals.emit (self, "quit")
+		urwid.emit_signal(self, "quit")
 
 		self.ui.stop()
 
@@ -223,7 +236,7 @@ class MainWindow(object):
 		self.context.set_focus ("footer")
 
 	def keypress(self, size, key):
-		Signals.emit (self, "keypress", size, key)
+		urwid.emit_signal(self, "keypress", size, key)
 
 		if key in ("page up","page down"):
 			self.body.keypress (size, key)
@@ -346,11 +359,11 @@ class MainWindow(object):
 	def add_server(self, server_tab):
 		self.servers.append(server_tab)
 
-		Signals.connect(server_tab, "remove",
+		urwid.connect_signal(server_tab, "remove",
 			self.handle_server_remove)
-		Signals.connect(server_tab, "child_added",
+		urwid.connect_signal(server_tab, "child_added",
 			self.handle_channel_add)
-		Signals.connect(server_tab, "child_removed",
+		urwid.connect_signal(server_tab, "child_removed",
 			self.handle_channel_remove)
 
 		server_tab.input_history = InputHistory(
@@ -419,7 +432,7 @@ class MainWindow(object):
 
 		self.update_divider()
 
-		Signals.emit(self, "tab_switched", tab)
+		urwid.emit_signal(self, "tab_switched", tab)
 
 	def switch_to_next_tab (self):
 		tablist = tabs.tree_to_list(self.servers)
