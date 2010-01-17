@@ -145,6 +145,8 @@ class MainWindow(object):
 		self.generic_input_history = InputHistory(
 				text_callback = self.footer.get_edit_text)
 
+		connection.connect()
+
 		# urwid main loop
 		def urwid_main_loop (self, size):
 			try:
