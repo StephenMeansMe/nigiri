@@ -39,9 +39,9 @@ class ExtendedEdit (urwid.Edit):
 
 	def get_text (self):
 
-		if self.hide_edit_text:
-			edit_text = len(self.edit_text)*"*"
-		else:
-			edit_text = self.edit_text
+		text = urwid.Edit.get_text(self)
 
-		return self.caption + edit_text, self.attrib
+		if self.hide_edit_text:
+			text[0] = len(text[0])*"*"
+
+		return text
