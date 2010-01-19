@@ -27,6 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 """
 
+import os
 import sys
 import traceback
 
@@ -60,6 +61,7 @@ except ImportError:
 	sys.exit(1)
 import re
 
+import logging
 import locale
 import gettext
 from gettext import gettext as _
@@ -72,8 +74,6 @@ import signals
 import tabs
 import plugin_control
 
-from helper.iowatch import IOWatch
-import helper.log
 from typecheck import types
 
 import extends
@@ -614,10 +614,44 @@ def except_hook(extype, exobj, extb):
 		})
 	print >> sys.stderr, message
 
+
+def setup_logging():
+	""" set the path of the logfile to tekka.logfile config
+		value and create it (including path) if needed.
+		After that, add a logging handler for exceptions
+		which reports exceptions catched by the logger
+		to the tekka_excepthook. (DBus uses this)
+	"""
+	try:
+		class ExceptionHandler(logging.Handler):
+			""" handler for exceptions caught with logging.error.
+				dump those exceptions to the exception handler.
+			"""
+			def emit(self, record):
+				if record.exc_info:
+					except_hook(*record.exc_info)
+
+		logfile = config.get("nigiri","logfile")
+		logdir = os.path.dirname(logfile)
+
+		if not os.path.exists(logdir):
+			os.makedirs(logdir)
+
+		logging.basicConfig(filename = logfile, level = logging.DEBUG,
+			filemode="w")
+
+		logging.getLogger("").addHandler(ExceptionHandler())
+
+	except BaseException as e:
+		print >> sys.stderr, "Logging init error: %s" % (e)
+
+
 if __name__ == "__main__":
 	global main_window, stderr
 
 	config.setup()
+
+	setup_logging()
 
 	# setup locale stuff
 	try:
