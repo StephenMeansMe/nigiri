@@ -594,11 +594,12 @@ class MainWindow(object):
 
 		walker.append (urwid.Text (text))
 
-		self.body.scroll_to_bottom (self.ui.get_cols_rows())
+		self.body.scroll_to_bottom()
 
 	def draw_screen(self, size):
 		canvas = self.context.render (size, focus=True)
 		self.ui.draw_screen (size, canvas)
+
 
 def except_hook(extype, exobj, extb):
 	try:

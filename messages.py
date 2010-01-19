@@ -169,8 +169,7 @@ def print_tab(dest_tab, msg):
 			dest_tab.add_status(msg.category)
 			main_window.update_divider()
 		else:
-			main_window.body.scroll_to_bottom(
-				main_window.ui.get_cols_rows())
+			main_window.body.scroll_to_bottom()
 
 def print_tab_notification(tab, msg):
 	print_tab(tab, "*** Notification: " + msg)

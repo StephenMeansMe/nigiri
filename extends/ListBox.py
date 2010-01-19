@@ -27,11 +27,13 @@ SUCH DAMAGE.
 """
 
 import urwid
+import logging
 
 class ExtendedListBox(urwid.ListBox):
 
 	def __init__(self, body):
 		urwid.ListBox.__init__(self, body)
+		self.auto_scroll = True
 
 	def set_body(self, body):
 		if self.body:
@@ -42,8 +44,23 @@ class ExtendedListBox(urwid.ListBox):
 
 		urwid.connect_signal(body, "modified", self._invalidate)
 
-	def scroll_to_bottom (self, size):
-		while self.keypress (size, "down") != "down":
-			pass
+	def keypress(self, size, key):
+		urwid.ListBox.keypress(self, size, key)
+
+		if key in ("page up", "page down"):
+			logging.debug("focus = %d, len = %d" % (self.get_focus()[1], len(self.body)))
+			if self.get_focus()[1] == len(self.body)-1:
+				self.auto_scroll = True
+			else:
+				self.auto_scroll = False
+			logging.debug("auto_scroll = %s" % (self.auto_scroll))
+
+	def scroll_to_bottom(self):
+		logging.debug("current_focus = %d, len(self.body) = %d" % (self.get_focus()[1], len(self.body)))
+
+		if self.auto_scroll:
+			# at bottom -> scroll down
+			self.set_focus(len(self.body))
+
 
 
