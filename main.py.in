@@ -413,7 +413,12 @@ class MainWindow(object):
 		self.switch_to_tab(tab)
 
 	def switch_to_tab(self, tab):
+		""" switch to the given tab and emit tab_switched signal
+			if switching is done
+		"""
+
 		if self.current_tab:
+			# set readline and save typed text from input bar
 			self.current_tab.set_readline()
 			self.current_tab.input_text = self.footer.get_edit_text()
 
@@ -423,6 +428,7 @@ class MainWindow(object):
 			self.body.set_body(self.generic_output_walker)
 
 		else:
+			# Set body content to tab content
 			self.body.set_body(tab.output_walker)
 			tab.reset_status()
 
@@ -431,6 +437,7 @@ class MainWindow(object):
 			else:
 				self.header.set_text("")
 
+			# Restore typed text in the input bar
 			self.footer.set_edit_text(tab.input_text)
 			self.footer.set_edit_pos(len(tab.input_text))
 
