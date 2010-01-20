@@ -141,3 +141,16 @@ def disconnect():
 
 	_shutdown_handler.remove()
 
+
+def parse_from (from_str):
+	h = from_str.split("!", 2)
+
+	if len(h) < 2:
+		return (h[0],)
+
+	t = h[1].split("@", 2)
+
+	if len(t) < 2:
+		return (h[0],)
+
+	return (h[0], t[0], t[1])

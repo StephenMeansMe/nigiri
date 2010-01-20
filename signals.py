@@ -42,19 +42,6 @@ from messages import print_tab, print_error, \
 
 signals = {}
 
-def parse_from (from_str):
-	h = from_str.split("!", 2)
-
-	if len(h) < 2:
-		return (h[0],)
-
-	t = h[1].split("@", 2)
-
-	if len(t) < 2:
-		return (h[0],)
-
-	return (h[0], t[0], t[1])
-
 def connect_signal (signal, handler):
 	""" connect handler to signal """
 	global signals
