@@ -29,14 +29,17 @@ from gettext import gettext as _
 
 import inspect
 import time
+import urwid
 
 import config
 import tabs
+import connection
+
+from connection import parse_from, sushi
 
 from messages import print_tab, print_error, \
 	format_message, print_tab_notification
 
-sushi = None
 signals = {}
 
 def parse_from (from_str):
@@ -87,7 +90,10 @@ def setup(mw):
 	global main_window
 	main_window = mw
 
-def maki_disconnected():
+	urwid.connect_signal(connection.sushi, "connected", maki_connected)
+	urwid.connect_signal(connection.sushi, "disconnected", maki_disconnected)
+
+def maki_disconnected(sushi):
 	for signal in signals:
 		for handler in signals[signal]:
 			signals[signal][handler].remove()
@@ -96,11 +102,8 @@ def maki_connected(sushi_interface):
 	""" called by dbus connection handler.
 		sushi is the dbus interface
 	"""
-	global sushi, signals
+	maki_disconnected(sushi_interface)
 
-	maki_disconnected()
-
-	sushi = sushi_interface
 	signals = {}
 
 	# message receiving

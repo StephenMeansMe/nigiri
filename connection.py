@@ -28,15 +28,15 @@ SUCH DAMAGE.
 
 import os
 
+from gettext import gettext as _
 import dbus
 from dbus.mainloop.glib import DBusGMainLoop
 
+import urwid
+from urwid import MetaSignals
+
 from types import NoneType
 from typecheck import types
-
-import signals
-from signals import parse_from
-from messages import print_error
 
 dbus_loop = DBusGMainLoop()
 required_version = (1, 1, 0)
@@ -47,7 +47,10 @@ if bus_address:
 else:
 	bus = dbus.SessionBus(mainloop=dbus_loop)
 
-class SushiWrapper (object):
+class SushiWrapper(object):
+
+	__metaclass__ = MetaSignals
+	signals = ["error","connected","disconnected"]
 
 	@types (sushi_interface = (dbus.Interface, NoneType))
 	def __init__(self, sushi_interface):
@@ -57,19 +60,25 @@ class SushiWrapper (object):
 	def _set_connected(self, connected):
 		self._connected = connected
 
+		if connected:
+			self._urwid_emit("connected", self)
+		else:
+			self._urwid_emit("disconnected", self)
+
 	@types (interface = (dbus.Interface, NoneType))
 	def _set_interface(self, interface):
-		self._set_connected(interface != None)
 		self._sushi = interface
+		self._set_connected(interface != None)
+
+	def _urwid_emit(self, signal, *args, **kwargs):
+		urwid.emit_signal(self, signal, *args, **kwargs)
 
 	def __getattr__(self, attr):
 		def dummy(*args, **kwargs):
-			dialog = InlineMessageDialog(_("tekka could not contact maki."),
+			self._urwid_emit("error", _("tekka could not contact maki."),
 				_("There's no connection to maki, so the recent "
 				"action was not performed. Try to reconnect to "
 				"maki to solve this problem."))
-			dialog.connect("response", lambda w,i: w.destroy())
-			gui_control.showInlineDialog(dialog)
 
 		if attr[0] == "_" or attr == "connected":
 			# return my attributes
@@ -91,15 +100,6 @@ class SushiWrapper (object):
 sushi = SushiWrapper(None)
 
 _shutdown_handler = None
-_connect_callbacks = []
-_disconnect_callbacks = []
-
-@types(connect_callbacks = list, disconnect_callbacks = list)
-def setup(connect_callbacks, disconnect_callbacks):
-	""" set callbacks """
-	global _connect_callbacks, _disconnect_callbacks
-	_connect_callbacks = connect_callbacks
-	_disconnect_callbacks = disconnect_callbacks
 
 def connect():
 	"""
@@ -113,8 +113,10 @@ def connect():
 	try:
 		proxy = bus.get_object("de.ikkoku.sushi", "/de/ikkoku/sushi")
 	except dbus.exceptions.DBusException, e:
-		print_error("Error while connecting to maki: %s" % (e))
-		print_error("Is maki running?")
+		sushi._urwid_emit(
+			"error",
+			_("Error while connecting to maki."),
+			_("Error: %s" % (e)))
 
 	if not proxy:
 		return False
@@ -127,20 +129,15 @@ def connect():
 		sushi._set_interface(None)
 		return False
 
-	for callback in _connect_callbacks:
-		callback(sushi)
-
 	_shutdown_handler = sushi.connect_to_signal (
 		"shutdown", lambda time: disconnect())
 
 	return True
 
+
 def disconnect():
 	global sushi, __connected, _shutdown_handler
 	sushi._set_interface(None)
-
-	for callback in _disconnect_callbacks:
-		callback()
 
 	_shutdown_handler.remove()
 

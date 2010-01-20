@@ -667,9 +667,6 @@ if __name__ == "__main__":
 
 	sys.excepthook = except_hook
 
-	connection.setup([signals.maki_connected],
-		[main_window.handle_maki_disconnect,signals.maki_disconnected])
-
 	signals.setup(main_window)
 
 	messages.setup(main_window)
