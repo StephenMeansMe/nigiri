@@ -154,6 +154,8 @@ def setup_connected_servers():
 				parent = stab)
 			ctab.set_joined(True)
 
+			ctab.print_last_log()
+
 			sushi.names(server, channel)
 
 			topic = sushi.channel_topic(server, channel)

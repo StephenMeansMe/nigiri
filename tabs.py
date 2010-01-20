@@ -28,10 +28,13 @@ SUCH DAMAGE.
 
 import sys
 from typecheck import types
-from dbus import String
+from dbus import String, UInt64
 
 import urwid
 from urwid import MetaSignals, SimpleListWalker, Text
+
+import connection
+import config
 
 def tree_to_list(input_parents, target = None):
 
@@ -176,6 +179,26 @@ class Tab(object):
 
 	def reset_status(self):
 		self.status = {}
+
+	def print_last_log(self, lines=0):
+		"""	Fetch the given amount of lines of history for
+			the channel on the given server and print it to the
+			channel's textview.
+		"""
+		lines = UInt64(lines or config.get(
+			"chatting",
+			"last_log_lines",
+			"0"))
+
+		if type(self) == Server:
+			server = self.name
+			channel = ""
+		else:
+			server = self.parent.name
+			channel = self.name
+
+		for line in connection.sushi.log(server, channel, lines):
+			self.output_walker.append(Text(unicode(line)))
 
 class Server(Tab):
 

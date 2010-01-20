@@ -85,6 +85,7 @@ def set_defaults():
 	defaults["chatting"] = {}
 	defaults["chatting"]["quit_message"] = "Quit."
 	defaults["chatting"]["part_message"] = "Part."
+	defaults["chatting"]["last_log_lines"] = "15"
 
 	defaults["colors"] = {}
 	defaults["colors"]["messages"] = "text_fg_gray"
