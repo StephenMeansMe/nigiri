@@ -34,7 +34,7 @@ import config
 import tabs
 
 from messages import print_tab, print_error, \
-	format_message
+	format_message, print_tab_notification
 
 sushi = None
 signals = {}
