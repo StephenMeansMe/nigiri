@@ -144,7 +144,7 @@ def format_message(mtype, template_id, values, highlight = False, own = False):
 	return msg
 
 @types(msg = (basestring, list, FormattedMessage))
-def print_tab(dest_tab, msg):
+def print_tab(dest_tab, msg, msgtype="informative"):
 	if not main_window:
 		raise ValueError, "No main_window found."
 
@@ -166,7 +166,10 @@ def print_tab(dest_tab, msg):
 		tablist[i].output_walker.append(urwid.Text(markup))
 
 		if main_window.current_tab != dest_tab:
-			dest_tab.add_status(msg.category)
+			if isinstance(msg, FormattedMessage):
+				dest_tab.add_status(msg.category)
+			else:
+				dest_tab.add_status(msgtype)
 			main_window.update_divider()
 		else:
 			main_window.body.scroll_to_bottom()
