@@ -280,7 +280,7 @@ def current_server_tab_print(server, message):
 
 	if (not current_tab
 		or (type(current_tab) == tabs.Server and current_tab.name != server)
-		or (current_tab.parent.name != server)):
+		or (current_tab.parent and current_tab.parent.name != server)):
 		# print it to the server tab
 		tab = main_window.find_server(server)
 		print_tab(tab, message)
