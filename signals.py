@@ -27,6 +27,7 @@ SUCH DAMAGE.
 """
 from gettext import gettext as _
 
+import string # is_highlight
 import inspect
 import time
 import urwid
@@ -247,25 +248,25 @@ def find_channel_tab(server, channel, create = False):
 	tab = tabs.Channel(name = channel, parent = parent)
 	return tab
 
-def is_highlighted(server, message):
-	words = config.get_list("chatting", "highlight_words", [])
-	server_tab = main_window.find_server(server)
-
-	if not server_tab:
-		print_error("No server tab for server '%s'!" % (server))
+def is_highlighted (server, text):
+	def has_highlight(text, needle):
+		punctuation = string.punctuation + " \n\t"
+		ln = len(needle)
+		for line in text.split("\n"):
+			line = line.lower()
+			i = line.find(needle)
+			if i >= 0:
+				if (line[i-1:i] in punctuation
+				and line[ln+i:ln+i+1] in punctuation):
+					return True
 		return False
 
-	words.append(server_tab.get_nick())
-	words = [n.lower() for n in words if n]
+	server_tab = main_window.find_server(server)
+	highlightwords = config.get_list("chatting", "highlight_words", [])
+	highlightwords.append(server_tab.get_nick())
 
-	lower_message = message.lower()
-
-	for word in words:
-		try:
-			lower_message.index(word)
-		except ValueError:
-			continue
-		else:
+	for word in highlightwords:
+		if has_highlight(text, word):
 			return True
 	return False
 
@@ -300,7 +301,7 @@ def sushi_action(time, server, sender, target, message):
 		{"nick": nick,
 		 "message": message},
 		own = (tab.parent.get_nick() == nick),
-		highlight = is_highlighted(server, message))
+		highlight = (nick != tab.parent.get_nick()) and is_highlighted(server, message))
 
 	print_tab(tab, msg)
 
@@ -316,7 +317,7 @@ def sushi_message(time, server, sender, target, message):
 		 "nick": nick,
 		 "prefix": sushi.user_channel_prefix(server, target, nick)},
 		own = (nick == tab.parent.get_nick()),
-		highlight = is_highlighted(server, message))
+		highlight = (nick != tab.parent.get_nick()) and is_highlighted(server, message))
 
 	print_tab(tab, msg)
 
