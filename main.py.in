@@ -643,7 +643,7 @@ def setup_logging():
 
 		logging.getLogger("").addHandler(ExceptionHandler())
 
-	except BaseException as e:
+	except BaseException, e:
 		print >> sys.stderr, "Logging init error: %s" % (e)
 
 
