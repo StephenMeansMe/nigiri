@@ -415,6 +415,7 @@ class MainWindow(object):
 	def switch_to_tab(self, tab):
 		if self.current_tab:
 			self.current_tab.set_readline()
+			self.current_tab.input_text = self.footer.get_edit_text()
 
 		self.current_tab = tab
 
@@ -429,6 +430,9 @@ class MainWindow(object):
 				self.header.set_text(tab.get_topic())
 			else:
 				self.header.set_text("")
+
+			self.footer.set_edit_text(tab.input_text)
+			self.footer.set_edit_pos(len(tab.input_text))
 
 		self.update_divider()
 

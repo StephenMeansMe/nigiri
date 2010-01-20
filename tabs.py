@@ -81,6 +81,25 @@ class Tab(object):
 	def __str__(self):
 		return self.name
 
+	# Properties
+
+	@types(switch = bool)
+	def set_connected(self, switch):
+		self._connected = switch
+
+		for child in self.children:
+			child.set_connected(switch)
+
+		urwid.emit_signal(self, "connected", switch)
+
+	connected = property(lambda x: x._connected, set_connected)
+
+	def set_input_text(self, text):
+		self._input_text = text
+
+	input_text = property(lambda x: x._input_text, set_input_text)
+
+	# Methods
 
 	@types(name = (String, str, unicode))
 	def __init__(self, name):
@@ -93,6 +112,7 @@ class Tab(object):
 		self.children = []
 		self.input_history = None
 		self.output_walker = SimpleListWalker([])
+		self.input_text = ""
 
 		self.read_line_index = -1
 
@@ -107,17 +127,6 @@ class Tab(object):
 		line.set_align_mode ("center")
 		self.output_walker.append(line)
 		self.read_line_index = len(self.output_walker)-1
-
-	@types(switch = bool)
-	def set_connected(self, switch):
-		self._connected = switch
-
-		for child in self.children:
-			child.set_connected(switch)
-
-		urwid.emit_signal(self, "connected", switch)
-
-	connected = property(lambda x: x._connected, set_connected)
 
 	def child_added(self, child):
 		urwid.emit_signal(self, "child_added", self, child)
