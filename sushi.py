@@ -34,6 +34,8 @@ import tabs
 import messages
 import __main__
 
+# TODO: update plugin API to current version
+
 # XXX:  maybe better proxy both, commands and signals,
 # XXX:: to catch errors in the error code.
 
