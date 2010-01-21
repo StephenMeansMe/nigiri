@@ -1,6 +1,8 @@
+import time # strftime
 import logging
 import urwid
 
+import connection
 import sushi
 import __main__
 from extends.ListBox import ExtendedListBox
@@ -22,8 +24,19 @@ class GeneralOutputWidget(ExtendedListBox):
 	def _connect_signals(self):
 		self.sushi.connect_to_signal("message", self._message_cb)
 
-	def _message_cb(self, time, server, target, sender, message):
-		self.text_walker.append(urwid.Text(target+": "+message))
+	def _message_cb(self, timestamp, server, sender, target, message):
+		if not target:
+			locationFormat = server
+		else:
+			locationFormat = server+":"+target
+
+		format = "[%(timestamp)s] (%(location)s) <%(nick)s> %(message)s" % {
+			"timestamp": time.strftime("%H:%M", time.localtime(timestamp)),
+			"location": locationFormat,
+			"nick": connection.parse_from(sender)[0],
+			"message": message}
+
+		self.text_walker.append(urwid.Text(format))
 		self.scroll_to_bottom()
 
 
@@ -70,7 +83,7 @@ class general_output(sushi.Plugin):
 		body = __main__.main_window.body
 		self.original_body = body
 
-		__main__.main_window.body = ProxyFrame(body, header=urwid.BoxAdapter(self.output, 5))
+		__main__.main_window.body = ProxyFrame(body, header=urwid.LineBox(urwid.BoxAdapter(self.output, 5)))
 		__main__.main_window._setup_context()
 
 		self._applied = True
