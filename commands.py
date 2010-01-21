@@ -206,11 +206,12 @@ def cmd_help(main_window, argv):
 
 def cmd_join(main_window, argv):
 	""" /join <channel> [<key>] """
+	key = ""
+
 	if len(argv) == 3:
 		cmd, channel, key = argv
 	elif len(argv) == 2:
 		cmd, channel = argv
-		key = ""
 	elif len(argv) == 1 and type(main_window.current_tab) == tabs.Channel:
 		channel = main_window.current_tab.name
 	else:
