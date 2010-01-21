@@ -517,7 +517,7 @@ def sushi_part(time, server, sender, channel, message):
 	msg = format_message("actions", "part",
 		{"nick": nick,
 		 "channel": channel,
-		 "message": message},
+		 "reason": message},
 		own = (tab.parent.get_nick() == nick),
 		highlight = False)
 
