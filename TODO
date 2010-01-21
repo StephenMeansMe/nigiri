@@ -1,4 +1,5 @@
+- tab completion
 - better error handling (stderr destroys the display)
 - colored nicks
-- implement commands
-- implement signals
+- implement more commands
+- implement more signals
