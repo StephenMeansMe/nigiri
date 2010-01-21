@@ -428,14 +428,12 @@ _command_dict = {
 
 _builtins = _command_dict.keys()
 
-@types (cmd=str)
 def strip_command_char (cmd):
 	if not cmd: return cmd
 	if cmd[0] != config.get("nigiri","command_char"):
 		return cmd
 	return cmd[1:]
 
-@types (text=str)
 def parse(main_window, text):
 	argv = text.split(" ")
 
@@ -460,7 +458,7 @@ def parse(main_window, text):
 
 	return True
 
-@types (name=str, fun=type(lambda:""))
+@types (name=basestring, fun=type(lambda:""))
 def add_command(name, fun):
 	global _command_dict
 	if _command_dict.has_key (name):
@@ -468,7 +466,7 @@ def add_command(name, fun):
 	_command_dict[name] = fun
 	return True
 
-@types (name=str)
+@types (name=basestring)
 def remove_command(name):
 	global _command_dict
 	if _command_dict.has_key (name) and name not in _builtins:
