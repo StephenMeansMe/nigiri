@@ -1,5 +1,5 @@
 - tab completion
-- better error handling (stderr destroys the display)
 - colored nicks
 - implement more commands
 - implement more signals
+- reconnect registered signals on maki reconnect
