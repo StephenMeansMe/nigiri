@@ -59,10 +59,31 @@ TYPE_CHOICE: Takes n key/value tuple and a default index.
 class Plugin (object):
 
 	def __init__(self, plugin_name):
+		self.__registered_signals = {}
+
 		self._plugin_name = plugin_name
 
 		urwid.connect_signal(connection.sushi, "connected", self.maki_connected)
 		urwid.connect_signal(connection.sushi, "disconnected", self.maki_disconnected)
+
+	def __register_signal(self, signal, handler):
+		if self.__registered_signals.has_key(signal):
+			self.__registered_signals[signal].append(handler)
+		else:
+			self.__registered_signals[signal] = [handler]
+
+	def __unregister_signal(self, signal, handler):
+		if self.__registered_signals[signal].has_key(signal):
+			try:
+				i = self.__registered_signals[signal].index(handler)
+			except ValueError:
+				return
+			del self.__registered_signals[signal][i]
+
+	def unload(self):
+		for (signal, handlers) in self.__registered_signals.items():
+			for handler in handlers:
+				signals.disconnect_signal(signal, handler)
 
 	def maki_connected(self, sushi):
 		pass
@@ -110,10 +131,12 @@ class Plugin (object):
 
 	def connect_signal(self, signal, func):
 #		self.emit("signal_connect", signal, func)
+		self.__register_signal(signal,func)
 		return signals.connect_signal(signal, func)
 
 	def disconnect_signal(self, signal, func):
 #		self.emit("signal_disconnect", signal, func)
+		self.__unregister_signal(signal, func)
 		return signals.disconnect_signal(signal, func)
 
 	def set_config(self, name, value):
