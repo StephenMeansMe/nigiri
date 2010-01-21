@@ -136,19 +136,21 @@ class MainWindow(object):
 
 
 	def __init__(self):
-		# current active world
 		self.current_tab = None
 		self.servers = []
-		self.shortcut_pattern = re.compile(config.get(
-			"nigiri", "shortcut_pattern"))
+		self.shortcut_pattern = re.compile(
+			config.get("nigiri", "shortcut_pattern"))
 
 	def main(self):
-
+		""" entry point to start UI """
 		self.ui = urwid.curses_display.Screen ()
 		self.ui.register_palette (self._palette)
 		self.ui.run_wrapper (self.run)
 
 	def run(self):
+		""" urwid ui run wrapper.
+			Holds the mainloop, builds the interface.
+		"""
 		size = self.ui.get_cols_rows ()
 
 		self.build_interface()
@@ -195,6 +197,9 @@ class MainWindow(object):
 			self.quit()
 
 	def quit(self, exit=True):
+		""" stops the ui, exits the application (if exit=True)
+			After the UI is stopped, the config is written.
+		"""
 		urwid.emit_signal(self, "quit")
 
 		self.ui.stop()
@@ -207,6 +212,7 @@ class MainWindow(object):
 			sys.exit(0)
 
 	def _create_widgets(self):
+		""" create the UI widgets """
 		self.header = urwid.Text("nigiri %s" % NIGIRI_VERSION)
 		self.footer = extends.Edit.ExtendedEdit("> ")
 		self.divider = urwid.Text("Initializing.")
@@ -215,6 +221,9 @@ class MainWindow(object):
 		self.body = extends.ListBox.ExtendedListBox(self.generic_output_walker)
 
 	def _setup_widgets(self):
+		""" set coloring and attributes of the UI widgets
+			created in _create_widgets
+		"""
 		self.header = urwid.AttrWrap (self.header, "divider")
 		self.footer = urwid.AttrWrap (self.footer, "footer")
 		self.divider = urwid.AttrWrap (self.divider, "divider")
@@ -227,6 +236,9 @@ class MainWindow(object):
 			self.footer.set_wrap_mode ("space")
 
 	def _setup_context(self):
+		""" wrap a Frame called context around the widgets
+			created in _create_widgets
+		"""
 		self.context = urwid.Frame (self.body, header = self.header,
 				footer = self.divider)
 		self.context = urwid.Frame (self.context, footer = self.footer)
@@ -234,13 +246,14 @@ class MainWindow(object):
 		self.context.set_focus ("footer")
 
 	def build_interface(self):
+		""" call the widget methods to build the UI """
 		self._create_widgets()
 		self._setup_widgets()
 		self._setup_context()
 
 	def draw_interface(self, size):
 		canvas = self.context.render (size, focus=True)
-		self.ui.draw_interface(size, canvas)
+		self.ui.draw_screen(size, canvas)
 
 	def keypress(self, size, key):
 		urwid.emit_signal(self, "keypress", size, key)
