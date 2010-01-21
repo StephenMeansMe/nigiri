@@ -26,6 +26,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 """
 
+import urwid
+import logging
+
 import connection
 import commands
 import signals
@@ -39,10 +42,33 @@ import __main__
 # XXX:  maybe better proxy both, commands and signals,
 # XXX:: to catch errors in the error code.
 
+"""
+TYPE_STRING: Takes one argument (default string)
+TYPE_PASSWORD: Hidden string. Takes one argument (default string)
+TYPE_NUMBER: Takes one argument (default number)
+TYPE_BOOL: Takes one argument (default bool value)
+TYPE_CHOICE: Takes n key/value tuple and a default index.
+"""
+(TYPE_STRING,
+ TYPE_PASSWORD,
+ TYPE_NUMBER,
+ TYPE_BOOL,
+ TYPE_CHOICE
+) = range(5)
+
 class Plugin (object):
 
 	def __init__(self, plugin_name):
 		self._plugin_name = plugin_name
+
+		urwid.connect_signal(connection.sushi, "connected", self.maki_connected)
+		urwid.connect_signal(connection.sushi, "disconnected", self.maki_disconnected)
+
+	def maki_connected(self, sushi):
+		pass
+
+	def maki_disconnected(self, sushi):
+		pass
 
 	def get_bus(self):
 		return connection.sushi
@@ -103,4 +129,5 @@ class Plugin (object):
 		return config.get(section, name, default)
 
 	def display_error(self, error):
+		logging.error("%s: %s" % (self._plugin_name, error))
 		messages.print_error("%s: %s" % (self._plugin_name,error))
