@@ -42,6 +42,8 @@ import gobject
 import os
 import imp
 import sys
+import logging
+import traceback
 
 import config
 from messages import print_error
@@ -170,6 +172,7 @@ def load(filename):
 		instance = eval ("plugin.%s()" % (classname))
 
 	except BaseException,e:
+		logging.debug("plugin %s: %s" % (filename, traceback.format_exc(e)))
 		print_error("Error while instancing plugin: %s" % (e))
 		_unload_module(modname)
 		return False
