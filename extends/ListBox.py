@@ -35,7 +35,7 @@ class ExtendedListBox(urwid.ListBox):
 		urwid.ListBox.__init__(self, body)
 		self.auto_scroll = True
 
-	def set_body(self, body):
+	def switch_body(self, body):
 		if self.body:
 			urwid.disconnect_signal(body, "modified", self._invalidate)
 

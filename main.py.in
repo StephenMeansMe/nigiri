@@ -151,7 +151,7 @@ class MainWindow(object):
 	def run(self):
 		size = self.ui.get_cols_rows ()
 
-		self.setup_context()
+		self.build_interface()
 
 		self.update_divider()
 
@@ -167,7 +167,7 @@ class MainWindow(object):
 			except AttributeError:
 				urwid_main_loop.size = size
 
-			self.draw_screen (size)
+			self.draw_interface(size)
 
 			try:
 				keys = self.ui.get_input ()
@@ -206,10 +206,7 @@ class MainWindow(object):
 		if exit:
 			sys.exit(0)
 
-	def setup_context(self):
-		""" setup the widgets to display """
-
-		# create widgets
+	def _create_widgets(self):
 		self.header = urwid.Text("nigiri %s" % NIGIRI_VERSION)
 		self.footer = extends.Edit.ExtendedEdit("> ")
 		self.divider = urwid.Text("Initializing.")
@@ -217,7 +214,7 @@ class MainWindow(object):
 		self.generic_output_walker = urwid.SimpleListWalker([])
 		self.body = extends.ListBox.ExtendedListBox(self.generic_output_walker)
 
-		# setup attributes
+	def _setup_widgets(self):
 		self.header = urwid.AttrWrap (self.header, "divider")
 		self.footer = urwid.AttrWrap (self.footer, "footer")
 		self.divider = urwid.AttrWrap (self.divider, "divider")
@@ -229,11 +226,21 @@ class MainWindow(object):
 		else:
 			self.footer.set_wrap_mode ("space")
 
+	def _setup_context(self):
 		self.context = urwid.Frame (self.body, header = self.header,
 				footer = self.divider)
 		self.context = urwid.Frame (self.context, footer = self.footer)
 
 		self.context.set_focus ("footer")
+
+	def build_interface(self):
+		self._create_widgets()
+		self._setup_widgets()
+		self._setup_context()
+
+	def draw_interface(self, size):
+		canvas = self.context.render (size, focus=True)
+		self.ui.draw_interface(size, canvas)
 
 	def keypress(self, size, key):
 		urwid.emit_signal(self, "keypress", size, key)
@@ -322,11 +329,6 @@ class MainWindow(object):
 				self.footer.get_edit_text(),
 				self.footer.edit_pos)
 			self.footer.set_edit_text(new)
-
-		elif key == "ctrl l":
-			# refresh the whole screen
-			self.context._invalidate()
-			self.draw_screen (size)
 
 		else:
 			self.context.keypress (size, key)
@@ -425,11 +427,11 @@ class MainWindow(object):
 		self.current_tab = tab
 
 		if not tab:
-			self.body.set_body(self.generic_output_walker)
+			self.body.switch_body(self.generic_output_walker)
 
 		else:
 			# Set body content to tab content
-			self.body.set_body(tab.output_walker)
+			self.body.switch_body(tab.output_walker)
 			tab.reset_status()
 
 			if type(tab) == tabs.Channel:
@@ -607,12 +609,11 @@ class MainWindow(object):
 
 		self.body.scroll_to_bottom()
 
-	def draw_screen(self, size):
-		canvas = self.context.render (size, focus=True)
-		self.ui.draw_screen (size, canvas)
+
 
 
 def except_hook(extype, exobj, extb):
+	# FIXME: don't kill the application every time.
 	try:
 		main_window.quit(exit=False)
 	except NameError:
