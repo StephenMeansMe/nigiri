@@ -183,7 +183,10 @@ class MainWindow(object):
 					continue
 
 				else:
-					self.keypress (size, k)
+					try:
+						self.keypress (size, k)
+					except:
+						except_hook(*sys.exc_info(), manual=True)
 
 			return True
 
@@ -625,12 +628,12 @@ class MainWindow(object):
 
 
 
-def except_hook(extype, exobj, extb):
-	# FIXME: don't kill the application every time.
-	try:
-		main_window.quit(exit=False)
-	except NameError:
-		pass
+def except_hook(extype, exobj, extb, manual=False):
+	if not manual:
+		try:
+			main_window.quit(exit=False)
+		except NameError:
+			pass
 
 	message = _("An error occured:\n%(divider)s\n%(traceback)s\n"\
 		"%(exception)s\n%(divider)s" % {
@@ -638,8 +641,13 @@ def except_hook(extype, exobj, extb):
 			"traceback": "".join(traceback.format_tb(extb)),
 			"exception": extype.__name__+": "+str(exobj)
 		})
-	print >> sys.stderr, message
 
+	logging.error(message)
+
+	if manual:
+		messages.print_error(message)
+	else:
+		print >> sys.stderr, message
 
 def setup_logging():
 	""" set the path of the logfile to tekka.logfile config
@@ -663,7 +671,7 @@ def setup_logging():
 		if not os.path.exists(logdir):
 			os.makedirs(logdir)
 
-		logging.basicConfig(filename = logfile, level = logging.DEBUG,
+		logging.basicConfig(filename=logfile, level=logging.DEBUG,
 			filemode="w")
 
 		logging.getLogger("").addHandler(ExceptionHandler())
