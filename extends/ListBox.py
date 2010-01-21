@@ -31,6 +31,17 @@ import logging
 
 class ExtendedListBox(urwid.ListBox):
 
+	__metaclass__ = urwid.MetaSignals
+	signals = ["set_auto_scroll"]
+
+	def set_auto_scroll(self, switch):
+		if type(switch) != bool:
+			return
+		self._auto_scroll = switch
+		urwid.emit_signal(self, "set_auto_scroll", switch)
+
+	auto_scroll = property(lambda s: s._auto_scroll, set_auto_scroll)
+
 	def __init__(self, body):
 		urwid.ListBox.__init__(self, body)
 		self.auto_scroll = True

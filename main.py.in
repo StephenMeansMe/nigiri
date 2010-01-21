@@ -223,6 +223,8 @@ class MainWindow(object):
 		self.generic_output_walker = urwid.SimpleListWalker([])
 		self.body = extends.ListBox.ExtendedListBox(self.generic_output_walker)
 
+		urwid.connect_signal(self.body, "set_auto_scroll", self.handle_body_auto_scroll)
+
 	def _setup_widgets(self):
 		""" set coloring and attributes of the UI widgets
 			created in _create_widgets
@@ -237,6 +239,8 @@ class MainWindow(object):
 			self.footer.set_wrap_mode ("clip")
 		else:
 			self.footer.set_wrap_mode ("space")
+
+
 
 	def _setup_context(self):
 		""" wrap a Frame called context around the widgets
@@ -398,26 +402,6 @@ class MainWindow(object):
 			del self.servers[i]
 			self.update_divider()
 
-	def handle_server_remove(self, server):
-		self.remove_server(server)
-
-	def handle_channel_add(self, server_tab, channel_tab):
-		channel_tab.input_history = InputHistory(
-			text_callback = self.footer.get_edit_text)
-		self.update_divider()
-
-	def handle_channel_remove(self, server_tab, channel_tab):
-		if channel_tab == self.current_tab:
-			self.switch_to_next_tab()
-
-		if connection.sushi.connected and channel_tab.joined:
-			connection.sushi.part(server_tab.name, channel_tab.name, "")
-
-		self.update_divider()
-
-	def handle_maki_disconnect(self):
-		self.update_divider()
-
 	@types(id = int)
 	def switch_to_tabid(self, id):
 		""" this is not for use with indexes! """
@@ -459,6 +443,8 @@ class MainWindow(object):
 			self.footer.set_edit_text(tab.input_text)
 			self.footer.set_edit_pos(len(tab.input_text))
 
+		if tab.auto_scroll:
+			self.body.scroll_to_bottom()
 		self.update_divider()
 
 		urwid.emit_signal(self, "tab_switched", tab)
@@ -625,6 +611,30 @@ class MainWindow(object):
 
 		self.body.scroll_to_bottom()
 
+	# Signal handlers
+
+	def handle_body_auto_scroll(self, switch):
+		self.current_tab.auto_scroll = switch
+
+	def handle_server_remove(self, server):
+		self.remove_server(server)
+
+	def handle_channel_add(self, server_tab, channel_tab):
+		channel_tab.input_history = InputHistory(
+			text_callback = self.footer.get_edit_text)
+		self.update_divider()
+
+	def handle_channel_remove(self, server_tab, channel_tab):
+		if channel_tab == self.current_tab:
+			self.switch_to_next_tab()
+
+		if connection.sushi.connected and channel_tab.joined:
+			connection.sushi.part(server_tab.name, channel_tab.name, "")
+
+		self.update_divider()
+
+	def handle_maki_disconnect(self):
+		self.update_divider()
 
 
 
@@ -648,6 +658,7 @@ def except_hook(extype, exobj, extb, manual=False):
 		messages.print_error(message)
 	else:
 		print >> sys.stderr, message
+
 
 def setup_logging():
 	""" set the path of the logfile to tekka.logfile config

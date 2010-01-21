@@ -113,6 +113,7 @@ class Tab(object):
 		self.input_history = None
 		self.output_walker = SimpleListWalker([])
 		self.input_text = ""
+		self.auto_scroll = True
 
 		self.read_line_index = -1
 
