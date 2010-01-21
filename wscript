@@ -24,6 +24,7 @@ def build (bld):
 	bld.install_files('${DATAROOTDIR}/sushi/nigiri', bld.glob('*.py'))
 	bld.install_files('${DATAROOTDIR}/sushi/nigiri/extends', bld.glob('extends/*.py'))
 	bld.install_files('${DATAROOTDIR}/sushi/nigiri/helper', bld.glob('helper/*.py'))
+	bld.install_files('${DATAROOTDIR}/sushi/nigiri/plugins', bld.glob('plugins/*.py'))
 
 	bld.symlink_as('${BINDIR}/nigiri', Utils.subst_vars('${DATAROOTDIR}/sushi/nigiri/main.py', bld.env))
 
