@@ -95,7 +95,7 @@ def _find_module(filename):
 	mod_info = None
 	try:
 		mod_info = imp.find_module(
-			name, config.get_list("nigiri","plugin_dirs"))
+			name, config.get_list("nigiri","plugin_dirs",[]))
 
 	except ImportError, e:
 		print_error("Error while finding module for '%s'" % (filename))
