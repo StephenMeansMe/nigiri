@@ -608,6 +608,10 @@ def sushi_list(time, server, channel, users, topic):
 
 def sushi_motd(time, server, message):
 	""" message == "" => End OR no MOTD """
+	if message == "":
+		# fetch support data
+		server_tab = main_window.find_server(server)
+		server_tab.update()
 	pass
 
 def sushi_names(time, server, channel, nicks, prefixes, _call_count = {"n":0}):
@@ -667,6 +671,7 @@ def sushi_connect_attempt(time, server):
 
 	if not tab:
 		tab = tabs.Server(name = server)
+
 		main_window.add_server(tab)
 
 		print_tab_notification(tab, "Connecting...")

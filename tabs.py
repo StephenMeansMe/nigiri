@@ -218,6 +218,13 @@ class Server(Tab):
 		self._nick = None
 		self._away = ""
 
+		self.support_chantypes = ()
+		self.support_prefix = ()
+
+	def update(self):
+		self.support_prefix = connection.sushi.support_prefix(self.name)
+		self.support_chantypes = connection.sushi.support_chantypes(self.name)
+
 	@types(nick = (str,String))
 	def set_nick(self, nick):
 		self._nick = nick

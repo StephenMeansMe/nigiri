@@ -80,6 +80,8 @@ import extends
 from extends import *
 from input_history import InputHistory
 
+from helper import tabcompletion
+
 """
  -------context-------
 | --inner context---- |
@@ -265,6 +267,9 @@ class MainWindow(object):
 	def keypress(self, size, key):
 		urwid.emit_signal(self, "keypress", size, key)
 
+		if key != "tab":
+			tabcompletion.stopIteration()
+
 		if key in ("page up","page down"):
 			self.body.keypress (size, key)
 
@@ -350,6 +355,10 @@ class MainWindow(object):
 				self.footer.edit_pos)
 			self.footer.set_edit_text(new)
 
+		elif key == "tab":
+			logging.debug("tab is pressed!")
+			tabcompletion.complete(self.footer, self.footer.get_edit_text())
+
 		else:
 			self.context.keypress (size, key)
 
@@ -380,6 +389,8 @@ class MainWindow(object):
 
 	def add_server(self, server_tab):
 		self.servers.append(server_tab)
+
+		server_tab.support_chantypes = connection.sushi.support_chantypes(server_tab.name)
 
 		urwid.connect_signal(server_tab, "remove",
 			self.handle_server_remove)
@@ -714,5 +725,7 @@ if __name__ == "__main__":
 	signals.setup(main_window)
 
 	messages.setup(main_window)
+
+	tabcompletion.setup(main_window)
 
 	main_window.main()
