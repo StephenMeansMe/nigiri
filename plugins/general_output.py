@@ -13,16 +13,16 @@ plugin_info = ("Marian Tietz",
 
 class GeneralOutputWidget(ExtendedListBox):
 
-	def __init__(self, sushi, *args, **kwargs):
+	def __init__(self, plugin, *args, **kwargs):
 		self.text_walker = urwid.SimpleListWalker([])
 
 		ExtendedListBox.__init__(self, self.text_walker, *args, **kwargs)
 
-		self.sushi = sushi
+		self.plugin = plugin
 		self._connect_signals()
 
 	def _connect_signals(self):
-		self.sushi.connect_to_signal("message", self._message_cb)
+		self.plugin.connect_signal("message", self._message_cb)
 
 	def _message_cb(self, timestamp, server, sender, target, message):
 		if not target:
@@ -78,7 +78,7 @@ class general_output(sushi.Plugin):
 		self.append_general_output()
 
 	def append_general_output(self):
-		self.output = GeneralOutputWidget(self.get_bus())
+		self.output = GeneralOutputWidget(self)
 
 		body = __main__.main_window.body
 		self.original_body = body
@@ -88,13 +88,9 @@ class general_output(sushi.Plugin):
 
 		self._applied = True
 
-	def maki_connected(self, sushi):
-		pass
-
-	def maki_disconnected(self, sushi):
-		pass
-
 	def unload(self):
 		if self._applied:
 			__main__.main_window.body = self.original_body
+			__main__.main_window._setup_context()
+		sushi.Plugin.unload(self)
 
