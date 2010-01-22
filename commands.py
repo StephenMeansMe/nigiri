@@ -149,8 +149,8 @@ def cmd_dcc(main_window, argv):
 	elif argv[1] == "accept":
 		def accepted_cb(time, id, *x):
 			if id == int(argv[2]):
-				print_notification(_("DCC action with id %(id)d accepted." % {
-					"id": id}))
+				print_notification(_("DCC action with id %(id)d accepted.") % {
+					"id": id})
 				signals.disconnect_signal("dcc_send", accepted_cb)
 
 		if len(argv) < 3:
