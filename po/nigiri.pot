@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-11-14 18:02+0100\n"
+"POT-Creation-Date: 2010-01-23 00:27+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,17 +16,31 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../connection.py:67
+#: ../commands.py:152
+#, python-format
+msgid "DCC action with id %(id)d accepted."
+msgstr ""
+
+#: ../connection.py:78
 msgid "tekka could not contact maki."
 msgstr ""
 
-#: ../connection.py:68
+#: ../connection.py:79
 msgid ""
 "There's no connection to maki, so the recent action was not performed. Try "
 "to reconnect to maki to solve this problem."
 msgstr ""
 
-#: ../main.py.in:594
+#: ../connection.py:118
+msgid "Error while connecting to maki."
+msgstr ""
+
+#: ../connection.py:119
+#, python-format
+msgid "Error: %s"
+msgstr ""
+
+#: ../main.py.in:659
 #, python-format
 msgid ""
 "An error occured:\n"
