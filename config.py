@@ -147,6 +147,8 @@ def set_defaults():
 	defaults["templates"]["whois_begin"] = "%(time)s Begin of whois (%(target)s)."
 	defaults["templates"]["whois_item"] = ">> %(nick)s: %(message)s"
 	defaults["templates"]["whois_end"] = "%(time)s End of whois."
+	defaults["templates"]["dcc_new_incoming"] = "%(time)s Incoming file transfer (ID:%(id)d) from %(sender)s: \"%(filename)s\" (%(size)d)."
+	defaults["templates"]["dcc_file_auto_accept"] = "%(time)s Auto accepted file transfer from %(sender)s: \"%(filename)s\" (%(size)d)."
 
 	# Add default sections to config parser
 	# so setting is easier

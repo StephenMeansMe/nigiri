@@ -115,7 +115,7 @@ class FormattedMessage(object):
 
 	def __str__(self):
 		try:
-			return self.template % self.values
+			return self.template % (self.values)
 		except KeyError,e:
 			return "TEMPLATE_MISSING_KEY(%s)" % (e)
 

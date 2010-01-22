@@ -31,17 +31,20 @@ import string # is_highlight
 import inspect
 import time
 import urwid
+import logging
 
 import config
 import tabs
 import connection
 
+import helper.code
 from connection import parse_from, sushi
 
 from messages import print_tab, print_error, \
 	format_message, print_tab_notification
 
 signals = {}
+_backup_signals = []
 
 def connect_signal (signal, handler):
 	""" connect handler to signal """
@@ -82,51 +85,69 @@ def setup(mw):
 	urwid.connect_signal(connection.sushi, "disconnected", maki_disconnected)
 
 def maki_disconnected(sushi):
+	global signals, _backup_signals
+
 	for signal in signals:
 		for handler in signals[signal]:
 			signals[signal][handler].remove()
+
+			_backup_signals.append((signal,handler))
+	signals = {}
+
+def _reconnect_signals():
+	global _backup_signals
+
+	for (signal, handler) in _backup_signals:
+		connect_signal(signal, handler)
+	_backup_signals = []
 
 def maki_connected(sushi_interface):
 	""" called by dbus connection handler.
 		sushi is the dbus interface
 	"""
-	maki_disconnected(sushi_interface)
+	global _backup_signals
 
-	signals = {}
+	if _backup_signals:
+		# restore saved signal/handler pairs
+		_reconnect_signals()
 
-	# message receiving
-	connect_signal("action", sushi_action)
-	connect_signal("message", sushi_message)
-	connect_signal("ctcp", sushi_ctcp)
-	connect_signal("notice", sushi_notice)
+	else:
+		# initially setup signals
 
-	# action signals
-	connect_signal("invite", sushi_invite)
-	connect_signal("join", sushi_join)
-	connect_signal("kick", sushi_kick)
-	connect_signal("nick", sushi_nick)
-	connect_signal("mode", sushi_mode)
-	connect_signal("oper", sushi_oper)
-	connect_signal("part", sushi_part)
-	connect_signal("quit", sushi_quit)
-	connect_signal("topic", sushi_topic)
+		# message receiving
+		connect_signal("action", sushi_action)
+		connect_signal("message", sushi_message)
+		connect_signal("ctcp", sushi_ctcp)
+		connect_signal("notice", sushi_notice)
 
-	# informative signals
-	connect_signal("banlist", sushi_banlist)
-	connect_signal("cannot_join", sushi_cannot_join)
-	connect_signal("list", sushi_list)
-	connect_signal("motd", sushi_motd)
-	connect_signal("names", sushi_names)
-	connect_signal("no_such", sushi_no_such)
-	connect_signal("whois", sushi_whois)
+		# action signals
+		connect_signal("invite", sushi_invite)
+		connect_signal("join", sushi_join)
+		connect_signal("kick", sushi_kick)
+		connect_signal("nick", sushi_nick)
+		connect_signal("mode", sushi_mode)
+		connect_signal("oper", sushi_oper)
+		connect_signal("part", sushi_part)
+		connect_signal("quit", sushi_quit)
+		connect_signal("topic", sushi_topic)
 
-	# status signals
-	connect_signal("connect", sushi_connect_attempt)
-	connect_signal("connected", sushi_connected)
-	connect_signal("away", sushi_away)
-	connect_signal("back", sushi_back)
-	connect_signal("away_message", sushi_away_message)
-	connect_signal("shutdown", sushi_shutdown)
+		# informative signals
+		connect_signal("banlist", sushi_banlist)
+		connect_signal("cannot_join", sushi_cannot_join)
+		connect_signal("list", sushi_list)
+		connect_signal("motd", sushi_motd)
+		connect_signal("names", sushi_names)
+		connect_signal("no_such", sushi_no_such)
+		connect_signal("whois", sushi_whois)
+
+		# status signals
+		connect_signal("connect", sushi_connect_attempt)
+		connect_signal("connected", sushi_connected)
+		connect_signal("away", sushi_away)
+		connect_signal("back", sushi_back)
+		connect_signal("away_message", sushi_away_message)
+		connect_signal("shutdown", sushi_shutdown)
+		connect_signal("dcc_send", sushi_dcc_send)
 
 	setup_connected_servers()
 
@@ -271,7 +292,10 @@ def is_highlighted (server, text):
 	return False
 
 def current_server_tab_print(server, message):
-	""" for server related notifications.
+	""" server: basestring
+		message: basestring | FormattedMessage
+
+		for server related notifications.
 		print the message to the current active tab
 		if the tab belongs to the given server.
 		If no tab of the given server is active, print
@@ -489,6 +513,9 @@ def sushi_mode(time, server, sender, target, mode, param):
 			own = (nick == main_window.find_server(server).get_nick()),
 			highlight = (target == main_window.find_server(server).get_nick()))
 
+		tab = main_window.find_tab(server, target)
+		print_tab(tab, msg)
+
 def sushi_oper(time, server):
 	msg = format_message("actions", "oper",
 		{"nick": main_window.find_server(server).get_nick()},
@@ -705,5 +732,55 @@ def sushi_away_message(time, server, nick, message):
 
 def sushi_shutdown(time):
 	pass
+
+def sushi_dcc_send(time, id, server, sender, filename,
+				size, progress, speed, status):
+	""" handle dcc incoming/outgoing """
+	# setup function attributes
+	self = helper.code.init_function_attrs(sushi_dcc_send, new_register={})
+
+	# import dcc states
+	from helper.dcc import s_incoming, s_running, s_new
+
+	logging.debug("dcc_send: (%d,%s,%s,%s)" % (id, server, sender, filename))
+
+	if ("" in (server, sender, filename)
+	and 0 in (size, progress, speed, status)):
+		# file transfer removed
+		logging.debug("filetransfer %d removed." % (id))
+
+	else:
+		if status & s_incoming:
+			if status & s_new:
+				logging.debug("incoming filetransfer (%d): %s %s %s" % (id, server, sender, filename))
+
+				msg = format_message("informative", "dcc_new_incoming",
+						{"sender": sender,
+						 "id": id,
+						 "filename": filename,
+   						 "size": size})
+
+				if main_window.current_tab:
+					print_tab(main_window.current_tab, msg)
+				else:
+					main_window.print_text(unicode(msg))
+
+				self.new_register[id] = True
+
+			elif status & s_running and status & s_incoming:
+				if not self.new_register.has_key(id):
+					# notify about auto accepted file transfer
+					msg = format_message("informative", "dcc_file_auto_accept",
+							{"sender": sender,
+							 "filename": filename,
+							 "size": size})
+
+					if main_window.current_tab:
+						print_tab(main_window.current_tab, msg)
+					else:
+						main_window.print_text(unicode(msg))
+
+					self.new_register[id] = True
+
 
 

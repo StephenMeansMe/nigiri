@@ -28,9 +28,12 @@ SUCH DAMAGE.
 
 from typecheck import types
 from messages import print_notification, print_error, print_normal
+from gettext import gettext as _
+# TODO: use gettext
 
 import tabs
 import config
+import signals
 import connection
 import plugin_control
 
@@ -132,7 +135,7 @@ def cmd_dcc(main_window, argv):
 		return
 
 	if len(argv) < 2:
-		print_notification("Usage: /dcc chat|send|list|remove")
+		print_notification("Usage: /dcc accept|chat|send|list|remove")
 		return
 
 	server_tab = tabs.get_server(main_window.current_tab)
@@ -143,6 +146,19 @@ def cmd_dcc(main_window, argv):
 			return
 
 		connection.sushi.dcc_send(server_tab.name, argv[2], argv[3])
+	elif argv[1] == "accept":
+		def accepted_cb(time, id, *x):
+			if id == int(argv[2]):
+				print_notification(_("DCC action with id %(id)d accepted." % {
+					"id": id}))
+				signals.disconnect_signal("dcc_send", accepted_cb)
+
+		if len(argv) < 3:
+			print_notification("Usage: /dcc accept <id>")
+			return
+
+		signals.connect_signal("dcc_send", accepted_cb)
+		connection.sushi.dcc_send_accept(int(argv[2]))
 	elif argv[1] == "chat":
 		pass
 	elif argv[1] == "list":
