@@ -7,19 +7,19 @@ msgstr ""
 "Project-Id-Version: nigiri 1.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-01-23 00:27+0100\n"
-"PO-Revision-Date: 2009-12-09 14:36+0000\n"
+"PO-Revision-Date: 2010-01-23 01:23+0000\n"
 "Last-Translator: Raphael Durand <rdurand2@free.fr>\n"
 "Language-Team: French\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2010-01-23 00:04+0000\n"
+"X-Launchpad-Export-Date: 2010-02-11 20:20+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: ../commands.py:152
 #, python-format
 msgid "DCC action with id %(id)d accepted."
-msgstr ""
+msgstr "L'action de DCC avec l'id %(id)d est acceptée."
 
 #: ../connection.py:78
 msgid "tekka could not contact maki."
@@ -35,12 +35,12 @@ msgstr ""
 
 #: ../connection.py:118
 msgid "Error while connecting to maki."
-msgstr ""
+msgstr "Erreur durant la connexion à maki"
 
 #: ../connection.py:119
 #, python-format
 msgid "Error: %s"
-msgstr ""
+msgstr "Erreur: %s"
 
 #: ../main.py.in:659
 #, python-format
