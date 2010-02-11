@@ -3,7 +3,7 @@
 import Utils
 
 APPNAME = 'nigiri'
-VERSION = '1.1.1'
+VERSION = '1.1.2'
 
 srcdir = '.'
 blddir = 'build'
