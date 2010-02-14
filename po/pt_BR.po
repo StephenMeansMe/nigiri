@@ -4,16 +4,16 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: nigiri 1.1\n"
+"Project-Id-Version: nigiri 1.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-01-23 00:27+0100\n"
-"PO-Revision-Date: 2009-06-22 05:50+0000\n"
+"PO-Revision-Date: 2010-01-23 11:50+0000\n"
 "Last-Translator: Paulo H. Tanaka <Unknown>\n"
 "Language-Team: Brazilian Portuguese\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2010-01-23 00:04+0000\n"
+"X-Launchpad-Export-Date: 2010-02-14 21:56+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: ../commands.py:152
