@@ -120,7 +120,7 @@ def set_defaults():
 	defaults["templates"]["nick_own"] = "%(time)s * You are now known as %(new_nick)s."
 	defaults["templates"]["mode_list"] = "%(time)s * Modes for %(target)s: %(modes)s."
 	defaults["templates"]["mode_list_own"] = "%(time)s * Modes set on you: %(modes)s."
-	defaults["templates"]["mode"] = "%(time)s %(nick)s set %(mode)%(param)s on %(target)s."
+	defaults["templates"]["mode"] = "%(time)s %(nick)s set %(mode)s%(param)s on %(target)s."
 	defaults["templates"]["mode_own"] = "%(time)s You set %(mode)s%(param)s on %(target)s."
 	defaults["templates"]["oper"] = "%(time)s * %(nick)s is now an OPER."
 	defaults["templates"]["oper_own"] = "%(time)s * You are now an OPER."

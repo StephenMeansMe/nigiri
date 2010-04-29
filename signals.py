@@ -508,7 +508,7 @@ def sushi_mode(time, server, sender, target, mode, param):
 		msg = format_message("actions", "mode",
 			{"nick": nick,
 			 "mode": mode,
-			 "param": param,
+			 "param": param and " "+param or "",
 			 "target": target},
 			own = (nick == main_window.find_server(server).get_nick()),
 			highlight = (target == main_window.find_server(server).get_nick()))
