@@ -7,38 +7,40 @@ msgstr ""
 "Project-Id-Version: nigiri 1.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-01-23 00:27+0100\n"
-"PO-Revision-Date: 2010-01-23 11:50+0000\n"
-"Last-Translator: Paulo H. Tanaka <Unknown>\n"
+"PO-Revision-Date: 2010-03-03 13:53+0000\n"
+"Last-Translator: Thaynã Moretti <Unknown>\n"
 "Language-Team: Brazilian Portuguese\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2010-02-14 21:56+0000\n"
+"X-Launchpad-Export-Date: 2010-04-29 18:20+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: ../commands.py:152
 #, python-format
 msgid "DCC action with id %(id)d accepted."
-msgstr ""
+msgstr "DCC com o id %(id)d aceita."
 
 #: ../connection.py:78
 msgid "tekka could not contact maki."
-msgstr ""
+msgstr "tekka não conseguiu contatar maki."
 
 #: ../connection.py:79
 msgid ""
 "There's no connection to maki, so the recent action was not performed. Try "
 "to reconnect to maki to solve this problem."
 msgstr ""
+"Não há nenhuma conexão com maki, então sua ação não foi realizada. Tente "
+"reconectar no maki para resolver esse problema."
 
 #: ../connection.py:118
 msgid "Error while connecting to maki."
-msgstr ""
+msgstr "Erro ao conectar no maki."
 
 #: ../connection.py:119
 #, python-format
 msgid "Error: %s"
-msgstr ""
+msgstr "Erro: %s"
 
 #: ../main.py.in:659
 #, python-format
@@ -49,3 +51,8 @@ msgid ""
 "%(exception)s\n"
 "%(divider)s"
 msgstr ""
+"Um erro ocorreu:\n"
+"%(divider)s\n"
+"%(traceback)s\n"
+"%(exception)s\n"
+"%(divider)s"
