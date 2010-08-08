@@ -220,6 +220,32 @@ def cmd_help(main_window, argv):
 
 	print_normal(msg)
 
+def cmd_ignore(main_window, argv):
+	""" /ignore <pattern> """
+	if len(argv) != 2:
+		return print_notification("Usage: /ignore <pattern>")
+	if not main_window.current_tab:
+		return print_notification("You have to be on a tab.")
+
+	server = tabs.get_server(main_window.current_tab).name
+	connection.sushi.ignore(server, argv[1])
+
+	print_notification("Ignored user %(user)s." % {"user":argv[1]})
+
+def cmd_ignores(main_window, argv):
+	""" /ignores """
+	if not main_window.current_tab:
+		return print_notification("You have to be on a tab.")
+
+	server = tabs.get_server(main_window.current_tab).name
+	ignores = connection.sushi.ignores(server)
+
+	if not ignores:
+		print_normal("No users ignored on %(server)s." % {"server":server})
+	else:
+		print_normal("Ignored users: %(ulist)s." % {
+			"ulist":", ".join(ignores)})
+
 def cmd_join(main_window, argv):
 	""" /join <channel> [<key>] """
 	key = ""
@@ -405,6 +431,18 @@ def cmd_servers(main_window, argv):
 			connected = "not connected"
 		print_normal("- '%s' (%s)" % (name, connected))
 
+def cmd_unignore(main_window, argv):
+	if len(argv) != 2:
+		return print_notification("Usage: /unignore <pattern>")
+
+	if not main_window.current_tab:
+		return print_error("You have to be in a tab.")
+
+	server = tabs.get_server(main_window.current_tab).name
+	connection.sushi.unignore(server, argv[1])
+
+	print_notification("Unignored user %(user)s." % {"user":argv[1]})
+
 def cmd_unload(main_window, argv):
 	if len(argv) != 2:
 		print_notification("Usage: /unload <filename>")
@@ -428,6 +466,8 @@ _command_dict = {
 	"dcc": cmd_dcc,
 	"echo": cmd_echo,
 	"help": cmd_help,
+	"ignore" : cmd_ignore,
+	"ignores" : cmd_ignores,
 	"j": cmd_join,
 	"join": cmd_join,
 	"load": cmd_load,
@@ -439,6 +479,7 @@ _command_dict = {
 	"quit": cmd_quit,
 	"remove_server": cmd_remove_server,
 	"servers": cmd_servers,
+	"unignore" : cmd_unignore,
 	"unload": cmd_unload
 }
 
