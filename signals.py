@@ -341,7 +341,23 @@ def sushi_message(time, server, sender, target, message):
 		 "nick": nick,
 		 "prefix": sushi.user_channel_prefix(server, target, nick)},
 		own = (nick == tab.parent.get_nick()),
-		highlight = (nick != tab.parent.get_nick()) and is_highlighted(server, message))
+		highlight = (nick != tab.parent.get_nick())
+					and is_highlighted(server, message))
+
+	def markup_cb(msg):
+		# FIXME overthink this completely
+		def get_nick_color(nick):
+			colors = main_window._palette[14:14+8]
+			i = sum([ord(n) for n in nick]) % len(colors)
+			return colors[i][0]
+
+		if msg.own:
+			return unicode(msg)
+		msg.values["nick"]="'),('%s', '%s'),(msg.base_color, '" % (
+			get_nick_color(msg.values["nick"]), msg.values["nick"])
+		s = "[(msg.base_color, '" + unicode(msg) + "')]"
+		return eval(s)
+	msg.markup_cb = markup_cb
 
 	print_tab(tab, msg)
 
