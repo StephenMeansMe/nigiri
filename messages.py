@@ -102,6 +102,11 @@ def parse_markup(input):
 
 class FormattedMessage(object):
 
+	@property
+	def markup_cb(self): return self._markup_cb
+	@markup_cb.setter
+	def markup_cb(self, cb): self._markup_cb = cb
+
 	@types( category = basestring, template = basestring,
 			values = dict, highlight = bool, own = bool )
 	def __init__(self, category, template, values, base_color,
@@ -113,11 +118,18 @@ class FormattedMessage(object):
 		self.base_color = base_color
 		self.own = own 	# we triggered that/we are meant by it
 
+		self.markup_cb = None
+
 	def __str__(self):
 		try:
 			return self.template % (self.values)
 		except KeyError,e:
 			return "TEMPLATE_MISSING_KEY(%s)" % (e)
+
+	def markup(self):
+		if self.markup_cb:
+			return self.markup_cb(self)
+		return unicode(self)
 
 
 @types (mtype=basestring, template_id=basestring, values=dict)
@@ -159,7 +171,7 @@ def print_tab(dest_tab, msg, msgtype="informative"):
 
 	else:
 		if isinstance(msg, FormattedMessage):
-			markup = [(msg.base_color, unicode(msg))]
+			markup = [(msg.base_color, msg.markup())]
 		else:
 			markup = msg
 
