@@ -67,7 +67,7 @@ class ExtendedListBox(urwid.ListBox):
 			logging.debug("auto_scroll = %s" % (self.auto_scroll))
 
 	def scroll_to_bottom(self):
-		logging.debug("current_focus = %d, len(self.body) = %d" % (self.get_focus()[1], len(self.body)))
+		logging.debug("current_focus = %s, len(self.body) = %d" % (self.get_focus()[1], len(self.body)))
 
 		if self.auto_scroll:
 			# at bottom -> scroll down
