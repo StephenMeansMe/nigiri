@@ -27,25 +27,18 @@ SUCH DAMAGE.
 """
 
 import os
+import dbus
+import urwid
 
 from gettext import gettext as _
-import dbus
-from dbus.mainloop.glib import DBusGMainLoop
-
-import urwid
 from urwid import MetaSignals
-
 from types import NoneType
+
 from typecheck import types
 
-dbus_loop = DBusGMainLoop()
-required_version = (1, 1, 0)
-bus_address = os.getenv("SUSHI_REMOTE_BUS_ADDRESS")
 
-if bus_address:
-	bus = dbus.connection.Connection(bus_address, mainloop=dbus_loop)
-else:
-	bus = dbus.SessionBus(mainloop=dbus_loop)
+required_version = (1, 1, 0)
+
 
 class SushiWrapper(object):
 
@@ -97,9 +90,24 @@ class SushiWrapper(object):
 
 	connected = property(lambda s: s._connected, _set_connected)
 
+
 sushi = SushiWrapper(None)
 
 _shutdown_handler = None
+
+
+def get_bus():
+	bus_address = os.getenv("SUSHI_REMOTE_BUS_ADDRESS")
+
+	from dbus.mainloop.glib import DBusGMainLoop
+	loop=DBusGMainLoop(set_as_default=True)
+
+	if bus_address:
+		bus = dbus.connection.Connection(bus_address,mainloop=loop)
+	else:
+		bus = dbus.SessionBus(mainloop=loop)
+	return bus
+
 
 def connect():
 	"""
@@ -109,7 +117,10 @@ def connect():
 	"""
 	global sushi, _shutdown_handler
 
+	bus = get_bus()
+
 	proxy = None
+
 	try:
 		proxy = bus.get_object("de.ikkoku.sushi", "/de/ikkoku/sushi")
 	except dbus.exceptions.DBusException, e:
@@ -137,6 +148,7 @@ def connect():
 
 def disconnect():
 	global sushi, __connected, _shutdown_handler
+
 	sushi._set_interface(None)
 
 	_shutdown_handler.remove()

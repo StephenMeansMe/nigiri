@@ -31,6 +31,9 @@ import os
 import sys
 import traceback
 
+import glib
+import gobject
+
 try:
 	import urwid.curses_display
 	import urwid
@@ -115,8 +118,8 @@ class MainWindow(object):
 
 	_palette = [
 			('divider','black','dark cyan', 'standout'),
-			('text','light gray', 'black'),
-			('bold_text', 'light gray', 'black', 'bold'),
+			('text','light gray', 'default'),
+			('bold_text', 'light gray', 'default', 'bold'),
 			("body", "text"),
 			("footer", "text"),
 			("header", "text"),
@@ -124,7 +127,7 @@ class MainWindow(object):
 
 	for type, bg in (
 			("div_fg_", "dark cyan"),
-			("text_fg_", "black")):
+			("text_fg_", "default")):
 		for name, color in (
 				("red","dark red"),
 				("blue", "dark blue"),
@@ -142,18 +145,12 @@ class MainWindow(object):
 		self.servers = []
 		self.shortcut_pattern = re.compile(
 			config.get("nigiri", "shortcut_pattern"))
+		self.shall_quit = False
 
 	def main(self):
 		""" entry point to start UI """
-		self.ui = urwid.curses_display.Screen ()
+		self.ui = urwid.raw_display.Screen ()
 		self.ui.register_palette (self._palette)
-		self.ui.run_wrapper (self.run)
-
-	def run(self):
-		""" urwid ui run wrapper.
-			Holds the mainloop, builds the interface.
-		"""
-		size = self.ui.get_cols_rows ()
 
 		self.build_interface()
 
@@ -162,42 +159,57 @@ class MainWindow(object):
 		self.generic_input_history = InputHistory(
 				text_callback = self.footer.get_edit_text)
 
-		connection.connect()
 
-		# urwid main loop
-		def urwid_main_loop (self, size):
-			try:
-				size = urwid_main_loop.size
-			except AttributeError:
-				urwid_main_loop.size = size
+		self.ui.run_wrapper(self.run)
 
-			self.draw_interface(size)
+	def run(self):
 
-			try:
-				keys = self.ui.get_input ()
-			except KeyboardInterrupt:
-				self.quit()
+		"""
+		def redraw(self):
+			# Flush input keys
+			input_data = self.ui.get_input_nonblocking()
 
-			for k in keys:
-				if k == "window resize":
-					urwid_main_loop.size = size = self.ui.get_cols_rows()
-					self.keypress (size, k)
-					continue
+			if input_data[1]:
+				self.keypress(self.size, input_data[1][0])
 
-				else:
-					try:
-						self.keypress (size, k)
-					except:
-						except_hook(*sys.exc_info(), manual=True)
+			# Update screen
+			self.draw_interface()
 
+			return False
+
+		def call_redraw(*x):
+			redraw(self)
 			return True
 
-		gobject.idle_add(urwid_main_loop, self, size)
+		fds = self.ui.get_input_descriptors()
+		for fd in fds:
+			gobject.io_add_watch(fd, gobject.IO_IN, call_redraw)
 
-		self.gmainloop = gobject.MainLoop()
+
+
+		redraw(self)
+		"""
+
+		def input_cb(key):
+			if self.shall_quit:
+				raise urwid.ExitMainLoop
+			self.keypress(self.size, key)
+
+		self.size = self.ui.get_cols_rows()
+
+		self.main_loop = urwid.MainLoop(
+				self.context,
+				screen=self.ui,
+				handle_mouse=False,
+				unhandled_input=input_cb,
+				event_loop=urwid.GLibEventLoop()
+			)
+
+		connection.connect()
+
 
 		try:
-			self.gmainloop.run()
+			self.main_loop.run()
 		except KeyboardInterrupt:
 			self.quit()
 
@@ -207,11 +219,9 @@ class MainWindow(object):
 		"""
 		urwid.emit_signal(self, "quit")
 
-		self.ui.stop()
-
-		self.gmainloop.quit()
-
 		config.write_config_file ()
+
+		self.shall_quit = True
 
 		if exit:
 			sys.exit(0)
@@ -223,9 +233,11 @@ class MainWindow(object):
 		self.divider = urwid.Text("Initializing.")
 
 		self.generic_output_walker = urwid.SimpleListWalker([])
-		self.body = extends.ListBox.ExtendedListBox(self.generic_output_walker)
+		self.body = extends.ListBox.ExtendedListBox(
+			self.generic_output_walker)
 
-		urwid.connect_signal(self.body, "set_auto_scroll", self.handle_body_auto_scroll)
+		urwid.connect_signal(self.body, "set_auto_scroll",
+			self.handle_body_auto_scroll)
 
 	def _setup_widgets(self):
 		""" set coloring and attributes of the UI widgets
@@ -241,8 +253,6 @@ class MainWindow(object):
 			self.footer.set_wrap_mode ("clip")
 		else:
 			self.footer.set_wrap_mode ("space")
-
-
 
 	def _setup_context(self):
 		""" wrap a Frame called context around the widgets
@@ -260,9 +270,8 @@ class MainWindow(object):
 		self._setup_widgets()
 		self._setup_context()
 
-	def draw_interface(self, size):
-		canvas = self.context.render (size, focus=True)
-		self.ui.draw_screen(size, canvas)
+	def draw_interface(self):
+		self.main_loop.draw_screen()
 
 	def keypress(self, size, key):
 		urwid.emit_signal(self, "keypress", size, key)
@@ -272,6 +281,9 @@ class MainWindow(object):
 
 		if key in ("page up","page down"):
 			self.body.keypress (size, key)
+
+		elif key == "window resize":
+			self.size = self.ui.get_cols_rows()
 
 		elif key == "enter":
 			# Parse data or (if parse failed)

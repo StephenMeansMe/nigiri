@@ -186,6 +186,8 @@ def print_tab(dest_tab, msg, msgtype="informative"):
 		else:
 			main_window.body.scroll_to_bottom()
 
+		main_window.draw_interface()
+
 def print_tab_notification(tab, msg):
 	print_tab(tab, "*** Notification: " + msg)
 
