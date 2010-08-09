@@ -85,6 +85,7 @@ class general_output(sushi.Plugin):
 
 		__main__.main_window.body = ProxyFrame(body, header=urwid.LineBox(urwid.BoxAdapter(self.output, 5)))
 		__main__.main_window._setup_context()
+		__main__.main_window.main_loop.widget = __main__.main_window.context
 
 		self._applied = True
 
