@@ -152,7 +152,6 @@ class MainWindow(object):
 
 	def run(self):
 
-		"""
 		def redraw(self):
 			# Flush input keys
 			input_data = self.ui.get_input_nonblocking()
@@ -167,8 +166,10 @@ class MainWindow(object):
 
 		def call_redraw(*x):
 			redraw(self)
+			invalidate.locked = False
 			return True
 
+		"""
 		fds = self.ui.get_input_descriptors()
 		for fd in fds:
 			gobject.io_add_watch(fd, gobject.IO_IN, call_redraw)
@@ -195,6 +196,17 @@ class MainWindow(object):
 
 		connection.connect()
 
+		inv = urwid.canvas.CanvasCache.invalidate
+
+		def invalidate (cls, *a, **k):
+			inv(*a, **k)
+
+			if not invalidate.locked:
+				invalidate.locked = True
+				self.main_loop.set_alarm_in(0, call_redraw)
+
+		invalidate.locked = False
+		urwid.canvas.CanvasCache.invalidate = classmethod(invalidate)
 
 		try:
 			self.main_loop.run()
