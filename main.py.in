@@ -152,32 +152,6 @@ class MainWindow(object):
 
 	def run(self):
 
-		def redraw(self):
-			# Flush input keys
-			input_data = self.ui.get_input_nonblocking()
-
-			if input_data[1]:
-				self.keypress(self.size, input_data[1][0])
-
-			# Update screen
-			self.draw_interface()
-
-			return False
-
-		def call_redraw(*x):
-			redraw(self)
-			invalidate.locked = False
-			return True
-
-		"""
-		fds = self.ui.get_input_descriptors()
-		for fd in fds:
-			gobject.io_add_watch(fd, gobject.IO_IN, call_redraw)
-
-
-
-		redraw(self)
-		"""
 
 		def input_cb(key):
 			if self.shall_quit:
@@ -195,6 +169,11 @@ class MainWindow(object):
 			)
 
 		connection.connect()
+
+		def call_redraw(*x):
+			self.draw_interface()
+			invalidate.locked = False
+			return True
 
 		inv = urwid.canvas.CanvasCache.invalidate
 
