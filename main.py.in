@@ -43,18 +43,6 @@ except ImportError, e:
 	sys.exit(1)
 
 
-# XXX: dirty 0.9.9 hack
-versionSplit = urwid.__version__.split(".")
-if versionSplit[0] == "0" and versionSplit[1] == "9" and int(versionSplit[2]) < 9:
-	# we got a 0.9.[0-8] here, create {connect,disconnect,emit}_signal
-	# in urwid which are introduced in 0.9.9 and replace the methods
-	# from the Signals module
-	from urwid import Signals
-	urwid.emit_signal = Signals.emit
-	urwid.connect_signal = Signals.connect
-	urwid.disconnect_signal = Signals.disconnect
-
-
 from urwid import MetaSignals
 
 try:
