@@ -37,7 +37,9 @@ import config
 import tabs
 import connection
 
+import helper.markup
 import helper.code
+
 from connection import parse_from, sushi
 
 from messages import print_tab, print_error, \
@@ -345,7 +347,6 @@ def sushi_message(time, server, sender, target, message):
 					and is_highlighted(server, message))
 
 	def markup_cb(msg):
-		# FIXME overthink this completely
 		def get_nick_color(nick):
 			colors = main_window._palette[14:14+8]
 			i = sum([ord(n) for n in nick]) % len(colors)
@@ -353,10 +354,13 @@ def sushi_message(time, server, sender, target, message):
 
 		if msg.own:
 			return unicode(msg)
-		msg.values["nick"]="'),('%s', '%s'),(msg.base_color, '" % (
-			get_nick_color(msg.values["nick"]), msg.values["nick"])
-		s = "[(msg.base_color, '" + unicode(msg) + "')]"
-		return eval(s)
+		else:
+			return helper.markup.colorize(
+				unicode(msg),
+				msg.values["nick"],
+				get_nick_color(msg.values["nick"]),
+				msg.base_color)
+
 	msg.markup_cb = markup_cb
 
 	print_tab(tab, msg)
