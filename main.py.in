@@ -35,13 +35,11 @@ import glib
 import gobject
 
 try:
-	import urwid.curses_display
 	import urwid
 except ImportError, e:
 	print >> sys.stderr, "Failed to import urwid: %s" % (e)
 	print >> sys.stderr, "Do you have urwid installed?"
 	sys.exit(1)
-
 
 from urwid import MetaSignals
 
@@ -54,8 +52,13 @@ import re
 
 import logging
 import locale
-import gettext
-from gettext import gettext as _
+
+try:
+	import gettext
+	from gettext import gettext as _
+except ImportError:
+	print >> sys.stderr, "You need gettext installed."
+	sys.exit(1)
 
 import config
 import messages
@@ -137,6 +140,7 @@ class MainWindow(object):
 
 	def main(self):
 		""" entry point to start UI """
+
 		self.ui = urwid.raw_display.Screen ()
 		self.ui.register_palette (self._palette)
 
@@ -151,7 +155,11 @@ class MainWindow(object):
 		self.ui.run_wrapper(self.run)
 
 	def run(self):
+		""" setup input handler, invalidate handler to
+			automatically redraw the interface if needed.
 
+			connect to dbus, start mainloop.
+		"""
 
 		def input_cb(key):
 			if self.shall_quit:
@@ -253,6 +261,8 @@ class MainWindow(object):
 		self.main_loop.draw_screen()
 
 	def keypress(self, size, key):
+		""" handle keypress events """
+
 		urwid.emit_signal(self, "keypress", size, key)
 
 		if key != "tab":
@@ -355,7 +365,8 @@ class MainWindow(object):
 
 	def find_server(self, server_name):
 		try:
-			i = [n.name.lower() for n in self.servers].index(server_name.lower())
+			i = [n.name.lower()
+				for n in self.servers].index(server_name.lower())
 		except ValueError:
 			return None
 		else:
@@ -363,7 +374,8 @@ class MainWindow(object):
 
 	def find_tab(self, parent_name, child_name = ""):
 		try:
-			i = [n.name.lower() for n in self.servers].index(parent_name.lower())
+			i = [n.name.lower()
+				for n in self.servers].index(parent_name.lower())
 		except ValueError:
 			return None
 		else:
@@ -371,7 +383,9 @@ class MainWindow(object):
 				return self.servers[i]
 			else:
 				try:
-					j = [n.name.lower() for n in self.servers[i].children].index(child_name.lower())
+					j = [n.name.lower()
+						for n in self.servers[i].children].index(
+							child_name.lower())
 				except ValueError:
 					return None
 				else:
@@ -381,7 +395,8 @@ class MainWindow(object):
 	def add_server(self, server_tab):
 		self.servers.append(server_tab)
 
-		server_tab.support_chantypes = connection.sushi.support_chantypes(server_tab.name)
+		server_tab.support_chantypes = connection.sushi.support_chantypes(
+			server_tab.name)
 
 		urwid.connect_signal(server_tab, "remove",
 			self.handle_server_remove)
@@ -406,7 +421,8 @@ class MainWindow(object):
 
 	@types(id = int)
 	def switch_to_tabid(self, id):
-		""" this is not for use with indexes! """
+		""" Switch to the _visible_ number of the tab. """
+
 		tablist = tabs.tree_to_list(self.servers)
 		if not config.get_bool("nigiri","server_shortcuts"):
 			tablist = [n for n in tablist if type(n) != tabs.Server]
