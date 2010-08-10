@@ -42,7 +42,9 @@ def colorize(text, needle, color, base_color, start=0, end=-1):
 			l.append((base_color,i-p))
 		l.append((color,len(needle)))
 		p = i
-	l.append((base_color,p+i+len(needle)+1))
+	rest = len(text)-p
+	if rest > 0:
+		l.append((base_color,rest))
 
 	return (text, l)
 
