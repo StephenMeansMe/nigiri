@@ -47,6 +47,8 @@ def setup (mw):
 	global main_window
 	main_window = mw
 
+# TODO: overhaul color stuff completely
+
 def get_nick_color(nick):
 	"""
 	Returns a static color for the nick given.
@@ -172,6 +174,7 @@ def print_tab(dest_tab, msg, msgtype="informative"):
 	else:
 		if isinstance(msg, FormattedMessage):
 			markup = msg.markup()
+			msgtype = msg.category
 			if isinstance(markup,tuple):
 				# ("...",[(color,pos),...])
 				new_markup = helper.markup.tuple_to_list(markup)
@@ -187,10 +190,7 @@ def print_tab(dest_tab, msg, msgtype="informative"):
 		tablist[i].output_walker.append(textItem)
 
 		if main_window.current_tab != dest_tab:
-			if isinstance(msg, FormattedMessage):
-				dest_tab.add_status(msg.category)
-			else:
-				dest_tab.add_status(msgtype)
+			dest_tab.add_status(msgtype)
 			main_window.update_divider()
 		else:
 			main_window.body.scroll_to_bottom()
