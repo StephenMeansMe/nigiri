@@ -1,0 +1,76 @@
+
+
+def get_occurances(haystack,needle,l=[],start=0,end=-1):
+	""" return a list with all indices of needle in haystack """
+	i = haystack.find(needle,start)
+	if i == -1: return l
+	return get_occurances(haystack,needle,l+[i],i+1)
+
+def tuple_to_list(t):
+	""" Convert a markup tuple:
+			(text,[(color,pos),...])
+		To a markup list:
+			[(color,textpart),...]
+		This is the opposite to urwid.util.decompose_tagmarkup
+	"""
+	(text,attrs) = t
+	pc = 0
+	l = []
+
+	for (attr,pos) in attrs:
+		if attr == None:
+			l.append(text[pc:pc+pos])
+
+		else:
+			l.append((attr, text[pc:pc+pos]))
+		pc += pos
+
+	return l
+
+
+def colorize(text, needle, color, base_color, start=0, end=-1):
+	""" Color all occurances of needle in text in the given
+		color. The markup will have the tuple-form like:
+			(thetext,[(attr1,pos),...])
+	"""
+	occ = get_occurances(text,needle,start=start,end=end)
+	p = 0
+	l = []
+
+	for i in occ:
+		if i != p:
+			l.append((base_color,i-p))
+		l.append((color,len(needle)))
+		p = i
+	l.append((base_color,p+i+len(needle)+1))
+
+	return (text, l)
+
+
+if __name__ == "__main__":
+
+	print "Testing tuple_to_list."
+
+	r = tuple_to_list(("foobarbaz",[("red",3),("green",3),("blue",3)]))
+	assert r == [("red","foo"),("green","bar"),("blue","baz")]
+
+	r = tuple_to_list(("foobarbaz",[("red",3),(None,3),("blue",3)]))
+	assert r == [("red","foo"),"bar",("blue","baz")]
+
+	print "Success."
+
+	print "Testing get_occurances."
+	assert [0,1,2,3] == get_occurances("aaaa","a")
+	assert [3] == get_occurances("abcde","d")
+	assert [] == get_occurances("foo","x")
+	print "Success."
+
+	print "Testing colorize."
+	text = "00:11 <nick> Das ist ein Test."
+	color = "green"
+	nick = "nick"
+	base_color = "default"
+
+	assert (text,[("default",7),("green",4),("default",19)]) == colorize(
+		text,nick,color,base_color)
+	print "Success."
