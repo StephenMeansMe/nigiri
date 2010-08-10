@@ -132,7 +132,8 @@ class FormattedMessage(object):
 	def markup(self):
 		if self.markup_cb:
 			return self.markup_cb(self)
-		return unicode(self)
+		print_debug("Markup with %s." % (self.base_color))
+		return [(self.base_color, unicode(self))]
 
 
 @types (mtype=basestring, template_id=basestring, values=dict)

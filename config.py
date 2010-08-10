@@ -89,12 +89,12 @@ def set_defaults():
 	defaults["chatting"]["nick_separator"] = ": "
 
 	defaults["colors"] = {}
-	defaults["colors"]["messages"] = "text_fg_gray"
-	defaults["colors"]["messages_own"] = "text_fg_white"
+	defaults["colors"]["messages"] = "blue"
+	defaults["colors"]["messages_own"] = "gray"
 	defaults["colors"]["messages_highlight"] = "text_fg_red"
-	defaults["colors"]["actions"] = "text_fg_gray"
-	defaults["colors"]["actions_own"] = "text_fg_green"
-	defaults["colors"]["informative"] = "text_fg_gray"
+	defaults["colors"]["actions"] = "black"
+	defaults["colors"]["actions_own"] = "text_fg_gray"
+	defaults["colors"]["informative"] = "blue"
 
 	defaults["templates"] = {}
 	# misc
