@@ -324,6 +324,17 @@ def cmd_maki(main_window, argv):
 		usage()
 		return
 
+def cmd_me(main_window, argv):
+	""" /me <text>
+		Action in third person.
+	"""
+	if not argv:
+		return print_notification("Usage: /me <text>")
+	ct = main_window.current_tab
+	if not type(ct) in (tabs.Channel, tabs.Query):
+		return print_notification("You have to be on a channel or query.")
+	connection.sushi.action(ct.parent.name, ct.name, " ".join(argv[1:]))
+
 def cmd_names(main_window, argv):
 	""" /names """
 	if no_connection():
@@ -397,6 +408,13 @@ def cmd_python(main_window, argv):
 def cmd_quit(main_window, argv):
 	""" /quit """
 	main_window.quit()
+
+def cmd_reload(main_window, argv):
+	""" /reload
+		Reload the configuration.
+	"""
+	config.setup()
+	print_notification("Config reloaded.")
 
 def cmd_remove_server(main_window, argv):
 	""" /remove_server <name> """
@@ -472,11 +490,13 @@ _command_dict = {
 	"join": cmd_join,
 	"load": cmd_load,
 	"maki": cmd_maki,
+	"me" : cmd_me,
 	"names": cmd_names,
 	"overview": cmd_overview,
 	"part": cmd_part,
 	"python": cmd_python,
 	"quit": cmd_quit,
+	"reload" : cmd_reload,
 	"remove_server": cmd_remove_server,
 	"servers": cmd_servers,
 	"unignore" : cmd_unignore,
