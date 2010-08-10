@@ -39,6 +39,7 @@ import time
 import config
 from typecheck import types
 import tabs
+import helper
 
 main_window = None
 
@@ -144,9 +145,8 @@ def format_message(mtype, template_id, values, highlight = False, own = False):
 
 	values["time"] = time.strftime(config.get("templates", "datestring"))
 
-	base_color = config.get("colors", generic_type, "text_fg_gray")
+	base_color = config.get("colors", generic_type, "default")
 	template = config.get("templates", template_id)
-#	main_window.print_text("base_color = %s, own = %s, mtype = %s\n" % (base_color, own, generic_type))
 
 	msg = FormattedMessage(mtype, template, values, base_color, highlight, own)
 
@@ -171,11 +171,20 @@ def print_tab(dest_tab, msg, msgtype="informative"):
 
 	else:
 		if isinstance(msg, FormattedMessage):
-			markup = [(msg.base_color, msg.markup())]
+			markup = msg.markup()
+			if isinstance(markup,tuple):
+				# ("...",[(color,pos),...])
+				new_markup = helper.markup.tuple_to_list(markup)
+				textItem = urwid.Text(new_markup)
+			elif isinstance(markup,list):
+				# [(color,text),...]
+				textItem = urwid.Text(markup)
+			else:
+				textItem = urwid.Text(markup)
 		else:
-			markup = msg
+			textItem = urwid.Text(msg)
 
-		tablist[i].output_walker.append(urwid.Text(markup))
+		tablist[i].output_walker.append(textItem)
 
 		if main_window.current_tab != dest_tab:
 			if isinstance(msg, FormattedMessage):
@@ -185,8 +194,6 @@ def print_tab(dest_tab, msg, msgtype="informative"):
 			main_window.update_divider()
 		else:
 			main_window.body.scroll_to_bottom()
-
-		#main_window.draw_interface()
 
 def print_tab_notification(tab, msg):
 	print_tab(tab, "*** Notification: " + msg)
