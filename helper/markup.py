@@ -28,6 +28,36 @@ def tuple_to_list(t):
 	return l
 
 
+def colorize_mult(text, needles, colors, base_color, start=0, end=-1):
+
+	# list sorted descending by needle length
+	needles = sorted(b, cmp=lambda a,b: ((len(a)>len(b) and -1) or (len(a)<len(b) and 1) or 0))
+
+	if not needles: return text
+
+	def splitmatches(text,needle,ol):
+		for i in get_occurances(text,needle):
+			ol.append((colors[needle],text[i:i+len(needle)]))
+		return ol
+
+	def mutate(il,ol,needle,color):
+		for (attr,text) in il:
+			occ = get_occurances(text,needle)
+			if occ:
+				splitmatches(text,needle)
+			else:
+				ol.append((attr,text))
+
+
+		return ol
+
+	l = splitmatches(text, needles[0], [])
+
+	for needle in needles[1:]:
+		l = mutate(l,[],needle,colors[needle])
+
+	return l
+
 def colorize(text, needle, color, base_color, start=0, end=-1):
 	""" Color all occurances of needle in text in the given
 		color. The markup will have the tuple-form like:
