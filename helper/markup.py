@@ -28,33 +28,57 @@ def tuple_to_list(t):
 	return l
 
 
-def colorize_mult(text, needles, colors, base_color, start=0, end=-1):
+def colorize_mult(text, needles, colors, base_color="default"):
+	""" colorize more than one needle with a color.
+		If base_color is given, the text not matching a needle
+		is colored with the base_color.
 
+		Example: colorize_mult("foo bar baz",["foo","baz"],
+			{"foo":"green","baz":"blue"}) ->
+			[("green","foo")," bar ",("blue","baz")]
+
+				colorize_mult("foo bar baz",["foo","baz"],
+			{"foo":"green","baz":"blue"}, base_color="red") ->
+			[("green","foo"),("red"," bar "),("blue","baz")]
+		Returns a markup list.
+	"""
 	# list sorted descending by needle length
-	needles = sorted(b, cmp=lambda a,b: ((len(a)>len(b) and -1) or (len(a)<len(b) and 1) or 0))
+	needles = sorted(needles, cmp=lambda a,b: (
+		(len(a)>len(b) and -1) or (len(a)<len(b) and 1) or 0))
 
-	if not needles: return text
+	def join(l,elem):
+		nl = []
+		for i in l[:-1]:
+			if i != '':
+				nl.append(i)
+			nl.append(elem)
+		if l and l[-1] != '':
+			nl.append(l[-1])
+		return nl
 
-	def splitmatches(text,needle,ol):
-		for i in get_occurances(text,needle):
-			ol.append((colors[needle],text[i:i+len(needle)]))
-		return ol
-
-	def mutate(il,ol,needle,color):
-		for (attr,text) in il:
-			occ = get_occurances(text,needle)
-			if occ:
-				splitmatches(text,needle)
+	l = [text]
+	for needle in needles:
+		nl = []
+		for i in l:
+			if isinstance(i,basestring):
+				split = i.split(needle)
+				if len(split) > 1:
+					x = join(split,(colors[needle],needle))
+					nl = nl + x
+				else:
+					nl.append(i)
 			else:
-				ol.append((attr,text))
+				nl.append(i)
+		l = nl
 
-
-		return ol
-
-	l = splitmatches(text, needles[0], [])
-
-	for needle in needles[1:]:
-		l = mutate(l,[],needle,colors[needle])
+	if base_color != "default":
+		nl = []
+		for i in l:
+			if isinstance(i,basestring):
+				nl.append((base_color,i))
+			else:
+				nl.append(i)
+		l = nl
 
 	return l
 
@@ -73,7 +97,7 @@ def colorize(text, needle, color, base_color, start=0, end=-1):
 				l.append((base_color,i-p))
 		l.append((color,len(needle)))
 		p = i
-	rest = len(text)-p
+	rest = len(text)-(p+len(needle))
 	if rest > 0:
 		l.append((base_color,rest))
 
@@ -106,4 +130,13 @@ if __name__ == "__main__":
 
 	assert (text,[("default",7),("green",4),("default",19)]) == colorize(
 		text,nick,color,base_color)
+	print "Success."
+
+	print "Testing colorize_mult."
+	assert colorize_mult("foo bar baz",["foo","baz"],
+			{"foo":"green","baz":"blue"}) == [
+			("green","foo")," bar ",("blue","baz")]
+	assert colorize_mult("foo bar baz",["foo","baz"],
+			{"foo":"green","baz":"blue"}, base_color="red") == [
+			("green","foo"),("red"," bar "),("blue","baz")]
 	print "Success."
