@@ -118,7 +118,7 @@ class MainWindow(object):
 
 	for type, bg in (
 			("div_fg_", "dark cyan"),
-			("text_fg_", "default")):
+			("", "default")):
 		for name, color in (
 				("red","dark red"),
 				("blue", "dark blue"),
