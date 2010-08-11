@@ -313,6 +313,22 @@ def current_server_tab_print(server, message):
 	else:
 		print_tab(current_tab, message)
 
+
+def color_nick_markup_cb(msg,values=["nick"]):
+	def get_nick_color(nick):
+		colors = main_window._palette[14:14+8]
+		i = sum([ord(n) for n in nick]) % len(colors)
+		return colors[i][0]
+
+	if msg.own:
+		return msg._markup()
+	else:
+		return helper.markup.colorize(
+					unicode(msg),
+					msg.values["nick"],#[msg.values[n] for n in values],
+					get_nick_color(msg.values["nick"]),#[get_nick_color(msg.values[n]) for n in values],
+					msg.base_color)
+
 # message signals
 
 def sushi_action(time, server, sender, target, message):
@@ -346,22 +362,7 @@ def sushi_message(time, server, sender, target, message):
 		highlight = (nick != tab.parent.get_nick())
 					and is_highlighted(server, message))
 
-	def markup_cb(msg):
-		def get_nick_color(nick):
-			colors = main_window._palette[14:14+8]
-			i = sum([ord(n) for n in nick]) % len(colors)
-			return colors[i][0]
-
-		if msg.own:
-			return msg._markup()
-		else:
-			return helper.markup.colorize(
-				unicode(msg),
-				msg.values["nick"],
-				get_nick_color(msg.values["nick"]),
-				msg.base_color)
-
-	msg.markup_cb = markup_cb
+	msg.markup_cb = color_nick_markup_cb
 
 	print_tab(tab, msg)
 
@@ -375,6 +376,8 @@ def sushi_ctcp(time, server, sender, target, message):
 		 "message": message},
 		own = (nick == own_nick),
 		highlight = is_highlighted(server, message))
+
+	msg.markup_cb = color_nick_markup_cb
 
 	if target[0] in sushi.support_chantypes(server):
 		tab = find_target_tab(server, target)
@@ -393,6 +396,8 @@ def sushi_notice(time, server, sender, target, message):
 		 "message": message},
 		own = (nick == own_nick),
 		highlight = is_highlighted(server, message))
+
+	msg.markup_cb = color_nick_markup_cb
 
 	if target[0] in sushi.support_chantypes(server):
 		tab = find_target_tab(server, target)
@@ -413,6 +418,8 @@ def sushi_invite(time, server, sender, channel, who):
 		 "channel": channel},
 		own = (sender_name == main_window.find_server(server).get_nick()),
 		highlight = (who == sender_name))
+
+	msg.markup_cb = color_nick_markup_cb
 
 	current_server_tab_print(server, msg)
 
@@ -446,6 +453,8 @@ def sushi_join(time, server, sender, channel):
 		own = (nick == server_tab.get_nick()),
 		highlight = False)
 
+	msg.markup_cb = color_nick_markup_cb
+
 	print_tab(tab, msg)
 
 
@@ -474,6 +483,7 @@ def sushi_kick(time, server, sender, channel, who, message):
 		 "reason": message},
 		own = (who == stab.get_nick()),
 		highlight = (nick == tab.parent.get_nick()))
+	msg.markup_cb = color_nick_markup_cb
 
 	print_tab(tab, msg)
 
@@ -501,6 +511,8 @@ def sushi_nick(time, server, old, new):
 
 	else:
 		# print status message in channel tab
+		old = connection.parse_from(old)[0]
+		new = connection.parse_from(new)[0]
 
 		msg = format_message("actions", "nick",
 			{"nick": old,
@@ -508,9 +520,12 @@ def sushi_nick(time, server, old, new):
 			own = False,
 			highlight = False)
 
+		msg.markup_cb = color_nick_markup_cb
+		msg.markup_cb_kwargs = {"values":["nick","new_nick"]}
+
 		for tab in stab.children:
 			if type(tab) == tabs.Channel and tab.nicklist.has_nick(old):
-				tab.nicklist.rename_nick(new)
+				tab.nicklist.rename_nick(old,new)
 				print_tab(tab, msg)
 
 def sushi_mode(time, server, sender, target, mode, param):
@@ -532,6 +547,7 @@ def sushi_mode(time, server, sender, target, mode, param):
 			 "target": target},
 			own = (nick == main_window.find_server(server).get_nick()),
 			highlight = (target == main_window.find_server(server).get_nick()))
+		msg.markup_cb = color_nick_markup_cb
 
 		tab = main_window.find_tab(server, target)
 		print_tab(tab, msg)
@@ -567,6 +583,7 @@ def sushi_part(time, server, sender, channel, message):
 		 "reason": message},
 		own = (tab.parent.get_nick() == nick),
 		highlight = False)
+	msg.markup_cb = color_nick_markup_cb
 
 	print_tab(tab, msg)
 
@@ -585,6 +602,7 @@ def sushi_quit(time, server, sender, message):
 		 "reason": message},
 		own = (nick == server_tab.get_nick()),
 		highlight = False)
+	msg.markup_cb = color_nick_markup_cb
 
 	if nick == server_tab.get_nick():
 		# we quit
@@ -625,6 +643,8 @@ def sushi_topic(time, server, sender, channel, topic):
 		 "topic": topic},
 		own = (tab.parent.get_nick() == nick),
 		highlight = False)
+	if nick:
+		msg.markup_cb = color_nick_markup_cb
 
 	print_tab(tab, msg)
 
