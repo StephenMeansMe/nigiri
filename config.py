@@ -60,7 +60,7 @@ def set_defaults():
 		A further point is that this way realizes
 		"private" values which are not written
 		to config files but can be used with the same
-		API. For example the section "gladefiles".
+		API.
 	"""
 	global defaults
 

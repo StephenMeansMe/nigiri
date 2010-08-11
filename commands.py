@@ -413,6 +413,7 @@ def cmd_reload(main_window, argv):
 	""" /reload
 		Reload the configuration.
 	"""
+	# FIXME
 	config.setup()
 	print_notification("Config reloaded.")
 
