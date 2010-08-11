@@ -66,6 +66,7 @@ class FormattedMessage(object):
 		self.own = own 	# we triggered that/we are meant by it
 
 		self.markup_cb = None
+		self.markup_cb_kwargs = {}
 
 	def __str__(self):
 		try:
@@ -78,7 +79,7 @@ class FormattedMessage(object):
 
 	def markup(self):
 		if self.markup_cb:
-			return self.markup_cb(self)
+			return self.markup_cb(self, **self.markup_cb_kwargs)
 		return self._markup()
 
 
