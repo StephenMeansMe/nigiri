@@ -323,11 +323,19 @@ def color_nick_markup_cb(msg,values=["nick"]):
 	if msg.own:
 		return msg._markup()
 	else:
-		return helper.markup.colorize(
-					unicode(msg),
-					msg.values["nick"],#[msg.values[n] for n in values],
-					get_nick_color(msg.values["nick"]),#[get_nick_color(msg.values[n]) for n in values],
-					msg.base_color)
+		# Escape all values
+		for val in msg.values:
+			msg.values[val] = msg.values[val].replace(
+				"\\","\\\\").replace("'","\\'")
+
+		# Build markup tuples around values
+		for val in values:
+			msg.values[val] = "'),(%s,%s),(%s,'" % (
+				repr(get_nick_color(msg.values[val])),
+				repr(msg.values[val]),
+				repr(msg.base_color))
+		x = "[(%s,'%s')]" % (repr(msg.base_color),unicode(msg))
+		return eval(x)
 
 # message signals
 
