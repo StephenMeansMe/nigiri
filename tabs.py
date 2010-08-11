@@ -241,12 +241,10 @@ class NickList(dict):
 	def __init__(self):
 		dict.__init__(self)
 
-	@types(nick = (str, unicode, String))
-	def add_nick(self, nick):
-		# TODO:  would be nice to have
-		# TODO:: the hostmask as value but names()
-		# TODO:: does not support this yet
-		self[unicode(nick)] = 1
+	@types(host = (str, unicode, String))
+	def add_nick(self, host):
+		(nick,ident,host) = connection.parse_from(host)
+		self[unicode(nick)] = (ident,host)
 
 	@types(nick = (str, unicode, String))
 	def get_hostmask(self, nick):
