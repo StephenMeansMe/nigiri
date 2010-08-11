@@ -47,62 +47,6 @@ def setup (mw):
 	global main_window
 	main_window = mw
 
-# TODO: overhaul color stuff completely
-
-def get_nick_color(nick):
-	"""
-	Returns a static color for the nick given.
-	The returned color depends on the color list
-	set in config module.
-	"""
-	#return colors[sum([ord(n) for n in nick])%len(colors)]
-	pass
-
-color_tab = {
-	"30": "text_fg_black",
-	"31": "text_fg_red",
-	"32": "text_fg_green",
-	"33": "text_fg_yellow",
-	"34": "text_fg_blue",
-	"35": "text_fg_magenta",
-	"36": "text_fg_cyan",
-	"37": "text_fg_white",
-
-	"1": "bold_text",
-	"0": "body" # normal
-	}
-
-def parse_markup(input):
-	"""
-	search in input for \e and translate the ansi color
-	number to the urwid color string.
-	Parses \e[xm as well as \e[x;y;zm
-	"""
-	markup = []
-
-	split = input.split ("\033")
-
-	if split[0]:
-		markup.append (("body",split[0]))
-
-	for sub in split[1:]:
-		if not sub:
-			continue
-
-		color,text = sub.split ("m", 1)
-
-		for subcolor in color.split (";"):
-			subcolor = subcolor.lstrip ("[")
-
-			try:
-				attr = color_tab[subcolor]
-			except KeyError:
-				attr = "body"
-
-		markup.append ((attr, text))
-
-	return markup
-
 class FormattedMessage(object):
 
 	@property
@@ -151,9 +95,10 @@ def format_message(mtype, template_id, values, highlight = False, own = False):
 	base_color = config.get("colors", generic_type, "default")
 	template = config.get("templates", template_id)
 
-	msg = FormattedMessage(mtype, template, values, base_color, highlight, own)
+	msg = FormattedMessage(
+		mtype, template, values, base_color, highlight, own)
 
-	if None == template:
+	if template == None:
 		msg.template = "TEMPLATE_ERROR(%s)" % template_id
 
 	return msg
