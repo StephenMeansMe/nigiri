@@ -135,12 +135,11 @@ def maki_connected(sushi_interface):
 
 		# informative signals
 		connect_signal("banlist", sushi_banlist)
-		connect_signal("cannot_join", sushi_cannot_join)
 		connect_signal("list", sushi_list)
 		connect_signal("motd", sushi_motd)
 		connect_signal("names", sushi_names)
-		connect_signal("no_such", sushi_no_such)
 		connect_signal("whois", sushi_whois)
+		connect_signal("error", sushi_error)
 
 		# status signals
 		connect_signal("connect", sushi_connect_attempt)
@@ -330,6 +329,7 @@ def sushi_action(time, server, sender, target, message):
 		highlight = (nick != tab.parent.get_nick()) and is_highlighted(server, message))
 
 	print_tab(tab, msg)
+
 
 def sushi_message(time, server, sender, target, message):
 	nick = parse_from(sender)[0]
@@ -640,15 +640,6 @@ def sushi_banlist(time, server, channel, mask, who, when):
 	"""
 	pass
 
-def sushi_cannot_join(time, server, channel, reason):
-	""" reason is str:
-		l - channel is full
-		i - channel is invite only
-		b - you're banned
-		k - channel has key set
-	"""
-	pass
-
 def sushi_list(time, server, channel, users, topic):
 	""" channel == "" and users == -1 and topic == "" => EOL """
 	pass
@@ -663,6 +654,8 @@ def sushi_motd(time, server, message):
 
 def sushi_names(time, server, channel, nicks, prefixes, _call_count = {"n":0}):
 	""" len(nicks) == 0 => EOL """
+	# TODO: colorize
+
 	tab = find_channel_tab(server, channel)
 
 	if not tab:
@@ -698,14 +691,6 @@ def sushi_names(time, server, channel, nicks, prefixes, _call_count = {"n":0}):
 		msg = format_message("informative", "names_end", {})
 		print_tab(tab, msg)
 		_call_count["n"] = 0
-
-def sushi_no_such(time, server, target, type):
-	""" type is str:
-		n - nick/channel
-		s - server
-		c - channel
-	"""
-	pass
 
 def sushi_whois(time, server, nick, message):
 	""" message == "" => EOL """
@@ -753,6 +738,47 @@ def sushi_away_message(time, server, nick, message):
 def sushi_shutdown(time):
 	pass
 
+def sushi_error(time, server, domain, reason, arguments):
+
+	def noSuch(time, server, target, type):
+		if type == "nick":
+			# no such nick/channel
+			pass
+		elif type == "server":
+			# no such server
+			pass
+		elif type == "channel":
+			# no such channel
+			pass
+
+	def cannotJoin(time, server, channel, reason):
+		""" The channel could not be joined.
+			reason : { l (full), i (invite only), b (banned), k (key) }
+		"""
+		if reason == "full":
+			# channel is full
+			pass
+		elif reason == "invite":
+			# channel is invite only
+			pass
+		elif reason == "banned":
+			# you're bannend
+			pass
+		elif reason == "key":
+			# needs key
+			pass
+
+	if domain == "no_such":
+		noSuch(time, server, arguments[0], reason)
+
+	elif domain == "cannot_join":
+		cannotJoin(time, server, arguments[0], reason)
+
+	elif domain == "privilege":
+		if reason == "channel_operator":
+			# need op
+			pass
+
 def sushi_dcc_send(time, id, server, sender, filename,
 				size, progress, speed, status):
 	""" handle dcc incoming/outgoing """
@@ -790,7 +816,9 @@ def sushi_dcc_send(time, id, server, sender, filename,
 			elif status & s_running and status & s_incoming:
 				if not self.new_register.has_key(id):
 					# notify about auto accepted file transfer
-					msg = format_message("informative", "dcc_file_auto_accept",
+					msg = format_message(
+							"informative",
+							"dcc_file_auto_accept",
 							{"sender": sender,
 							 "filename": filename,
 							 "size": size})
