@@ -2,4 +2,3 @@
 - colors (%Cn,m)
 - implement more commands
 - implement more signals
-- reconnect registered signals on maki reconnect
