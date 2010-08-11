@@ -353,7 +353,7 @@ def sushi_message(time, server, sender, target, message):
 			return colors[i][0]
 
 		if msg.own:
-			return unicode(msg)
+			return msg._markup()
 		else:
 			return helper.markup.colorize(
 				unicode(msg),

@@ -73,15 +73,18 @@ class FormattedMessage(object):
 		except KeyError,e:
 			return "TEMPLATE_MISSING_KEY(%s)" % (e)
 
+	def _markup(self):
+		return [(self.base_color, unicode(self))]
+
 	def markup(self):
 		if self.markup_cb:
 			return self.markup_cb(self)
-		print_debug("Markup with %s." % (self.base_color))
-		return [(self.base_color, unicode(self))]
+		return self._markup()
 
 
 @types (mtype=basestring, template_id=basestring, values=dict)
-def format_message(mtype, template_id, values, highlight = False, own = False):
+def format_message(mtype, template_id, values, highlight=False, own=False):
+	""" factory method for FormattedMessage """
 	if highlight:
 		generic_type = mtype + "_highlight"
 	elif own:
