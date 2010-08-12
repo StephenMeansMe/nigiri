@@ -61,6 +61,25 @@ def send_text(tab, text):
 
 	connection.sushi.message(server_name, tab.name, text)
 
+def need_active_tab(fun):
+	""" decorator for command handlers which require an active tab """
+	def notifier(main_window, argv):
+		if not main_window.current_tab:
+			return print_error("You have to be on an active tab.")
+		return fun(main_window, argv)
+	return notifier
+
+def need_sushi(fun):
+	""" decorator for command handlers which require a sushi conn. """
+	def notifier(main_window, argv):
+		if no_connection():
+			return
+		return fun(main_window, argv)
+	return notifier
+
+# Command handler
+
+@need_sushi
 def cmd_add_server(main_window, argv):
 	""" /add_server <name> <address> <port> <nick> <real> """
 	if no_connection():
@@ -109,6 +128,7 @@ def cmd_close(main_window, argv):
 	main_window.switch_to_next_tab()
 	to_delete.remove()
 
+@need_sushi
 def cmd_connect(main_window, argv):
 	""" /connect <server> """
 	if no_connection():
@@ -125,6 +145,8 @@ def cmd_connect(main_window, argv):
 
 	connection.sushi.connect(argv[1])
 
+@need_sushi
+@need_active_tab
 def cmd_dcc(main_window, argv):
 	""" /dcc chat <target>
 	/dcc send <target> <path>
@@ -220,18 +242,20 @@ def cmd_help(main_window, argv):
 
 	print_normal(msg)
 
+@need_sushi
+@need_active_tab
 def cmd_ignore(main_window, argv):
 	""" /ignore <pattern> """
 	if len(argv) != 2:
 		return print_notification("Usage: /ignore <pattern>")
-	if not main_window.current_tab:
-		return print_notification("You have to be on a tab.")
 
 	server = tabs.get_server(main_window.current_tab).name
 	connection.sushi.ignore(server, argv[1])
 
 	print_notification("Ignored user %(user)s." % {"user":argv[1]})
 
+@need_sushi
+@need_active_tab
 def cmd_ignores(main_window, argv):
 	""" /ignores """
 	if not main_window.current_tab:
@@ -246,6 +270,8 @@ def cmd_ignores(main_window, argv):
 		print_normal("Ignored users: %(ulist)s." % {
 			"ulist":", ".join(ignores)})
 
+@need_sushi
+@need_active_tab
 def cmd_join(main_window, argv):
 	""" /join <channel> [<key>] """
 	key = ""
@@ -261,10 +287,6 @@ def cmd_join(main_window, argv):
 		return
 
 	server_tab = tabs.get_server(main_window.current_tab)
-
-	if not server_tab:
-		print_error("No tab active.")
-		return
 
 	connection.sushi.join(server_tab.name, channel, key)
 	print_notification("Joining channel '%s'." % (channel))
@@ -324,6 +346,7 @@ def cmd_maki(main_window, argv):
 		usage()
 		return
 
+@need_sushi
 def cmd_me(main_window, argv):
 	""" /me <text>
 		Action in third person.
@@ -333,6 +356,7 @@ def cmd_me(main_window, argv):
 		return print_notification("You have to be on a channel or query.")
 	connection.sushi.action(ct.parent.name, ct.name, " ".join(argv[1:]))
 
+@need_sushi
 def cmd_mode(main_window, argv):
 	""" /mode <target> [[+|-]<mode> [<param>]]
 		Set (+|-) or query a mode on a target with an optional parameter.
@@ -348,17 +372,13 @@ def cmd_mode(main_window, argv):
 	if not ct:
 		return print_error("You have to be on an active tab.")
 
-	if type(ct) == tabs.Server:
-		server = ct.name
-	else:
-		server = ct.parent.name
+	server = tabs.get_server(main_window.current_tab).name
 
 	connection.sushi.mode(server, argv[1], " ".join(argv[2:]))
 
+@need_sushi
 def cmd_names(main_window, argv):
 	""" /names """
-	if no_connection():
-		return
 	ct = main_window.current_tab
 	if type(ct) != tabs.Channel:
 		print_error("You must be on a channel to use /names.")
@@ -400,6 +420,7 @@ def cmd_overview(main_window, argv):
 
 	print_normal("End of overview.")
 
+@need_sushi
 def cmd_part(main_window, argv):
 	""" /part [<reason>] """
 	if no_connection():
@@ -437,6 +458,7 @@ def cmd_reload(main_window, argv):
 	config.setup()
 	print_notification("Config reloaded.")
 
+@need_sushi
 def cmd_remove_server(main_window, argv):
 	""" /remove_server <name> """
 	if no_connection():
@@ -455,11 +477,9 @@ def cmd_remove_server(main_window, argv):
 	connection.sushi.server_remove(name, "", "")
 	print_notification("Server '%s' successfully removed." % (name))
 
+@need_sushi
 def cmd_servers(main_window, argv):
 	""" /servers """
-	if no_connection():
-		return
-
 	active_servers = connection.sushi.servers()
 
 	print_normal("Servers known to maki: ")
@@ -470,6 +490,7 @@ def cmd_servers(main_window, argv):
 			connected = "not connected"
 		print_normal("- '%s' (%s)" % (name, connected))
 
+@need_sushi
 def cmd_unignore(main_window, argv):
 	if len(argv) != 2:
 		return print_notification("Usage: /unignore <pattern>")
