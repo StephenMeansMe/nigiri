@@ -385,6 +385,22 @@ def cmd_names(main_window, argv):
 		return
 	connection.sushi.names(ct.parent.name, ct.name)
 
+@need_sushi
+@need_active_tab
+def cmd_nick(main_window, argv):
+	""" /nick <new nick>
+		Changes the current nick to a new one.
+	"""
+	if len(argv) != 2:
+		return print_notification("Usage: /nick <new nick>")
+
+	if not main_window.current_tab:
+		return print_error("You have to be on an active tab.")
+
+	server = tabs.get_server(main_window.current_tab)
+
+	connection.sushi.nick(server.name, argv[1])
+
 def cmd_overview(main_window, argv):
 	""" /overview [<server>] """
 	if no_connection():
@@ -535,6 +551,7 @@ _command_dict = {
 	"me" : cmd_me,
 	"mode" : cmd_mode,
 	"names": cmd_names,
+	"nick" : cmd_nick,
 	"overview": cmd_overview,
 	"part": cmd_part,
 	"python": cmd_python,
