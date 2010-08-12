@@ -124,7 +124,7 @@ def cmd_away(main_window, argv):
 def cmd_back(main_window, argv):
 	""" /back """
 	server = tabs.get_server(main_window.current_tab)
-	connection.sushi.away(server.name)
+	connection.sushi.back(server.name)
 
 def cmd_clear(main_window, argv):
 	""" /clear [<markup>] """
@@ -275,9 +275,6 @@ def cmd_ignore(main_window, argv):
 @need_active_tab
 def cmd_ignores(main_window, argv):
 	""" /ignores """
-	if not main_window.current_tab:
-		return print_notification("You have to be on a tab.")
-
 	server = tabs.get_server(main_window.current_tab).name
 	ignores = connection.sushi.ignores(server)
 
@@ -388,6 +385,7 @@ def cmd_me(main_window, argv):
 	connection.sushi.action(ct.parent.name, ct.name, " ".join(argv[1:]))
 
 @need_sushi
+@need_active_tab
 def cmd_mode(main_window, argv):
 	""" /mode <target> [[+|-]<mode> [<param>]]
 		Set (+|-) or query a mode on a target with an optional parameter.
@@ -397,11 +395,6 @@ def cmd_mode(main_window, argv):
 	if len(argv) < 2:
 		return print_notification(
 			"Usage: /mode <target> [[+|-]<mode> [<param>]]")
-
-	ct = main_window.current_tab
-
-	if not ct:
-		return print_error("You have to be on an active tab.")
 
 	server = tabs.get_server(main_window.current_tab).name
 
@@ -425,9 +418,6 @@ def cmd_nick(main_window, argv):
 	"""
 	if len(argv) != 2:
 		return print_notification("Usage: /nick <new nick>")
-
-	if not main_window.current_tab:
-		return print_error("You have to be on an active tab.")
 
 	server = tabs.get_server(main_window.current_tab)
 
@@ -559,12 +549,10 @@ def cmd_topic(main_window, argv):
 	connection.sushi.topic(ct.parent.name, ct.name, " ".join(argv[1:]))
 
 @need_sushi
+@need_active_tab
 def cmd_unignore(main_window, argv):
 	if len(argv) != 2:
 		return print_notification("Usage: /unignore <pattern>")
-
-	if not main_window.current_tab:
-		return print_error("You have to be in a tab.")
 
 	server = tabs.get_server(main_window.current_tab).name
 	connection.sushi.unignore(server, argv[1])
