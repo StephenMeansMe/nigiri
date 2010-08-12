@@ -1,4 +1,14 @@
-- colored nicks
 - colors (%Cn,m)
+- would be nice to support libcontrast but:
+  * high color setting is not reliable
+  * can't determine background color if not set by self
+  * two systems (high and low color)
 - implement more commands
+  * mode
 - implement more signals
+  * error
+  * shutdown
+  * user_away
+  * away_message
+  * list?
+  * banlist
