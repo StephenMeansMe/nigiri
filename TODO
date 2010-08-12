@@ -4,7 +4,21 @@
   * can't determine background color if not set by self
   * two systems (high and low color)
 - implement more commands
-  * mode
+  * away
+  * back
+  * topic
+  * ctcp
+  * notice
+  * invite
+  * list
+  * kick
+  * log
+  * nick
+  * oper
+  * raw
+  * who
+  * whois
+- overhaul connection management
 - implement more signals
   * error
   * shutdown
