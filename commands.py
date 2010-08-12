@@ -109,6 +109,16 @@ def cmd_add_server(main_window, argv):
 
 	print_notification("Server '%s' successfully added." % (server_name))
 
+@need_sushi
+@need_active_tab
+def cmd_away(main_window, argv):
+	""" /away <message> """
+	# TODO default away message
+	if len(argv) < 2:
+		return print_notification("/away <message>")
+	server = tabs.get_server(main_window.current_tab)
+	connection.sushi.away(server.name, " ".join(argv[1:]))
+
 def cmd_clear(main_window, argv):
 	""" /clear [<markup>] """
 	if len(argv) == 2 and argv[1] == "markup":
@@ -562,6 +572,7 @@ def cmd_unload(main_window, argv):
 
 _command_dict = {
 	"add_server": cmd_add_server,
+	"away" : cmd_away
 	"clear": cmd_clear,
 	"close": cmd_close,
 	"connect": cmd_connect,
@@ -572,12 +583,14 @@ _command_dict = {
 	"ignores" : cmd_ignores,
 	"j": cmd_join,
 	"join": cmd_join,
+	"kick" : cmd_kick,
 	"load": cmd_load,
 	"maki": cmd_maki,
 	"me" : cmd_me,
 	"mode" : cmd_mode,
 	"names": cmd_names,
 	"nick" : cmd_nick,
+	"notice" : cmd_notice,
 	"overview": cmd_overview,
 	"part": cmd_part,
 	"python": cmd_python,
