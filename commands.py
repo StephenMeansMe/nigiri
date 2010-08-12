@@ -291,6 +291,20 @@ def cmd_join(main_window, argv):
 	connection.sushi.join(server_tab.name, channel, key)
 	print_notification("Joining channel '%s'." % (channel))
 
+@need_sushi
+@need_active_tab
+def cmd_kick(main_window, argv):
+	""" /kick <user> [<reason>]
+		Kick a user from the current channel with an optional reason.
+	"""
+	if len(argv) < 2:
+		return print_notification("Usage: /kick <user> [<reason>]")
+	ct = main_window.current_tab
+	if type(ct) != tabs.Channel:
+		return print_error("You have to be on a channel to do so.")
+	connection.sushi.kick(ct.parent.name, ct.name, argv[1],
+		" ".join(argv[2:])
+
 def cmd_load(main_window, argv):
 	if len(argv) != 2:
 		print_notification("Usage: /load <filename>")
