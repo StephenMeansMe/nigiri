@@ -320,7 +320,7 @@ def cmd_kick(main_window, argv):
 	if type(ct) != tabs.Channel:
 		return print_error("You have to be on a channel to do so.")
 	connection.sushi.kick(ct.parent.name, ct.name, argv[1],
-		" ".join(argv[2:])
+		" ".join(argv[2:]))
 
 def cmd_load(main_window, argv):
 	if len(argv) != 2:
@@ -550,6 +550,15 @@ def cmd_servers(main_window, argv):
 		print_normal("- '%s' (%s)" % (name, connected))
 
 @need_sushi
+@need_active_tab
+def cmd_topic(main_window, argv):
+	""" /topic [<new topic>] """
+	ct = main_window.current_tab
+	if type(ct) != tabs.Channel:
+		return print_error("You have to be on a channel to do so.")
+	connection.sushi.topic(ct.parent.name, ct.name, " ".join(argv[1:]))
+
+@need_sushi
 def cmd_unignore(main_window, argv):
 	if len(argv) != 2:
 		return print_notification("Usage: /unignore <pattern>")
@@ -606,6 +615,7 @@ _command_dict = {
 	"reload" : cmd_reload,
 	"remove_server": cmd_remove_server,
 	"servers": cmd_servers,
+	"topic" : cmd_topic,
 	"unignore" : cmd_unignore,
 	"unload": cmd_unload
 }

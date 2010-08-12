@@ -4,7 +4,6 @@
   * can't determine background color if not set by self
   * two systems (high and low color)
 - implement more commands
-  * topic
   * ctcp
   * invite
   * list
