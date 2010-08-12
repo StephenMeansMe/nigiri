@@ -119,6 +119,13 @@ def cmd_away(main_window, argv):
 	server = tabs.get_server(main_window.current_tab)
 	connection.sushi.away(server.name, " ".join(argv[1:]))
 
+@need_sushi
+@need_active_tab
+def cmd_back(main_window, argv):
+	""" /back """
+	server = tabs.get_server(main_window.current_tab)
+	connection.sushi.away(server.name)
+
 def cmd_clear(main_window, argv):
 	""" /clear [<markup>] """
 	if len(argv) == 2 and argv[1] == "markup":
@@ -572,7 +579,8 @@ def cmd_unload(main_window, argv):
 
 _command_dict = {
 	"add_server": cmd_add_server,
-	"away" : cmd_away
+	"away" : cmd_away,
+	"back" : cmd_back,
 	"clear": cmd_clear,
 	"close": cmd_close,
 	"connect": cmd_connect,
