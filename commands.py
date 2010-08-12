@@ -328,12 +328,32 @@ def cmd_me(main_window, argv):
 	""" /me <text>
 		Action in third person.
 	"""
-	if not argv:
-		return print_notification("Usage: /me <text>")
 	ct = main_window.current_tab
 	if not type(ct) in (tabs.Channel, tabs.Query):
 		return print_notification("You have to be on a channel or query.")
 	connection.sushi.action(ct.parent.name, ct.name, " ".join(argv[1:]))
+
+def cmd_mode(main_window, argv):
+	""" /mode <target> [[+|-]<mode> [<param>]]
+		Set (+|-) or query a mode on a target with an optional parameter.
+		If wether mode nor param are given, this command queries the
+		current modes set.
+	"""
+	if len(argv) < 2:
+		return print_notification(
+			"Usage: /mode <target> [[+|-]<mode> [<param>]]")
+
+	ct = main_window.current_tab
+
+	if not ct:
+		return print_error("You have to be on an active tab.")
+
+	if type(ct) == tabs.Server:
+		server = ct.name
+	else:
+		server = ct.parent.name
+
+	connection.sushi.mode(server, argv[1], " ".join(argv[2:]))
 
 def cmd_names(main_window, argv):
 	""" /names """
@@ -492,6 +512,7 @@ _command_dict = {
 	"load": cmd_load,
 	"maki": cmd_maki,
 	"me" : cmd_me,
+	"mode" : cmd_mode,
 	"names": cmd_names,
 	"overview": cmd_overview,
 	"part": cmd_part,
