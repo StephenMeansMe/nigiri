@@ -377,6 +377,7 @@ def cmd_mode(main_window, argv):
 	connection.sushi.mode(server, argv[1], " ".join(argv[2:]))
 
 @need_sushi
+@need_active_tab
 def cmd_names(main_window, argv):
 	""" /names """
 	ct = main_window.current_tab
@@ -400,6 +401,17 @@ def cmd_nick(main_window, argv):
 	server = tabs.get_server(main_window.current_tab)
 
 	connection.sushi.nick(server.name, argv[1])
+
+@need_sushi
+@need_active_tab
+def cmd_notice(main_window, argv):
+	""" /notice <user> <message>
+		Send a notice to a user.
+	"""
+	if len(argv) < 3:
+		return print_notification("Usage: /notice <user> <message>")
+	server = tabs.get_server(main_window.current_tab)
+	connection.sushi.notice(server.name, argv[1], " ".join(argv[2]))
 
 def cmd_overview(main_window, argv):
 	""" /overview [<server>] """
