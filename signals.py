@@ -144,9 +144,8 @@ def maki_connected(sushi_interface):
 		# status signals
 		connect_signal("connect", sushi_connect_attempt)
 		connect_signal("connected", sushi_connected)
-		connect_signal("away", sushi_away)
-		connect_signal("back", sushi_back)
 		connect_signal("away_message", sushi_away_message)
+		connect_signal("user_away", sushi_user_away)
 		connect_signal("shutdown", sushi_shutdown)
 		connect_signal("dcc_send", sushi_dcc_send)
 
@@ -323,17 +322,25 @@ def color_nick_markup_cb(msg,values=["nick"]):
 	if msg.own:
 		return msg._markup()
 	else:
-		# Escape all values
 		for val in msg.values:
+			# Escape all values
 			msg.values[val] = msg.values[val].replace(
 				"\\","\\\\").replace("'","\\'")
 
-		# Build markup tuples around values
-		for val in values:
-			msg.values[val] = "'),(%s,%s),(%s,'" % (
-				repr(get_nick_color(msg.values[val])),
-				repr(msg.values[val]),
-				repr(msg.base_color))
+			# Build markup tuples around values
+			# This substitutes every input value to the form
+			#   '),('color','value'),('base_color',
+			# and embraces the generated template like this
+			#   [('base_color','unicode(msg)')]
+			# the following form is achieved
+			#   [('base_color','Text '),('color','value'),
+			#   	('base_color','...')]
+			# repr is used for escaping.
+			if val in values:
+				msg.values[val] = "'),(%s,%s),(%s,'" % (
+					repr(get_nick_color(msg.values[val])),
+					repr(msg.values[val]),
+					repr(msg.base_color))
 		x = "[(%s,'%s')]" % (repr(msg.base_color),unicode(msg))
 		return eval(x)
 
@@ -666,7 +673,46 @@ def sushi_banlist(time, server, channel, mask, who, when):
 	""" who can be empty (""), when can be empty (0).
 		mask == "" and who == "" and when == -1 => EOL
 	"""
-	pass
+	self = helper.code.init_function_attrs(sushi_banlist, first_run=True)
+
+	if "" in (mask,who) and when == -1:
+		# EOBL
+		self.first_run = True
+
+		msg = format_message("informative", "banlist_end",
+			{"channel": channel},
+			own = False,
+			highlight = False)
+
+		print_tab(self.tab, msg)
+	elif self.started:
+		# Listing just started
+
+		self.first_run = False
+
+		self.tab = main_window.find_channel_tab(server,channel)
+
+		if not self.tab:
+			# SHOULD NOT HAPPEN (banlist only in active channels)
+			return
+
+		msg = format_message("informative", "banlist_begin",
+			{"channel": channel},
+			own = False,
+			highlight = False)
+
+		print_tab(self.tab, msg)
+	else:
+		# Banlist item
+
+		msg = format_message("informative", "banlist_begin",
+			{"who": who,
+			 "mask": mask,
+			 "when": when},
+			own = False,
+			highlight = False)
+
+		print_tab(self.tab, msg)
 
 def sushi_list(time, server, channel, users, topic):
 	""" channel == "" and users == -1 and topic == "" => EOL """
@@ -724,48 +770,6 @@ def sushi_whois(time, server, nick, message):
 	""" message == "" => EOL """
 	pass
 
-# status signals
-
-def sushi_connect_attempt(time, server):
-	tab = main_window.find_server(server)
-
-	if not tab:
-		tab = tabs.Server(name = server)
-
-		main_window.add_server(tab)
-
-		print_tab_notification(tab, "Connecting...")
-
-	elif tab.connected:
-		tab.set_connected(False)
-
-		print_tab_notification(tab, "Reconnecting...")
-
-	else:
-		print_tab_notification(tab, "Connecting...")
-
-def sushi_connected(time, server):
-	tab = main_window.find_server(server)
-
-	if not tab:
-		tab = tabs.Server(name = server)
-		main_window.add_server(tab)
-
-	print_tab_notification(tab, "Connected.")
-	tab.set_connected(True)
-
-def sushi_away(time, server):
-	pass
-
-def sushi_back(time, server):
-	pass
-
-def sushi_away_message(time, server, nick, message):
-	pass
-
-def sushi_shutdown(time):
-	pass
-
 def sushi_error(time, server, domain, reason, arguments):
 
 	def noSuch(time, server, target, type):
@@ -806,6 +810,45 @@ def sushi_error(time, server, domain, reason, arguments):
 		if reason == "channel_operator":
 			# need op
 			pass
+
+# status signals
+
+def sushi_connect_attempt(time, server):
+	tab = main_window.find_server(server)
+
+	if not tab:
+		tab = tabs.Server(name = server)
+
+		main_window.add_server(tab)
+
+		print_tab_notification(tab, "Connecting...")
+
+	elif tab.connected:
+		tab.set_connected(False)
+
+		print_tab_notification(tab, "Reconnecting...")
+
+	else:
+		print_tab_notification(tab, "Connecting...")
+
+def sushi_connected(time, server):
+	tab = main_window.find_server(server)
+
+	if not tab:
+		tab = tabs.Server(name = server)
+		main_window.add_server(tab)
+
+	print_tab_notification(tab, "Connected.")
+	tab.set_connected(True)
+
+def sushi_away_message(time, server, nick, message):
+	pass
+
+def sushi_user_away(time, server, from_str, away):
+	pass
+
+def sushi_shutdown(time):
+	pass
 
 def sushi_dcc_send(time, id, server, sender, filename,
 				size, progress, speed, status):
