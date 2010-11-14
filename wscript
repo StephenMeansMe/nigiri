@@ -31,7 +31,7 @@ def build (ctx):
 		source = 'main.py.in',
 		target = 'main.py',
 		install_path = '${DATAROOTDIR}/sushi/nigiri',
-		chmod = 0755,
+		chmod = Utils.O755,
 		SUSHI_VERSION = ctx.env.VERSION
 	)
 
