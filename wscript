@@ -1,58 +1,57 @@
 #!/usr/bin/env python
 
-import Utils
+from waflib import Utils
 
 APPNAME = 'nigiri'
 VERSION = '1.4.0'
 
-srcdir = '.'
-blddir = 'build'
+top = '.'
+out = 'build'
 
-def configure (conf):
-	conf.check_tool('gnu_dirs')
-	conf.check_tool('misc')
+def configure (ctx):
+	ctx.load('gnu_dirs')
 
-	conf.find_program('gzip', var = 'GZIP')
+	ctx.find_program('gzip', var = 'GZIP')
 
-	conf.env.VERSION = VERSION
+	ctx.env.VERSION = VERSION
 
-	conf.sub_config('po')
+	ctx.recurse('po')
 
-def build (bld):
-	bld.add_subdirs('po')
+def build (ctx):
+	ctx.install_files('${DATAROOTDIR}/sushi/nigiri', ctx.path.ant_glob('*.py'))
+	ctx.install_files('${DATAROOTDIR}/sushi/nigiri/extends', ctx.path.ant_glob('extends/*.py'))
+	ctx.install_files('${DATAROOTDIR}/sushi/nigiri/helper', ctx.path.ant_glob('helper/*.py'))
+	ctx.install_files('${DATAROOTDIR}/sushi/nigiri/plugins', ctx.path.ant_glob('plugins/*.py'))
 
-	bld.install_files('${DATAROOTDIR}/sushi/nigiri', bld.glob('*.py'))
-	bld.install_files('${DATAROOTDIR}/sushi/nigiri/extends', bld.glob('extends/*.py'))
-	bld.install_files('${DATAROOTDIR}/sushi/nigiri/helper', bld.glob('helper/*.py'))
-	bld.install_files('${DATAROOTDIR}/sushi/nigiri/plugins', bld.glob('plugins/*.py'))
-
-	bld.symlink_as('${BINDIR}/nigiri', Utils.subst_vars('${DATAROOTDIR}/sushi/nigiri/main.py', bld.env))
+	ctx.symlink_as('${BINDIR}/nigiri', Utils.subst_vars('${DATAROOTDIR}/sushi/nigiri/main.py', ctx.env))
 
 	# FIXME
-	bld.new_task_gen(
+	ctx(
 		features = 'subst',
 		source = 'main.py.in',
 		target = 'main.py',
 		install_path = '${DATAROOTDIR}/sushi/nigiri',
 		chmod = 0755,
-		dict = {'SUSHI_VERSION': bld.env.VERSION}
+		SUSHI_VERSION = ctx.env.VERSION
 	)
 
 	for man in ('nigiri.1',):
-		bld.new_task_gen(
+		ctx(
 			features = 'subst',
 			source = '%s.in' % (man),
 			target = man,
 			install_path = None,
-			dict = {'SUSHI_VERSION': bld.env.VERSION}
+			SUSHI_VERSION = ctx.env.VERSION
 		)
 
-	bld.add_group()
+	ctx.add_group()
 
 	for man in ('nigiri.1',):
-		bld.new_task_gen(
+		ctx(
 			source = man,
 			target = '%s.gz' % (man),
 			rule = '${GZIP} -c ${SRC} > ${TGT}',
 			install_path = '${MANDIR}/man1'
 		)
+
+	ctx.recurse('po')
