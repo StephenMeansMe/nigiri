@@ -154,3 +154,6 @@ class Plugin (object):
 	def display_error(self, error):
 		logging.error("%s: %s" % (self._plugin_name, error))
 		messages.print_error("%s: %s" % (self._plugin_name,error))
+
+	def parse_from(self, host):
+		return connection.parse_from(host)
