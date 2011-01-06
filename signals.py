@@ -337,11 +337,11 @@ def color_nick_markup_cb(msg,values=["nick"]):
 			#   	('base_color','...')]
 			# repr is used for escaping.
 			if val in values:
-				msg.values[val] = "'),(%s,%s),(%s,'" % (
+				msg.values[val] = "'),(%s,%s),(%s,u'" % (
 					repr(get_nick_color(msg.values[val])),
 					repr(msg.values[val]),
 					repr(msg.base_color))
-		x = "[(%s,'%s')]" % (repr(msg.base_color),unicode(msg))
+		x = "[(%s,u'%s')]" % (repr(msg.base_color),unicode(msg))
 		return eval(x)
 
 # message signals
