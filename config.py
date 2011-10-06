@@ -76,7 +76,7 @@ def set_defaults():
 	defaults["nigiri"]["logfile"] = os.path.join(xdg_cache_home, "sushi", "nigiri.txt")
 	defaults["nigiri"]["locale_dir"] = get_path("..", "..", "locale")
 	defaults["nigiri"]["plugin_dirs"] = escape_join(",", (
-			os.path.join(xdg_data_home, "sushi", "nigiri", "plugins"),
+			os.path.join(xdg_data_home, "nigiri", "plugins"),
 			os.path.join(xdg_data_home, "sushi", "plugins"),
 			get_path("plugins"),
 			get_path("..", "plugins")

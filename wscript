@@ -18,19 +18,19 @@ def configure (ctx):
 	ctx.recurse('po')
 
 def build (ctx):
-	ctx.install_files('${DATAROOTDIR}/sushi/nigiri', ctx.path.ant_glob('*.py'))
-	ctx.install_files('${DATAROOTDIR}/sushi/nigiri/extends', ctx.path.ant_glob('extends/*.py'))
-	ctx.install_files('${DATAROOTDIR}/sushi/nigiri/helper', ctx.path.ant_glob('helper/*.py'))
-	ctx.install_files('${DATAROOTDIR}/sushi/nigiri/plugins', ctx.path.ant_glob('plugins/*.py'))
+	ctx.install_files('${DATAROOTDIR}/nigiri', ctx.path.ant_glob('*.py'))
+	ctx.install_files('${DATAROOTDIR}/nigiri/extends', ctx.path.ant_glob('extends/*.py'))
+	ctx.install_files('${DATAROOTDIR}/nigiri/helper', ctx.path.ant_glob('helper/*.py'))
+	ctx.install_files('${DATAROOTDIR}/nigiri/plugins', ctx.path.ant_glob('plugins/*.py'))
 
-	ctx.symlink_as('${BINDIR}/nigiri', Utils.subst_vars('${DATAROOTDIR}/sushi/nigiri/main.py', ctx.env))
+	ctx.symlink_as('${BINDIR}/nigiri', Utils.subst_vars('${DATAROOTDIR}/nigiri/main.py', ctx.env))
 
 	# FIXME
 	ctx(
 		features = 'subst',
 		source = 'main.py.in',
 		target = 'main.py',
-		install_path = '${DATAROOTDIR}/sushi/nigiri',
+		install_path = '${DATAROOTDIR}/nigiri',
 		chmod = Utils.O755,
 		SUSHI_VERSION = ctx.env.VERSION
 	)
