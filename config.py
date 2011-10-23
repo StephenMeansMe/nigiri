@@ -77,9 +77,9 @@ def set_defaults():
 	defaults["nigiri"]["locale_dir"] = get_path("..", "..", "locale")
 	defaults["nigiri"]["plugin_dirs"] = escape_join(",", (
 			os.path.join(xdg_data_home, "nigiri", "plugins"),
-			os.path.join(xdg_data_home, "sushi", "plugins"),
+			os.path.join(xdg_data_home, "chirashi"),
 			get_path("plugins"),
-			get_path("..", "plugins")
+			get_path("..", "chirashi")
 		))
 
 	defaults["chatting"] = {}
